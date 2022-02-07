@@ -1,0 +1,7 @@
+# Ballerina
+target
+
+# IDE Files
+.idea/
+.vscode/
+.devcontainer.json

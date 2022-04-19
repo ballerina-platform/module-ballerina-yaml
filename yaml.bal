@@ -1,6 +1,6 @@
-import yaml.serializer;
 import ballerina/io;
 import yaml.emitter;
+import yaml.serializer;
 
 # Configurations for writing a YAML document.
 #
@@ -11,10 +11,16 @@ public type WriteConfig record {|
     int blockLevel = 1;
 |};
 
-public function writeDocument(string fileName, json yamlStructure, WriteConfig config) returns error? {
+# Write a single YAML document into a file.
+#
+# + fileName - Path to the file  
+# + yamlDoc - Document to be written to the file
+# + config - Configurations for writing a YAML file
+# + return - An error on failure
+public function writeDocument(string fileName, json yamlDoc, WriteConfig config) returns error? {
     check openFile(fileName);
     string[] output = check emitter:emit(
-        check serializer:serialize(yamlStructure, config.blockLevel),
+        check serializer:serialize(yamlDoc, config.blockLevel),
         config.indentationPolicy,
         false);
     check io:fileWriteLines(fileName, output);

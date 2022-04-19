@@ -8,7 +8,7 @@ public class ComposerState {
     map<json> anchorBuffer = {};
     boolean docTerminated = false;
 
-    function init(string[] lines) returns parser:ParsingError? {
+    public function init(string[] lines) returns parser:ParsingError? {
         self.parserState = check new (lines);
     }
 }

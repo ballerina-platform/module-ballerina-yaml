@@ -1,6 +1,7 @@
 import ballerina/io;
 import yaml.emitter;
 import yaml.serializer;
+import yaml.composer;
 
 # Configurations for writing a YAML document.
 #
@@ -10,6 +11,28 @@ public type WriteConfig record {|
     int indentationPolicy = 2;
     int blockLevel = 1;
 |};
+
+# Parses one YAML document to Ballerina data structure.
+#
+# + filePath - Path to the YAML file
+# + return - The ballerina data structure o success.
+public function readDocument(string filePath) returns json|error {
+    string[] lines = check io:fileReadLines(filePath);
+    composer:ComposerState composerState = check new (lines);
+
+    return composer:composeDocument(composerState);
+}
+
+# Parses a stream of YAML documents to Ballerina array.
+#
+# + filePath - Path to the YAML file
+# + return - An array of Ballerina data structures on success.
+public function readAll(string filePath) returns json[]|error {
+    string[] lines = check io:fileReadLines(filePath);
+    composer:ComposerState composerState = check new (lines);
+
+    return composer:composeStream(composerState);
+}
 
 # Write a single YAML document into a file.
 #

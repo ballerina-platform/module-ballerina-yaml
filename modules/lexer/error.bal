@@ -1,5 +1,5 @@
 # Represents an error caused by the lexical analyzer
-type LexicalError distinct error;
+public type LexicalError distinct error;
 
 # Generates a Lexical Error.
 #

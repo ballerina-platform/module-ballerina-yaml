@@ -49,7 +49,6 @@ function contextSingleQuote(LexerState state) returns LexerState|LexicalError {
         if state.peek() == () {
             return state.tokenize(EMPTY_LINE);
         }
-        state.lexeme += state.lexeme;
     }
 
     // Escaped single quote

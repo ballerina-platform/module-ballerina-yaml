@@ -149,7 +149,7 @@ function scanPlanarChar(LexerState state) returns boolean|LexicalError {
     }
 
     // Terminate when the flow indicators are detected inside flow style collections
-    if matchRegexPattern(state, [FLOW_INDICATOR_PATTERN]) && state.numOpenedFlowCollections > 0 {
+    if matchRegexPattern(state, [FLOW_INDICATOR_PATTERN]) && state.isFlowCollection() {
         return true;
     }
 
@@ -366,7 +366,7 @@ function scanMappingValueKey(LexerState state, YAMLToken outputToken, function (
     int startIndent = state.index;
     LexerState token = check iterate(state, process, outputToken);
 
-    if state.numOpenedFlowCollections > 0 {
+    if state.isFlowCollection() {
         return token;
     }
 
@@ -378,13 +378,13 @@ function scanMappingValueKey(LexerState state, YAMLToken outputToken, function (
     }
 
     if err is LexicalError { // Not sufficient indent to process as a value token
-        if state.peek() == ":" && state.numOpenedFlowCollections == 0 { // The token is a mapping key
+        if state.peek() == ":" && !state.isFlowCollection() { // The token is a mapping key
             token.indentation = check checkIndent(state, startIndent);
             return token;
         }
         return generateError(state, "Invalid indentation");
     }
-    if state.peek() == ":" && state.numOpenedFlowCollections == 0 {
+    if state.peek() == ":" && !state.isFlowCollection() {
         token.indentation = check checkIndent(state, startIndent);
         return token;
     }
@@ -409,19 +409,19 @@ function scanMappingValueKeyWithDelimiter(LexerState state, YAMLToken outputToke
         state.forward();
     }
 
-    if state.numOpenedFlowCollections > 0 {
+    if state.isFlowCollection() {
         return token;
     }
 
     if state.index < state.delimiterStartIndex { // Not sufficient indent to process as a value token
-        if state.peek() == ":" && state.numOpenedFlowCollections == 0 { // The token is a mapping key
+        if state.peek() == ":" && !state.isFlowCollection() { // The token is a mapping key
             token.indentation = check checkIndent(state, state.delimiterStartIndex);
             state.delimiterStartIndex = -1;
             return token;
         }
         return generateError(state, "Invalid indentation");
     }
-    if state.peek() == ":" && state.numOpenedFlowCollections == 0 {
+    if state.peek() == ":" && !state.isFlowCollection() {
         token.indentation = check checkIndent(state, state.delimiterStartIndex);
         state.delimiterStartIndex = -1;
         return token;

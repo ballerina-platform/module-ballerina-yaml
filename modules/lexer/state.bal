@@ -4,7 +4,7 @@ public class LexerState {
     public int lineNumber = 0;
 
     # Line to be lexically analyzed
-    string line = "";
+    public string line = "";
 
     # Value of the generated token
     string lexeme = "";
@@ -34,10 +34,10 @@ public class LexerState {
 
     # Flag is enabled after a JSON key is detected.
     # Used to generate mapping value even when it is possible to generate a planar scalar.
-    boolean isJsonKey = false;
+    public boolean isJsonKey = false;
 
     # The lexer is currently processing trailing comments when the flag is set.
-    boolean trailingComment = false;
+    public boolean trailingComment = false;
 
     # When flag is set, updates the current indent to the indent of the first line
     boolean captureIndent = false;
@@ -105,4 +105,6 @@ public class LexerState {
         self.lexeme = "";
         self.context = LEXER_START;
     }
+
+    public function isFlowCollection() returns boolean => self.numOpenedFlowCollections > 0;
 }

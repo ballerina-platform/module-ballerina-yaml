@@ -4,12 +4,12 @@ import yaml.event;
 @test:Config {
     dataProvider: serializingEventDataGen
 }
-function testGenerateSerializingEvent(anydata structure, event:Event[] assertingEvents) returns error? {
+function testGenerateSerializingEvent(json structure, event:Event[] assertingEvents) returns error? {
     event:Event[] events = check serialize(structure, 1);
     test:assertEquals(events, assertingEvents);
 }
 
-function serializingEventDataGen() returns map<[anydata, event:Event[]]> {
+function serializingEventDataGen() returns map<[json, event:Event[]]> {
     return {
         "empty array": [[], [{startType: event:SEQUENCE}, {endType: event:SEQUENCE}]],
         "single element array": [["value"], [{startType: event:SEQUENCE}, {value: "value"}, {endType: event:SEQUENCE}]],

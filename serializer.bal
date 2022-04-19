@@ -5,7 +5,7 @@ class Serializer {
         self.blockLevel = blockLevel;
     }
 
-    function serialize(anydata data, int depthLevel = 0) returns Event[]|SerializingError {
+    function serialize(json data, int depthLevel = 0) returns Event[]|SerializingError {
         Event[] events = [];
         // TODO: check if the data is a custom tag
 
@@ -14,10 +14,10 @@ class Serializer {
         // TODO: check if the current schema is JSON_SCHEMA
 
         // Convert sequence
-        if data is anydata[] {
+        if data is json[] {
             events.push({startType: SEQUENCE, flowStyle: self.blockLevel <= depthLevel});
 
-            foreach anydata dataItem in data {
+            foreach json dataItem in data {
                 events = self.combineArray(events, check self.serialize(dataItem, depthLevel + 1));
             }
 
@@ -26,7 +26,7 @@ class Serializer {
         }
 
         // Convert mapping
-        if data is map<anydata> {
+        if data is map<json> {
             events.push({startType: MAPPING, flowStyle: self.blockLevel <= depthLevel});
 
             string[] keys = data.keys();

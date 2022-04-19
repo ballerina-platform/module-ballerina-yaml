@@ -6,7 +6,7 @@ import yaml.event;
 # + blockLevel - The depth of the block nodes 
 # + depthLevel - The current depth level
 # + return - Event tree. Else, an error on failure.
-public function serialize(anydata data, int blockLevel, int depthLevel = 0) returns event:Event[]|SerializingError {
+public function serialize(json data, int blockLevel, int depthLevel = 0) returns event:Event[]|SerializingError {
     event:Event[] events = [];
     // TODO: check if the data is a custom tag
 
@@ -15,10 +15,10 @@ public function serialize(anydata data, int blockLevel, int depthLevel = 0) retu
     // TODO: check if the current schema is JSON_SCHEMA
 
     // Convert sequence
-    if data is anydata[] {
+    if data is json[] {
         events.push({startType: event:SEQUENCE, flowStyle: blockLevel <= depthLevel});
 
-        foreach anydata dataItem in data {
+        foreach json dataItem in data {
             events = combineArray(events, check serialize(dataItem, blockLevel, depthLevel + 1));
         }
 
@@ -27,7 +27,7 @@ public function serialize(anydata data, int blockLevel, int depthLevel = 0) retu
     }
 
     // Convert mapping
-    if data is map<anydata> {
+    if data is map<json> {
         events.push({startType: event:MAPPING, flowStyle: blockLevel <= depthLevel});
 
         string[] keys = data.keys();

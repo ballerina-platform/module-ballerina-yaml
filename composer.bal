@@ -1,7 +1,7 @@
 class Composer {
     Parser parser;
     private Event? buffer = ();
-    private map<anydata> anchorBuffer = {};
+    private map<json> anchorBuffer = {};
     private boolean docTerminated = false;
 
     function init(Parser parser) {
@@ -10,7 +10,7 @@ class Composer {
 
     function isEndOfDocument(Event event) returns boolean => event is EndEvent && (event.endType == STREAM || event.endType == DOCUMENT);
 
-    public function composeDocument(Event? eventParam = ()) returns anydata|ParsingError|LexicalError|ComposingError {
+    public function composeDocument(Event? eventParam = ()) returns json|ParsingError|LexicalError|ComposingError {
         // Obtain the root event
         Event event = eventParam is () ? check self.checkEvent() : eventParam;
 
@@ -25,7 +25,7 @@ class Composer {
         }
 
         // Construct the single document
-        anydata output = check self.composeNode(event);
+        json output = check self.composeNode(event);
 
         // Return an error if there is another root event
         event = check self.checkEvent();
@@ -33,8 +33,8 @@ class Composer {
             : self.generateError("There can only be one root event to a document");
     }
 
-    public function composeStream() returns anydata[]|ParsingError|LexicalError|ComposingError {
-        anydata[] output = [];
+    public function composeStream() returns json[]|ParsingError|LexicalError|ComposingError {
+        json[] output = [];
         Event event = check self.checkEvent();
 
         while !(event is EndEvent && event.endType == STREAM) {
@@ -46,8 +46,8 @@ class Composer {
         return output;
     }
 
-    private function composeSequence(boolean flowStyle) returns anydata[]|LexicalError|ParsingError|ComposingError {
-        anydata[] sequence = [];
+    private function composeSequence(boolean flowStyle) returns json[]|LexicalError|ParsingError|ComposingError {
+        json[] sequence = [];
         Event event = check self.checkEvent();
 
         while true {
@@ -83,8 +83,8 @@ class Composer {
         return sequence;
     }
 
-    private function composeMapping(boolean flowStyle) returns map<anydata>|LexicalError|ParsingError|ComposingError {
-        map<anydata> structure = {};
+    private function composeMapping(boolean flowStyle) returns map<json>|LexicalError|ParsingError|ComposingError {
+        map<json> structure = {};
         Event event = check self.checkEvent(EXPECT_KEY);
 
         while true {
@@ -117,9 +117,9 @@ class Composer {
                 return self.generateError("Expected a key for a mapping");
             }
 
-            anydata key = check self.composeNode(event);
+            json key = check self.composeNode(event);
             event = check self.checkEvent(EXPECT_VALUE);
-            anydata value = check self.composeNode(event);
+            json value = check self.composeNode(event);
 
             structure[key.toString()] = value;
             event = check self.checkEvent(EXPECT_KEY);
@@ -129,13 +129,13 @@ class Composer {
     }
 
     // TODO: Tag resolution for 
-    // private function composeScalar() returns anydata|LexicalError|ParsingError|ComposingError {
+    // private function composeScalar() returns json|LexicalError|ParsingError|ComposingError {
     //     Event event = check self.checkEvent();
 
     // }
 
-    private function composeNode(Event event) returns anydata|LexicalError|ParsingError|ComposingError {
-        anydata output;
+    private function composeNode(Event event) returns json|LexicalError|ParsingError|ComposingError {
+        json output;
 
         // Check for +SEQ
         if event is StartEvent && event.startType == SEQUENCE {
@@ -166,7 +166,7 @@ class Composer {
         }
     }
 
-    private function checkAnchor(StartEvent|ScalarEvent event, anydata assignedValue) returns ComposingError? {
+    private function checkAnchor(StartEvent|ScalarEvent event, json assignedValue) returns ComposingError? {
         if event.anchor != () {
             if self.anchorBuffer.hasKey(<string>event.anchor) {
                 return self.generateError(string `Duplicate anchor definition of '${<string>event.anchor}'`);

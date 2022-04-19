@@ -3,14 +3,14 @@ import ballerina/test;
 @test:Config {
     dataProvider: serializingEventDataGen
 }
-function testGenerateSerializingEvent(anydata structure, Event[] assertingEvents) returns error? {
+function testGenerateSerializingEvent(json structure, Event[] assertingEvents) returns error? {
     Serializer serializer = new Serializer();
     Event[] events = check serializer.serialize(structure);
 
     test:assertEquals(events, assertingEvents);
 }
 
-function serializingEventDataGen() returns map<[anydata, Event[]]> {
+function serializingEventDataGen() returns map<[json, Event[]]> {
     return {
         "empty array": [[], [{startType: SEQUENCE}, {endType: SEQUENCE}]],
         "single element array": [["value"], [{startType: SEQUENCE}, {value: "value"}, {endType: SEQUENCE}]],

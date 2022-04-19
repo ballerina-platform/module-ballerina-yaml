@@ -3,15 +3,15 @@ import ballerina/test;
 @test:Config {
     dataProvider: nativeDataStructureDataGen
 }
-function testGenerateNativeDataStructure(string|string[] line, anydata structure) returns error? {
+function testGenerateNativeDataStructure(string|string[] line, json structure) returns error? {
     Parser parser = check new Parser((line is string) ? [line] : line);
     Composer composer = new Composer(parser);
-    anydata output = check composer.composeDocument();
+    json output = check composer.composeDocument();
 
     test:assertEquals(output, structure);
 }
 
-function nativeDataStructureDataGen() returns map<[string|string[], anydata]> {
+function nativeDataStructureDataGen() returns map<[string|string[], json]> {
     return {
         "empty document": ["", ()],
         "empty sequence": ["[]", []],
@@ -41,7 +41,7 @@ function testComposeInvalidEventStream(string[] lines) returns error? {
     Parser parser = check new Parser(lines);
     Composer composer = new Composer(parser);
 
-    anydata|error output = composer.composeDocument();
+    json|error output = composer.composeDocument();
     test:assertTrue(output is ComposingError);
 }
 
@@ -57,16 +57,16 @@ function invalidEventStreamDataGen() returns map<[string[]]> {
 @test:Config {
     dataProvider: streamDataGen
 }
-function testComposeMultipleDocuments(string[] lines, anydata[] expectedDocs) returns error? {
+function testComposeMultipleDocuments(string[] lines, json[] expectedDocs) returns error? {
     Parser parser = check new (lines);
     Composer composer = new (parser);
-    anydata[] docs = check composer.composeStream();
+    json[] docs = check composer.composeStream();
 
     test:assertEquals(docs, expectedDocs);
 
 }
 
-function streamDataGen() returns map<[string[], anydata[]]> {
+function streamDataGen() returns map<[string[], json[]]> {
     return {
         "multiple bare documents": [["first doc", "...", "second doc"], ["first doc", "second doc"]],
         "hoping out from block collection": [["-", " - value", "...", "second doc"], [[["value"]], "second doc"]]

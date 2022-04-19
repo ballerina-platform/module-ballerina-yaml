@@ -1331,7 +1331,7 @@ class Lexer {
     #
     # + value - Value to be type casted.
     # + return - Value as a Ballerina data type  
-    private function processTypeCastingError(anydata|error value) returns anydata|LexicalError {
+    private function processTypeCastingError(json|error value) returns json|LexicalError {
         // Check if the type casting has any errors
         if value is error {
             return self.generateError("Invalid value for assignment");

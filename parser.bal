@@ -640,7 +640,7 @@ class Parser {
         return [tagHandle, tag, anchor];
     }
 
-    private function appendData(ParserOption option, map<anydata> tagStructure = {}, boolean peeked = false) returns Event|LexicalError|ParsingError {
+    private function appendData(ParserOption option, map<json> tagStructure = {}, boolean peeked = false) returns Event|LexicalError|ParsingError {
         Indentation? indentation = ();
         if self.explicitKey {
             indentation = self.currentToken.indentation;
@@ -824,8 +824,8 @@ class Parser {
         return self.generateError(check self.formatErrorMessage(1, [EOL, SEPARATION_IN_LINE], self.currentToken.token));
     }
 
-    private function constructEvent(map<anydata> m1, map<anydata>? m2 = ()) returns Event|ParsingError {
-        map<anydata> returnMap = m1.clone();
+    private function constructEvent(map<json> m1, map<json>? m2 = ()) returns Event|ParsingError {
+        map<json> returnMap = m1.clone();
 
         if m2 != () {
             m2.keys().forEach(function(string key) {
@@ -944,7 +944,7 @@ class Parser {
     #
     # + value - Value to be type casted.
     # + return - Value as a Ballerina data type  
-    private function processTypeCastingError(anydata|error value) returns anydata|ParsingError {
+    private function processTypeCastingError(json|error value) returns json|ParsingError {
         // Check if the type casting has any errors
         if value is error {
             return self.generateError("Invalid value for assignment");

@@ -1,7 +1,7 @@
 import yaml.lexer;
 
 # Represents an error caused by parser
-type ParsingError distinct error;
+public type ParsingError distinct error;
 
 # Generates a Parsing Error.
 #

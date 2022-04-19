@@ -30,7 +30,7 @@ public class ParserState {
 
     event:Event[] eventBuffer = [];
 
-    function init(string[] lines) returns ParsingError? {
+    public function init(string[] lines) returns ParsingError? {
         self.lines = lines;
         self.numLines = lines.length();
         check self.initLexer();
@@ -39,6 +39,10 @@ public class ParserState {
     function updateLexerContext(lexer:Context context) {
         self.lexerState.context = context;
     }
+
+    public function getLineNumber() returns int => self.lexerState.lineNumber;
+
+    public function getIndex() returns int => self.lexerState.index;
 
     # Initialize the lexer with the attributes of a new line.
     #

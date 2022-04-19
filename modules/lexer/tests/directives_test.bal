@@ -17,6 +17,21 @@ function directiveDataGen() returns map<[string, string]> {
 }
 
 @test:Config {
+    dataProvider: invalidUriHexDataGen
+}
+function testInvalidURIHexCharacters(string lexeme) returns error? {
+    assertLexicalError(lexeme, context = LEXER_TAG_PREFIX);
+}
+
+function invalidUriHexDataGen() returns map<[string]> {
+    return {
+        "one digit": ["%a"],
+        "no digit": ["%"],
+        "two %": ["%1%"]
+    };
+}
+
+@test:Config {
     dataProvider: validTagDataGen
 }
 function testValidTagHandlers(string tag, string lexeme) returns error? {

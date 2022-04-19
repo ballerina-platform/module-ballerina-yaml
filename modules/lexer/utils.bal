@@ -3,6 +3,7 @@ import ballerina/regex;
 # Encapsulate a function to run isolated on the remaining characters.
 # Function lookahead to capture the lexemes for a targeted token.
 #
+# + state - Current lexer state
 # + process - Function to be executed on each iteration  
 # + successToken - Token to be returned on successful traverse of the characters  
 # + message - Message to display if the end delimiter is not shown  
@@ -29,6 +30,7 @@ function iterate(LexerState state, function (LexerState state) returns boolean|L
 
 # Check if the given character matches the regex pattern.
 #
+# + state - Current lexer state
 # + inclusionPatterns - Included the regex patterns
 # + offset - Offset of the character from the current index. Default = 0  
 # + exclusionPatterns - Exclude the regex patterns
@@ -65,6 +67,7 @@ function concatenateStringArray(string[]|string strings) returns string {
 
 # Check if the tokens adhere to the given string.
 #
+# + state - Current lexer state
 # + chars - Expected string  
 # + successToken - Output token if succeed
 # + return - If success, returns the token. Else, returns the parsing error.  
@@ -83,6 +86,7 @@ function tokensInSequence(LexerState state, string chars, YAMLToken successToken
 
 # Assert the character of the current index
 #
+# + state - Current lexer state
 # + expectedCharacters - Expected characters at the current index  
 # + index - Index of the character. If null, takes the lexer's 
 # + return - True if the assertion is true. Else, an lexical error
@@ -97,6 +101,7 @@ function checkCharacter(LexerState state, string|string[] expectedCharacters, in
 
 # Check errors during type casting to Ballerina types.
 #
+# + state - Current lexer state
 # + value - Value to be type casted.
 # + return - Value as a Ballerina data type  
 function processTypeCastingError(LexerState state, json|error value) returns json|LexicalError {

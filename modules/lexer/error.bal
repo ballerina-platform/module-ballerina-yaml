@@ -3,7 +3,8 @@ type LexicalError distinct error;
 
 # Generates a Lexical Error.
 #
-# + message - Error message  
+# + state - Current lexer state  
+# + message - Error message
 # + return - Constructed Lexical Error message
 function generateError(LexerState state, string message) returns LexicalError {
     string text = "Lexical Error at line "

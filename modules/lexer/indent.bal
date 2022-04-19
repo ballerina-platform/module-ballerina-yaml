@@ -13,6 +13,7 @@ type Indent record {|
 # Increments and decrement the indentation safely.
 # If the indent is explicitly given, then the function continues for mappings.
 #
+# + state - Current lexer state  
 # + mapIndex - If the current token is a mapping key, then the starting index of it.
 # + return - Change of indentation. Else, an indentation error on failure
 function checkIndent(LexerState state, int? mapIndex = ()) returns Indentation|LexicalError {

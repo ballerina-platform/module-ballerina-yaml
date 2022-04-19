@@ -2,8 +2,8 @@ import ballerina/test;
 
 # Returns a new lexer with the configured line for testing
 #
-# + line - Testing TOML string  
-# + lexerState - The state for the lexer to be initialized with
+# + testingLine - Testing TOML string  
+# + context - The state for the lexer to be initialized with
 # + return - Configured lexer
 function setLexerString(string testingLine, Context context = LEXER_START) returns LexerState {
     LexerState state = new ();
@@ -33,7 +33,7 @@ function assertToken(LexerState state, YAMLToken assertingToken, int currentInde
 #
 # + yamlString - String to generate a Lexer token  
 # + index - Index of the targeted token (default = 0)  
-# + state - Context of the lexer
+# + context - Context of the lexer
 function assertLexicalError(string yamlString, int index = 0, Context context = LEXER_START) {
     Token|error token = getToken(setLexerString(yamlString, context), index);
     test:assertTrue(token is LexicalError);

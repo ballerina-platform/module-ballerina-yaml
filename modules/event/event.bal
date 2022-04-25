@@ -16,8 +16,6 @@ public type ScalarEvent record {|
 |};
 
 public type DocumentStartEvent record {|
-    boolean explicit = false;
-    string docVersion;
     map<string> tags;
 |};
 

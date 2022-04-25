@@ -66,7 +66,6 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
         }
         lexer:DIRECTIVE_MARKER => {
             return {
-                    docVersion: state.yamlVersion == () ? "1.2.2" : <string>state.yamlVersion,
                     tags: state.tagHandles
                 };
         }

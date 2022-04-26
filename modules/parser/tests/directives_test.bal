@@ -11,6 +11,17 @@ function testAccurateYAMLDirective() returns error? {
     test:assertEquals(state.yamlVersion, "1.3");
 }
 
+@test:Config {}
+function testYAMLVersionOfMultipleDocuments() returns error? {
+    ParserState state = check new (["%YAML 1.3", "---", "...", "%YAML 1.1", "---"]);
+    _ = check parse(state, docType = DIRECTIVE_DOCUMENT);
+    test:assertEquals(state.yamlVersion, "1.3");
+
+    _ = check parse(state, docType = BARE_DOCUMENT);
+    _ = check parse(state, docType = DIRECTIVE_DOCUMENT);
+    test:assertEquals(state.yamlVersion, "1.1");
+}
+
 @test:Config {
     groups: ["directives"]
 }
@@ -33,7 +44,6 @@ function invalidDirectiveDataGen() returns map<[string]> {
         "single digit": ["%YAML 1"]
     };
 }
-
 
 @test:Config {}
 function testTagDuplicates() returns error? {
@@ -70,4 +80,9 @@ function testInvalidDirectiveInBareDocument() returns error? {
     error|event:Event err = parse(state);
 
     test:assertTrue(err is ParsingError);
+}
+
+@test:Config {}
+function testStartingEmptyLines() returns error? {
+    check assertParsingEvent(["", " ", "", " value"], "value");
 }

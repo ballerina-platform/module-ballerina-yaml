@@ -176,6 +176,7 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
         }
         lexer:DOCUMENT_MARKER => {
             state.lexerState.resetState();
+            state.yamlVersion = ();
             return {endType: event:DOCUMENT};
         }
         lexer:SEQUENCE_END => {

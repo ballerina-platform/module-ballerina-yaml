@@ -32,6 +32,11 @@ function tagDirective(ParserState state) returns (lexer:LexicalError|ParsingErro
 # + state - Current parser state
 # + return - An error on mismatch.
 function yamlDirective(ParserState state) returns lexer:LexicalError|ParsingError|() {
+    // Returns an error if the document version is already defined.
+    if state.yamlVersion != () {
+        return generateError(state, formateDuplicateErrorMessage("%YAML"));
+    }
+
     // Expect a separate in line.
     check checkToken(state, lexer:SEPARATION_IN_LINE);
     state.updateLexerContext(lexer:LEXER_DIRECTIVE);
@@ -45,10 +50,5 @@ function yamlDirective(ParserState state) returns lexer:LexicalError|ParsingErro
     lexemeBuffer += state.currentToken.value;
 
     // Update the version
-    if (state.yamlVersion is null) {
-        state.yamlVersion = lexemeBuffer;
-        return;
-    }
-
-    return generateError(state, formateDuplicateErrorMessage("%YAML"));
+    state.yamlVersion = lexemeBuffer;
 }

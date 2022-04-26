@@ -20,7 +20,6 @@ public class ParserState {
     # Lexical analyzer tool for getting the tokens
     lexer:LexerState lexerState = new ();
 
-    # Flag is set if an empty node is possible to expect
     boolean explicitKey = false;
 
     map<string> tagHandles = {};

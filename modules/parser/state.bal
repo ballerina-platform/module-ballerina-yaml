@@ -22,7 +22,12 @@ public class ParserState {
 
     boolean explicitKey = false;
 
-    map<string> tagHandles = {};
+    map<string> defaultTagHandles = {
+        "!": "!",
+        "!!": "tag:yaml.org,2002:"
+    };
+
+    map<string> customTagHandles = {};
 
     # YAML version of the document.
     float? yamlVersion = ();

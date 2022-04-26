@@ -7,7 +7,6 @@ public type AliasEvent record {|
 public type NodeEvent record {|
     string? anchor = ();
     string? tag = ();
-    string? tagHandle  = ();
 |};
 
 public type ScalarEvent record {|

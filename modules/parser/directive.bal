@@ -16,15 +16,17 @@ function tagDirective(ParserState state) returns (lexer:LexicalError|ParsingErro
     string tagHandle = state.currentToken.value;
     check checkToken(state, lexer:SEPARATION_IN_LINE);
 
+    // Tag handles cannot be redefined
+    if (state.customTagHandles.hasKey(tagHandle)) {
+        return generateError(state, formateDuplicateErrorMessage(tagHandle));
+    }
+
     // Expect a tag prefix
     state.updateLexerContext(lexer:LEXER_TAG_PREFIX);
     check checkToken(state, lexer:TAG_PREFIX);
     string tagPrefix = state.currentToken.value;
 
-    if (state.tagHandles.hasKey(tagHandle)) {
-        return generateError(state, formateDuplicateErrorMessage(tagHandle));
-    }
-    state.tagHandles[tagHandle] = tagPrefix;
+    state.customTagHandles[tagHandle] = tagPrefix;
 }
 
 # Check the grammar productions for YAML directives.

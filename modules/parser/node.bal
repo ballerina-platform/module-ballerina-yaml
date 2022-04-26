@@ -1,12 +1,12 @@
 import yaml.lexer;
 
-function nodeTagHandle(ParserState state) returns [string?, string?]|ParsingError|lexer:LexicalError {
-    string? tag = ();
+function nodeTag(ParserState state) returns [string?, string?]|ParsingError|lexer:LexicalError {
+    string? tagPrefix = ();
     string? tagHandle = ();
     match state.tokenBuffer.token {
         lexer:TAG => {
             check checkToken(state);
-            tag = state.currentToken.value;
+            tagPrefix = state.currentToken.value;
             check separate(state);
         }
         lexer:TAG_HANDLE => {
@@ -15,12 +15,12 @@ function nodeTagHandle(ParserState state) returns [string?, string?]|ParsingErro
 
             state.updateLexerContext(lexer:LEXER_TAG_NODE);
             check checkToken(state, lexer:TAG);
-            tag = state.currentToken.value;
+            tagPrefix = state.currentToken.value;
             check separate(state);
         }
     }
 
-    return [tagHandle, tag];
+    return [tagHandle, tagPrefix];
 }
 
 function nodeAnchor(ParserState state) returns string?|lexer:LexicalError|ParsingError {
@@ -35,19 +35,19 @@ function nodeAnchor(ParserState state) returns string?|lexer:LexicalError|Parsin
 
 function nodeProperties(ParserState state) returns [string?, string?, string?]|lexer:LexicalError|ParsingError {
     string? tagHandle = ();
-    string? tag = ();
+    string? tagPrefix = ();
     string? anchor = ();
 
     match state.tokenBuffer.token {
         lexer:TAG|lexer:TAG_HANDLE => {
-            [tag, tagHandle] = check nodeTagHandle(state);
+            [tagPrefix, tagHandle] = check nodeTag(state);
             anchor = check nodeAnchor(state);
         }
         lexer:ANCHOR => {
             anchor = check nodeAnchor(state);
-            [tag, tagHandle] = check nodeTagHandle(state);
+            [tagPrefix, tagHandle] = check nodeTag(state);
         }
     }
 
-    return [tagHandle, tag, anchor];
+    return [tagHandle, tagPrefix, anchor];
 }

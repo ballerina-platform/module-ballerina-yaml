@@ -12,7 +12,7 @@ function testAccurateYAMLDirective() returns error? {
 }
 
 @test:Config {}
-function testYAMLVersionOfMultipleDocuments() returns error? {
+function testYAMLVersionsOfMultipleDocuments() returns error? {
     ParserState state = check new (["%YAML 1.3", "---", "...", "%YAML 1.1", "---"]);
     _ = check parse(state, docType = DIRECTIVE_DOCUMENT);
     test:assertEquals(state.yamlVersion, 1.3);
@@ -77,7 +77,7 @@ function testTagDuplicates() returns error? {
 function testTagHandles(string line, string tagHandle, string tagPrefix) returns error? {
     ParserState state = check new ([line, "---"]);
     _ = check parse(state, docType = ANY_DOCUMENT);
-    test:assertEquals(state.tagHandles[tagHandle], tagPrefix);
+    test:assertEquals(state.customTagHandles[tagHandle], tagPrefix);
 }
 
 function tagHandlesDataGen() returns map<[string, string, string]> {

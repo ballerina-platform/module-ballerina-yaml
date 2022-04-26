@@ -19,7 +19,7 @@ function lineFoldingDataGen() returns map<[string[], string]> {
     dataProvider: invalidNodeTagDataGen
 }
 function testInvalidNodeTagToken(string line, boolean isLexical) returns error? {
-    check assertParsingError(line, isLexical);
+    check assertParsingError(line, isLexical, customTagHandles = {"!e!": "tag:named:"});
 }
 
 function invalidNodeTagDataGen() returns map<[string, boolean]> {
@@ -33,17 +33,17 @@ function invalidNodeTagDataGen() returns map<[string, boolean]> {
 @test:Config {
     dataProvider: tagShorthandDataGen
 }
-function testTagShorthandEvent(string line, string tagHandle, string tag) returns error? {
-    check assertParsingEvent(line, tagHandle = tagHandle, tag = tag);
+function testTagShorthandEvent(string line, string tag) returns error? {
+    check assertParsingEvent(line, tag = tag, customTagHandles = {"!e!": "tag:named:"});
 }
 
-function tagShorthandDataGen() returns map<[string, string, string]> {
+function tagShorthandDataGen() returns map<[string, string]> {
     return {
-        "primary": ["!local value", "!", "local"],
-        "secondary": ["!!str value", "!!", "str"],
-        "named": ["!e!tag value", "!e!", "tag"],
-        "escaped": ["!e!tag%21 value", "!e!", "tag!"],
-        "double!": ["!%21 value", "!", "!"]
+        "primary": ["!local value", "!local"],
+        "secondary": ["!!str value", "tag:yaml.org,2002:str"],
+        "named": ["!e!tag value", "tag:named:tag"],
+        "escaped": ["!e!tag%21 value", "tag:named:tag!"],
+        "double!": ["!%21 value", "!!"]
     };
 }
 
@@ -51,7 +51,7 @@ function tagShorthandDataGen() returns map<[string, string, string]> {
     dataProvider: invalidTagShorthandDataGen
 }
 function testInvalidTagShorthandEvent(string line, boolean isLexical) returns error? {
-    check assertParsingError(line, isLexical);
+    check assertParsingError(line, isLexical, customTagHandles = {"!e!": "tag:named:"});
 }
 
 function invalidTagShorthandDataGen() returns map<[string, boolean]> {
@@ -64,17 +64,17 @@ function invalidTagShorthandDataGen() returns map<[string, boolean]> {
 @test:Config {
     dataProvider: nodeSeparateDataGen
 }
-function testNodeSeparationEvent(string[] arr, string tagHandle) returns error? {
-    check assertParsingEvent(arr, "value", "tag", tagHandle, "anchor");
+function testNodeSeparationEvent(string[] arr, string tag) returns error? {
+    check assertParsingEvent(arr, "value", tag, "anchor");
 }
 
 function nodeSeparateDataGen() returns map<[string[], string]> {
     return {
-        "single space": [["!tag &anchor value"], "!"],
-        "verbatim tag": [["!<tag> &anchor value"], ""],
-        "new line": [["!!tag", "&anchor value"], "!!"],
-        "with comment": [["!tag #first-comment", "#second-comment", "&anchor value"], "!"],
-        "anchor first": [["&anchor !tag value"], "!"]
+        "single space": [["!tag &anchor value"], "!tag"],
+        "verbatim tag": [["!<tag> &anchor value"], "tag"],
+        "new line": [["!!tag", "&anchor value"], "tag:yaml.org,2002:tag"],
+        "with comment": [["!tag #first-comment", "#second-comment", "&anchor value"], "!tag"],
+        "anchor first": [["&anchor !tag value"], "!tag"]
     };
 }
 

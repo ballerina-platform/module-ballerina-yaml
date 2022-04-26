@@ -44,7 +44,8 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
     }
 
     // Only directive tokens are allowed in directive document
-    if docType == DIRECTIVE_DOCUMENT && !(state.currentToken.token == lexer:DIRECTIVE || state.currentToken.token == lexer:DIRECTIVE_MARKER) {
+    if docType == DIRECTIVE_DOCUMENT
+        && !(state.currentToken.token == lexer:DIRECTIVE || state.currentToken.token == lexer:DIRECTIVE_MARKER) {
         return generateError(state, string `'${state.currentToken.token}' is not allowed in a directive document`);
     }
 
@@ -66,7 +67,7 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
         }
         lexer:DIRECTIVE_MARKER => {
             return {
-                    tags: state.tagHandles
+                    tags: state.customTagHandles
                 };
         }
         lexer:DOUBLE_QUOTE_DELIMITER|lexer:SINGLE_QUOTE_DELIMITER|lexer:PLANAR_CHAR => {
@@ -81,10 +82,10 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
         lexer:TAG_HANDLE => {
             string tagHandle = state.currentToken.value;
 
-            // Obtain the tag associated with the tag handle
+            // Obtain the tagPrefix associated with the tag handle
             state.updateLexerContext(lexer:LEXER_TAG_NODE);
             check checkToken(state, lexer:TAG);
-            string tag = state.currentToken.value;
+            string tagPrefix = state.currentToken.value;
 
             // Check if there is a separate 
             check separate(state);
@@ -92,19 +93,20 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
             // Obtain the anchor if there exists
             string? anchor = check nodeAnchor(state);
 
-            return appendData(state, option, {tag, tagHandle, anchor});
+            return appendData(state, option,
+                {tag: check generateCompleteTagName(state, tagHandle, tagPrefix), anchor});
         }
         lexer:TAG => {
-            // Obtain the tag name
-            string tag = state.currentToken.value;
+            // Obtain the tagPrefix name
+            string tagPrefix = state.currentToken.value;
 
-            // There must be a separate after the tag
+            // There must be a separate after the tagPrefix
             check separate(state);
 
             // Obtain the anchor if there exists
             string? anchor = check nodeAnchor(state);
 
-            return appendData(state, option, {tag, anchor});
+            return appendData(state, option, {tag: tagPrefix, anchor});
         }
         lexer:ANCHOR => {
             // Obtain the anchor name
@@ -115,10 +117,21 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
 
             // Obtain the tag if there exists
             string? tagHandle;
-            string? tag;
-            [tagHandle, tag] = check nodeTagHandle(state);
+            string? tagPrefix;
+            [tagHandle, tagPrefix] = check nodeTag(state);
 
-            return appendData(state, option, {tagHandle, tag, anchor});
+            string? tag;
+            if tagPrefix == () {
+                tag = ();
+            } else {
+                if tagHandle == () {
+                    tag = tagPrefix;
+                } else {
+                    tag = check generateCompleteTagName(state, tagHandle, tagPrefix);
+                }
+            }
+
+            return appendData(state, option, {tag, anchor});
         }
         lexer:MAPPING_VALUE => { // Empty node as the key
             lexer:Indentation? indentation = state.currentToken.indentation;

@@ -148,3 +148,21 @@ function verifyKey(ParserState state, boolean isSingleLine) returns lexer:Lexica
         return generateError(state, "Single-quoted keys cannot span multiple lines");
     }
 }
+
+function generateCompleteTagName(ParserState state, string tagHandle, string tagPrefix) returns string|ParsingError {
+    string tagHandleName;
+
+    // Check if the tag handle is defined in the map
+    if state.customTagHandles.hasKey(tagHandle) {
+        tagHandleName = state.customTagHandles.get(tagHandle);
+    } else {
+        if state.defaultTagHandles.hasKey(tagHandle) {
+            tagHandleName = state.defaultTagHandles.get(tagHandle);
+        }
+        else {
+            return generateError(state, string `'${tagHandle}' tag handle is not defined`);
+        }
+    }
+
+    return tagHandleName + tagPrefix;
+}

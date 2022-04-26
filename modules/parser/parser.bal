@@ -67,8 +67,8 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
         }
         lexer:DIRECTIVE_MARKER => {
             return {
-                    tags: state.customTagHandles
-                };
+                startType: event:DOCUMENT
+            };
         }
         lexer:DOUBLE_QUOTE_DELIMITER|lexer:SINGLE_QUOTE_DELIMITER|lexer:PLANAR_CHAR => {
             return appendData(state, option, peeked = true);
@@ -120,6 +120,7 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
             string? tagPrefix;
             [tagHandle, tagPrefix] = check nodeTag(state);
 
+            // Construct the complete tag
             string? tag;
             if tagPrefix == () {
                 tag = ();

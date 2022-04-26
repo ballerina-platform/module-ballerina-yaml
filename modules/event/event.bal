@@ -1,4 +1,4 @@
-public type Event AliasEvent|ScalarEvent|DocumentStartEvent|StartEvent|EndEvent;
+public type Event AliasEvent|ScalarEvent|StartEvent|EndEvent;
 
 public type AliasEvent record {|
     string alias;
@@ -12,10 +12,6 @@ public type NodeEvent record {|
 public type ScalarEvent record {|
     *NodeEvent;
     string? value;
-|};
-
-public type DocumentStartEvent record {|
-    map<string> tags;
 |};
 
 public type StartEvent record {|

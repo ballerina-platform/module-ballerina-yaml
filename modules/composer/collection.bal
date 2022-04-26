@@ -31,7 +31,7 @@ function composeSequence(ComposerState state, boolean flowStyle) returns json[]|
             }
         }
 
-        if event is event:DocumentStartEvent {
+        if event is event:StartEvent && event.startType == event:DOCUMENT {
             if !flowStyle {
                 break;
             }
@@ -74,7 +74,7 @@ function composeMapping(ComposerState state, boolean flowStyle) returns map<json
             }
         }
 
-        if event is event:DocumentStartEvent {
+        if event is event:StartEvent && event.startType == event:DOCUMENT {
             if !flowStyle {
                 break;
             }

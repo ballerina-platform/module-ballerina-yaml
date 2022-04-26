@@ -32,22 +32,3 @@ function nodeAnchor(ParserState state) returns string?|lexer:LexicalError|Parsin
     }
     return anchor;
 }
-
-function nodeProperties(ParserState state) returns [string?, string?, string?]|lexer:LexicalError|ParsingError {
-    string? tagHandle = ();
-    string? tagPrefix = ();
-    string? anchor = ();
-
-    match state.tokenBuffer.token {
-        lexer:TAG|lexer:TAG_HANDLE => {
-            [tagPrefix, tagHandle] = check nodeTag(state);
-            anchor = check nodeAnchor(state);
-        }
-        lexer:ANCHOR => {
-            anchor = check nodeAnchor(state);
-            [tagPrefix, tagHandle] = check nodeTag(state);
-        }
-    }
-
-    return [tagHandle, tagPrefix, anchor];
-}

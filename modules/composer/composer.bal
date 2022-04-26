@@ -17,7 +17,7 @@ public function composeDocument(ComposerState state, event:Event? eventParam = (
     }
 
     // TODO: Set up the hash map for tag handling
-    if event is event:DocumentStartEvent {
+    if event is event:StartEvent && event.startType == event:DOCUMENT {
         event = check checkEvent(state);
     }
 

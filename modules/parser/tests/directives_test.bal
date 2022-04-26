@@ -8,18 +8,39 @@ function testAccurateYAMLDirective() returns error? {
     ParserState state = check new (["%YAML 1.3", "---"]);
     _ = check parse(state, docType = ANY_DOCUMENT);
 
-    test:assertEquals(state.yamlVersion, "1.3");
+    test:assertEquals(state.yamlVersion, 1.3);
 }
 
 @test:Config {}
 function testYAMLVersionOfMultipleDocuments() returns error? {
     ParserState state = check new (["%YAML 1.3", "---", "...", "%YAML 1.1", "---"]);
     _ = check parse(state, docType = DIRECTIVE_DOCUMENT);
-    test:assertEquals(state.yamlVersion, "1.3");
+    test:assertEquals(state.yamlVersion, 1.3);
 
     _ = check parse(state, docType = BARE_DOCUMENT);
     _ = check parse(state, docType = DIRECTIVE_DOCUMENT);
-    test:assertEquals(state.yamlVersion, "1.1");
+    test:assertEquals(state.yamlVersion, 1.1);
+}
+
+@test:Config {
+    dataProvider: invalidYAMLVersionDataGen
+}
+function testOnlySupportMajorVersionOne(string line) returns error? {
+    check assertParsingError([line]);
+}
+
+function invalidYAMLVersionDataGen() returns map<[string]> {
+    return {
+        "lower version": ["%YAML 0.9"],
+        "higher version": ["%YAML 2.1"]
+    };
+}
+
+@test:Config {
+    groups: ["directives"]
+}
+function testOnlySupportVersion1() returns error? {
+    check assertParsingError(["%YAML 1.3", "%YAML 1.1"]);
 }
 
 @test:Config {

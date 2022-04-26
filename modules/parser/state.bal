@@ -25,7 +25,7 @@ public class ParserState {
     map<string> tagHandles = {};
 
     # YAML version of the document.
-    string? yamlVersion = ();
+    float? yamlVersion = ();
 
     event:Event[] eventBuffer = [];
 

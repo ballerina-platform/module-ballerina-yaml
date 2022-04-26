@@ -1,3 +1,4 @@
+import ballerina/log;
 import yaml.lexer;
 
 # Check the grammar productions for TAG directives.
@@ -49,6 +50,13 @@ function yamlDirective(ParserState state) returns lexer:LexicalError|ParsingErro
     check checkToken(state, lexer:DECIMAL);
     lexemeBuffer += state.currentToken.value;
 
-    // Update the version
-    state.yamlVersion = lexemeBuffer;
+    // The parser only works with versions that is compatible with the major version of the parser.
+    float yamlVersion = <float>(check processTypeCastingError(state, 'float:fromString(lexemeBuffer)));
+    if yamlVersion != 1.2 {
+        if yamlVersion >= 2.0 || yamlVersion < 1.0 {
+            return generateError(state, string `Incompatible version ${yamlVersion} for the 1.2 parser`);
+        }
+        log:printWarn(string `The parser is designed for YAML 1.2. Some features may not work with ${yamlVersion}`);
+    }
+    state.yamlVersion = yamlVersion;
 }

@@ -1,13 +1,14 @@
 import yaml.parser;
 import yaml.event;
 import yaml.lexer;
+import yaml.schema;
 
 # Compose single YAML document to native Ballerina structure.
 #
 # + state - Initiated composer state  
 # + eventParam - Passed the expected event if already fetched
 # + return - Native Ballerina data structure on success
-public function composeDocument(ComposerState state, event:Event? eventParam = ()) returns json|parser:ParsingError|lexer:LexicalError|ComposingError {
+public function composeDocument(ComposerState state, event:Event? eventParam = ()) returns json|parser:ParsingError|lexer:LexicalError|ComposingError|schema:TypeError {
     // Obtain the root event
     event:Event event = eventParam is () ? check checkEvent(state) : eventParam;
 
@@ -16,7 +17,6 @@ public function composeDocument(ComposerState state, event:Event? eventParam = (
         return ();
     }
 
-    // TODO: Set up the hash map for tag handling
     if event is event:StartEvent && event.startType == event:DOCUMENT {
         event = check checkEvent(state);
     }
@@ -34,7 +34,7 @@ public function composeDocument(ComposerState state, event:Event? eventParam = (
 #
 # + state - Initiated composer state  
 # + return - Native Ballerina data structure on success
-public function composeStream(ComposerState state) returns json[]|parser:ParsingError|lexer:LexicalError|ComposingError {
+public function composeStream(ComposerState state) returns json[]|parser:ParsingError|lexer:LexicalError|ComposingError|schema:TypeError {
     json[] output = [];
     event:Event event = check checkEvent(state);
 

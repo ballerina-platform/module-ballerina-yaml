@@ -4,7 +4,7 @@ import ballerina/test;
     dataProvider: nativeDataStructureDataGen
 }
 function testGenerateNativeDataStructure(string|string[] line, json structure) returns error? {
-    ComposerState state = check new ((line is string) ? [line] : line);
+    ComposerState state = check new ((line is string) ? [line] : line, {});
     json output = check composeDocument(state);
 
     test:assertEquals(output, structure);
@@ -37,7 +37,7 @@ function nativeDataStructureDataGen() returns map<[string|string[], json]> {
     dataProvider: invalidEventStreamDataGen
 }
 function testComposeInvalidEventStream(string[] lines) returns error? {
-    ComposerState state = check new (lines);
+    ComposerState state = check new (lines, {});
 
     json|error output = composeDocument(state);
     test:assertTrue(output is ComposingError);
@@ -48,6 +48,7 @@ function invalidEventStreamDataGen() returns map<[string[]]> {
         "multiple root data values": [["|-", " 123", "", "-", " 123"]],
         "flow style sequence without end": [["[", " first, ", "second "]],
         "aliasing anchor does note exist": [["*alias"]],
+        "invalid explicit tags must return an error": [["!!int alias"]],
         "cyclic reference": [["- &anchor [*anchor]"]]
     };
 }
@@ -56,7 +57,7 @@ function invalidEventStreamDataGen() returns map<[string[]]> {
     dataProvider: streamDataGen
 }
 function testComposeMultipleDocuments(string[] lines, json[] expectedDocs) returns error? {
-    ComposerState state = check new (lines);
+    ComposerState state = check new (lines, {});
     json[] docs = check composeStream(state);
 
     test:assertEquals(docs, expectedDocs);

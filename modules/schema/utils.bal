@@ -1,12 +1,12 @@
 import ballerina/regex;
 
 function constructWithRegex(string regexPattern,
-    string data,
+    json data,
     string typeName,
     function (string data) returns json|TypeError construct) returns json|TypeError {
 
-    if regex:matches(data, regexPattern) {
-        return construct(data);
+    if regex:matches(data.toString(), regexPattern) {
+        return construct(data.toString());
     }
     return generateError(string `Cannot cast '${data.toJsonString()}' to '${typeName}'`);
 }

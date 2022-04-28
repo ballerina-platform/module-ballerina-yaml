@@ -1,13 +1,14 @@
 import yaml.event;
 import yaml.parser;
 import yaml.lexer;
+import yaml.schema;
 
 # Compose the sequence collection into Ballerina array.
 #
 # + state - Current composer state
 # + flowStyle - If a collection is flow sequence
 # + return - Constructed Ballerina array on success
-function composeSequence(ComposerState state, boolean flowStyle) returns json[]|lexer:LexicalError|parser:ParsingError|ComposingError {
+function composeSequence(ComposerState state, boolean flowStyle) returns json[]|lexer:LexicalError|parser:ParsingError|ComposingError|schema:TypeError {
     json[] sequence = [];
     event:Event event = check checkEvent(state);
 
@@ -50,7 +51,7 @@ function composeSequence(ComposerState state, boolean flowStyle) returns json[]|
 # + state - Current composer state
 # + flowStyle - If a collection is flow mapping
 # + return - Constructed Ballerina array on success
-function composeMapping(ComposerState state, boolean flowStyle) returns map<json>|lexer:LexicalError|parser:ParsingError|ComposingError {
+function composeMapping(ComposerState state, boolean flowStyle) returns map<json>|lexer:LexicalError|parser:ParsingError|ComposingError|schema:TypeError {
     map<json> structure = {};
     event:Event event = check checkEvent(state, parser:EXPECT_KEY);
 

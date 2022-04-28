@@ -15,9 +15,9 @@ public type ScalarEvent record {|
 |};
 
 public type StartEvent record {|
+    *NodeEvent;
     Collection startType;
     boolean flowStyle = false;
-    *NodeEvent;
 |};
 
 public type EndEvent record {|

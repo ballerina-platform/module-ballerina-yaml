@@ -23,10 +23,10 @@ function generateTagHandlesMap(YAMLType[] yamlTypes, YAMLSchema yamlSchema) retu
     // Obtain the default tag handles.
     match yamlSchema {
         JSON_SCHEMA => {
-            tagHandles = schema:getJSONSchemaTags();
+            tagHandles = schema:getJsonSchemaTags();
         }
         CORE_SCHEMA => {
-            // TODO: Add extended json schema tags
+            tagHandles = schema:getCoreSchemaTags();
         }
     }
 

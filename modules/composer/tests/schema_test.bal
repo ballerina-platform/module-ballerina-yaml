@@ -73,7 +73,11 @@ function testCustomTag() returns error? {
     map<schema:YAMLTypeConstructor> tagHandles = schema:getJsonSchemaTags();
     tagHandles["!rgb"] = {
         kind: schema:SEQUENCE,
-        construct: constructRGB
+        construct: constructRGB,
+        identity: function(json data) returns boolean {
+            RGB|error output = data.cloneWithType();
+            return output is RGB;
+        }
     };
 
     ComposerState state = check new (["!rgb [123, 12, 32]"], tagHandles);
@@ -88,7 +92,11 @@ function testInvalidCustomTag() returns error? {
     map<schema:YAMLTypeConstructor> tagHandles = schema:getJsonSchemaTags();
     tagHandles["!rgb"] = {
         kind: schema:SEQUENCE,
-        construct: constructRGB
+        construct: constructRGB,
+        identity: function(json data) returns boolean {
+            RGB|error output = data.cloneWithType();
+            return output is RGB;
+        }
     };
 
     ComposerState state = check new (["!rgb [256, 12, 32]"], tagHandles);

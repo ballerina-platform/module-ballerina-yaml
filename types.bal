@@ -24,9 +24,11 @@ public type ReadConfig record {|
 
 # Represents the attributes of the custom YAML type.
 #
-# + tag - YAML tag for the custom type
+# + tag - YAML tag for the custom type  
+# + ballerinaType - The equivalent Ballerina type for the YAML tag
 public type YAMLType record {|
     string tag;
+    typedesc<json> ballerinaType;
     *schema:YAMLTypeConstructor;
 |};
 

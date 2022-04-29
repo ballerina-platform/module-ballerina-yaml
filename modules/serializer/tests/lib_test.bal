@@ -55,6 +55,7 @@ function keySerializeDataGen() returns map<[json, event:Event[]]> {
         "negative integer": [-1, [{value: "-1", tag: "tag:yaml.org,2002:int"}]],
         "float": [1.1, [{value: "1.1", tag: "tag:yaml.org,2002:float"}]],
         "boolean": [true, [{value: "true", tag: "tag:yaml.org,2002:bool"}]],
+        "null": [(), [{value: "", tag: "tag:yaml.org,2002:null"}]],
         "float infinity": ['float:Infinity, [{value: ".inf", tag: "tag:yaml.org,2002:float"}]],
         "float negative infinity": [-'float:Infinity, [{value: "-.inf", tag: "tag:yaml.org,2002:float"}]],
         "float not a number": ['float:NaN, [{value: ".nan", tag: "tag:yaml.org,2002:float"}]]

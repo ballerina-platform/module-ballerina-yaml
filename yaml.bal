@@ -38,6 +38,7 @@ public function writeDocument(string fileName, json yamlDoc, WriteConfig config 
     string[] output = check emitter:emit(
         check serializer:serialize(yamlDoc, {}, config.blockLevel),
         config.indentationPolicy,
+        {},
         false
     );
     check io:fileWriteLines(fileName, output);

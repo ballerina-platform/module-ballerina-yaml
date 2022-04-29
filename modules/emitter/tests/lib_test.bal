@@ -5,7 +5,7 @@ import yaml.event;
     dataProvider: simpleEventDataGen
 }
 function testWritingSimpleEvent(event:Event[] events, string[] expectedOutput) returns error? {
-    string[] output = check emit(events, 2);
+    string[] output = check emit(events, 2, {});
     test:assertEquals(output, expectedOutput);
 }
 
@@ -30,6 +30,21 @@ function simpleEventDataGen() returns map<[event:Event[], string[]]> {
 
 @test:Config {}
 function testMultipleRootEventsForOneDocument() returns error? {
-    string[]|EmittingError output = emit([{value: "first root"}, {value: "second root"}], 2);
+    string[]|EmittingError output = emit([{value: "first root"}, {value: "second root"}], 2, {});
     test:assertTrue(output is EmittingError);
+}
+
+@test:Config {
+    dataProvider: canonicalDataGen
+}
+function testWritingInCanonical(event:Event[] events, string[] expectedOutput) returns error? {
+    string[] output = check emit(events, 2, {}, canonical = true);
+    test:assertEquals(output, expectedOutput);
+}
+
+function canonicalDataGen() returns map<[event:Event[], string[]]> {
+    return {
+        "simple global scalar": [[{value: "1", tag: "tag:yaml.org,2002:int"}], ["!!int 1"]],
+        "simple local scalar": [[{value: "1", tag: "!digit"}], ["!digit 1"]]
+    };
 }

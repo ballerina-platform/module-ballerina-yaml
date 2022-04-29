@@ -1,3 +1,4 @@
+import yaml.schema;
 import yaml.event;
 
 # Represents the variables of the Emitter state.
@@ -5,9 +6,11 @@ import yaml.event;
 # + output - Lines to be written.
 # + indent - Total whitespace for a single indent  
 # + events - Event tree to be written
-public type EmitterState record {|
+type EmitterState record {|
     string[] output;
     readonly string indent;
+    readonly boolean canonical;
+    map<schema:YAMLTypeConstructor> tagSchema;
     event:Event[] events;
 |};
 
@@ -17,7 +20,12 @@ public type EmitterState record {|
 # + indentationPolicy - Number of whitespace for an indent  
 # + isStream - Whether the event tree is a stream
 # + return - YAML string lines
-public function emit(event:Event[] events, int indentationPolicy, boolean isStream = false) returns string[]|EmittingError {
+public function emit(event:Event[] events,
+    int indentationPolicy,
+    map<schema:YAMLTypeConstructor> tagSchema,
+    boolean isStream = false,
+    boolean canonical = false) returns string[]|EmittingError {
+
     // Setup the total whitespace for an indentation
     string indent = "";
     foreach int i in 1 ... indentationPolicy {
@@ -27,6 +35,8 @@ public function emit(event:Event[] events, int indentationPolicy, boolean isStre
     EmitterState state = {
         output: [],
         indent,
+        canonical,
+        tagSchema,
         events
     };
 
@@ -71,7 +81,7 @@ function write(EmitterState state) returns EmittingError? {
 
     // Convert scalar 
     if event is event:ScalarEvent {
-        state.output.push(event.value == () ? "" : event.value.toString());
+        state.output.push(reduceTagHandle(event.tag) + " " + event.value.toString());
         return;
     }
 }
@@ -85,4 +95,22 @@ function getEvent(EmitterState state) returns event:Event {
         return {endType: event:STREAM};
     }
     return state.events.shift();
+}
+
+function reduceTagHandle(string? tag) returns string {
+    if tag == () {
+        return "";
+    }
+
+    string[] keys = schema:defaultTagHandles.keys();
+
+    string tagHandleReference;
+    foreach string key in keys {
+        tagHandleReference = schema:defaultTagHandles.get(key);
+        if tag.startsWith(tagHandleReference) {
+            return key + tag.substring(tagHandleReference.length());
+        }
+    }
+
+    return string `!<${tag}>`;
 }

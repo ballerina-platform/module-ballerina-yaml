@@ -80,3 +80,20 @@ function constructFloat(json data) returns json|TypeError {
         function(string s) returns json|TypeError => processTypeCastingError('float:fromString(s)));
 }
 
+function representFloat(json data) returns string {
+    if data == -'float:Infinity {
+        return "-.inf";
+    }
+
+    match data {
+        'float:Infinity => {
+            return ".inf";
+        }
+        'float:NaN => {
+            return ".nan";
+        }
+        _ => {
+            return data.toString();
+        }
+    }
+}

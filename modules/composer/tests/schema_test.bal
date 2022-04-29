@@ -77,7 +77,8 @@ function testCustomTag() returns error? {
         identity: function(json data) returns boolean {
             RGB|error output = data.cloneWithType();
             return output is RGB;
-        }
+        },
+        represent: function (json data) returns string => data.toString()
     };
 
     ComposerState state = check new (["!rgb [123, 12, 32]"], tagHandles);
@@ -96,7 +97,8 @@ function testInvalidCustomTag() returns error? {
         identity: function(json data) returns boolean {
             RGB|error output = data.cloneWithType();
             return output is RGB;
-        }
+        },
+        represent: function (json data) returns string => data.toString()
     };
 
     ComposerState state = check new (["!rgb [256, 12, 32]"], tagHandles);

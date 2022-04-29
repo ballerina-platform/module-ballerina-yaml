@@ -35,7 +35,8 @@ function generateTagHandlesMap(YAMLType[] yamlTypes, YAMLSchema yamlSchema) retu
         tagHandles[yamlType.tag] = {
             kind: yamlType.kind,
             construct: yamlType.construct,
-            identity: schema:generateIdentityFunction(yamlType.ballerinaType)
+            identity: schema:generateIdentityFunction(yamlType.ballerinaType),
+            represent: yamlType.represent
         };
     });
 

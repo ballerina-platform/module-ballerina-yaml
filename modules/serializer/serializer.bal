@@ -12,14 +12,17 @@ public function serialize(json data, map<schema:YAMLTypeConstructor> tagSchema, 
     event:Event[] events = [];
 
     string? tag = ();
+    schema:YAMLTypeConstructor? typeConstructor = ();
 
     // Obtain the tag
+    schema:YAMLTypeConstructor currentTypeConstructor;
     string[] tagKeys = tagSchema.keys();
     foreach string key in tagKeys {
-        schema:YAMLTypeConstructor typeConstructor = <schema:YAMLTypeConstructor>tagSchema[key];
+        currentTypeConstructor = <schema:YAMLTypeConstructor>tagSchema[key];
 
-        if typeConstructor.identity(data) {
+        if currentTypeConstructor.identity(data) {
             tag = key;
+            typeConstructor = currentTypeConstructor;
             break;
         }
     }
@@ -51,7 +54,10 @@ public function serialize(json data, map<schema:YAMLTypeConstructor> tagSchema, 
     }
 
     // Convert string
-    events.push({value: data.toString(), tag});
+    events.push({
+        value: typeConstructor == () ? data.toString() : (<schema:YAMLTypeConstructor>typeConstructor).represent(data),
+        tag
+    });
     return events;
 }
 

@@ -1,5 +1,6 @@
 import yaml.lexer;
 import yaml.event;
+import yaml.schema;
 
 # Generates an event my combining to map<json> objects.
 #
@@ -156,8 +157,8 @@ function generateCompleteTagName(ParserState state, string tagHandle, string tag
     if state.customTagHandles.hasKey(tagHandle) {
         tagHandleName = state.customTagHandles.get(tagHandle);
     } else {
-        if state.defaultTagHandles.hasKey(tagHandle) {
-            tagHandleName = state.defaultTagHandles.get(tagHandle);
+        if schema:defaultTagHandles.hasKey(tagHandle) {
+            tagHandleName = schema:defaultTagHandles.get(tagHandle);
         }
         else {
             return generateError(state, string `'${tagHandle}' tag handle is not defined`);

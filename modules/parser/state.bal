@@ -21,12 +21,7 @@ public class ParserState {
     lexer:LexerState lexerState = new ();
 
     boolean explicitKey = false;
-
-    map<string> defaultTagHandles = {
-        "!": "!",
-        "!!": "tag:yaml.org,2002:"
-    };
-
+    
     map<string> customTagHandles = {};
 
     # YAML version of the document.

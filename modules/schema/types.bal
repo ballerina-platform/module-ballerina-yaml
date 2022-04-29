@@ -10,3 +10,8 @@ public type YAMLTypeConstructor record {|
     function (json data) returns boolean identity;
     function (json data) returns string represent;
 |};
+
+public readonly & map<string> defaultTagHandles = {
+    "!": "!",
+    "!!": "tag:yaml.org,2002:"
+};

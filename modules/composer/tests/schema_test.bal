@@ -1,6 +1,24 @@
 import ballerina/test;
 import yaml.schema;
 
+type RGB [int, int, int];
+
+function constructRGB(json data) returns json|schema:TypeError {
+    RGB|error value = data.cloneWithType();
+
+    if value is error {
+        return error("Invalid shape for RGB");
+    }
+
+    foreach int index in value {
+        if index > 255 || index < 0 {
+            return error("One RGB value must be between 0-255");
+        }
+    }
+
+    return value;
+}
+
 @test:Config {
     dataProvider: jsonLineDataGen
 }
@@ -50,3 +68,31 @@ function coreLineDataGen() returns map<[string, json]> {
     };
 }
 
+@test:Config {}
+function testCustomTag() returns error? {
+    map<schema:YAMLTypeConstructor> tagHandles = schema:getJsonSchemaTags();
+    tagHandles["!rgb"] = {
+        kind: schema:SEQUENCE,
+        construct: constructRGB
+    };
+
+    ComposerState state = check new (["!rgb [123, 12, 32]"], tagHandles);
+    json output = check composeDocument(state);
+    RGB expectedOutput = [123, 12, 32];
+
+    test:assertEquals(output, expectedOutput);
+}
+
+@test:Config {}
+function testInvalidCustomTag() returns error? {
+    map<schema:YAMLTypeConstructor> tagHandles = schema:getJsonSchemaTags();
+    tagHandles["!rgb"] = {
+        kind: schema:SEQUENCE,
+        construct: constructRGB
+    };
+
+    ComposerState state = check new (["!rgb [256, 12, 32]"], tagHandles);
+    json|error output = composeDocument(state);
+
+    test:assertTrue(output is schema:TypeError);
+}

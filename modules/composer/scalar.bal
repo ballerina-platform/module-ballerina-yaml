@@ -28,10 +28,10 @@ function composeNode(ComposerState state, event:Event event) returns json|lexer:
         output = {};
         match event.startType {
             event:SEQUENCE => { // Check for +SEQ
-                output = check composeSequence(state, event.flowStyle);
+                output = check castData(state, check composeSequence(state, event.flowStyle), schema:SEQUENCE, event.tag);
             }
             event:MAPPING => {
-                output = check composeMapping(state, event.flowStyle);
+                output = check castData(state, check composeMapping(state, event.flowStyle), schema:MAPPING, event.tag);
             }
             _ => {
                 return generateError(state, "Only sequence and mapping are allowed as node start events");

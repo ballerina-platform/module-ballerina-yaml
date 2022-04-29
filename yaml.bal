@@ -36,7 +36,7 @@ public function readAll(string filePath, ReadConfig config = {}) returns json[]|
 public function writeDocument(string fileName, json yamlDoc, WriteConfig config = {}) returns error? {
     check openFile(fileName);
     string[] output = check emitter:emit(
-        check serializer:serialize(yamlDoc, config.blockLevel),
+        check serializer:serialize(yamlDoc, {}, config.blockLevel),
         config.indentationPolicy,
         false
     );

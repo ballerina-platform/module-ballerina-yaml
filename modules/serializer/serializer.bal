@@ -1,4 +1,5 @@
 import yaml.event;
+import yaml.schema;
 
 # Generates the event tree for the given Ballerina native data structure.
 #
@@ -6,20 +7,29 @@ import yaml.event;
 # + blockLevel - The depth of the block nodes 
 # + depthLevel - The current depth level
 # + return - Event tree. Else, an error on failure.
-public function serialize(json data, int blockLevel, int depthLevel = 0) returns event:Event[]|SerializingError {
+public function serialize(json data, map<schema:YAMLTypeConstructor> tagSchema, int blockLevel,
+    int depthLevel = 0) returns event:Event[]|SerializingError {
     event:Event[] events = [];
-    // TODO: check if the data is a custom tag
 
-    // TODO: check if the current schema is CORE_SCHEMA
+    string? tag = ();
 
-    // TODO: check if the current schema is JSON_SCHEMA
+    // Obtain the tag
+    string[] tagKeys = tagSchema.keys();
+    foreach string key in tagKeys {
+        schema:YAMLTypeConstructor typeConstructor = <schema:YAMLTypeConstructor>tagSchema[key];
+
+        if typeConstructor.identity(data) {
+            tag = key;
+            break;
+        }
+    }
 
     // Convert sequence
     if data is json[] {
-        events.push({startType: event:SEQUENCE, flowStyle: blockLevel <= depthLevel});
+        events.push({startType: event:SEQUENCE, flowStyle: blockLevel <= depthLevel, tag});
 
         foreach json dataItem in data {
-            events = combineArray(events, check serialize(dataItem, blockLevel, depthLevel + 1));
+            events = combineArray(events, check serialize(dataItem, tagSchema, blockLevel, depthLevel + 1));
         }
 
         events.push({endType: event:SEQUENCE});
@@ -28,12 +38,12 @@ public function serialize(json data, int blockLevel, int depthLevel = 0) returns
 
     // Convert mapping
     if data is map<json> {
-        events.push({startType: event:MAPPING, flowStyle: blockLevel <= depthLevel});
+        events.push({startType: event:MAPPING, flowStyle: blockLevel <= depthLevel, tag});
 
         string[] keys = data.keys();
         foreach string key in keys {
             events.push({value: key});
-            events = combineArray(events, check serialize(data[key], blockLevel, depthLevel + 1));
+            events = combineArray(events, check serialize(data[key], tagSchema, blockLevel, depthLevel + 1));
         }
 
         events.push({endType: event:MAPPING});
@@ -41,8 +51,7 @@ public function serialize(json data, int blockLevel, int depthLevel = 0) returns
     }
 
     // Convert string
-    // TODO: check the tag type
-    events.push({value: data.toString()});
+    events.push({value: data.toString(), tag});
     return events;
 }
 

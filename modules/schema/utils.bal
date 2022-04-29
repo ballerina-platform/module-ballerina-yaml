@@ -25,6 +25,13 @@ function processTypeCastingError(json|error value) returns json|TypeError {
     return value;
 }
 
+# Description
+#
+# + typeDesc - Parameter Description
+# + return - Return Value Description
 public function generateIdentityFunction(typedesc<json> typeDesc) returns function (json data) returns boolean {
-    return function(json data) returns boolean => data.cloneWithType(typeDesc) is json;
+    return function(json data) returns boolean {
+        json|error output = data.ensureType(typeDesc);
+        return output == data;
+    };
 }

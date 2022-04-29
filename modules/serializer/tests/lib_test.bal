@@ -2,6 +2,24 @@ import ballerina/test;
 import yaml.schema;
 import yaml.event;
 
+type RGB [int, int, int];
+
+function constructRGB(json data) returns json|schema:TypeError {
+    RGB|error value = data.cloneWithType();
+
+    if value is error {
+        return error("Invalid shape for RGB");
+    }
+
+    foreach int index in value {
+        if index > 255 || index < 0 {
+            return error("One RGB value must be between 0-255");
+        }
+    }
+
+    return value;
+}
+
 @test:Config {
     dataProvider: serializingEventDataGen
 }
@@ -41,6 +59,26 @@ function keySerializeDataGen() returns map<[json, event:Event[]]> {
         "float negative infinity": [-'float:Infinity, [{value: "-.inf", tag: "tag:yaml.org,2002:float"}]],
         "float not a number": ['float:NaN, [{value: ".nan", tag: "tag:yaml.org,2002:float"}]]
     };
+}
+
+@test:Config {}
+function testCustomTag() returns error? {
+    map<schema:YAMLTypeConstructor> tagHandles = schema:getJsonSchemaTags();
+    tagHandles["!rgb"] = {
+        kind: schema:SEQUENCE,
+        construct: constructRGB,
+        identity: function(json data) returns boolean {
+            RGB|error output = data.cloneWithType();
+            return output is RGB;
+        },
+        represent: function(json data) returns string => data.toString()
+    };
+
+    RGB testingInput = [123, 12, 32];
+    event:Event[] events = check serialize(testingInput, tagHandles, 1);
+    event:Event expectedEvent = {startType: event:SEQUENCE, tag: "!rgb"};
+
+    test:assertEquals(events[0], expectedEvent);
 }
 
 @test:Config {}

@@ -41,7 +41,9 @@ public function writeDocument(string fileName, json yamlDoc, WriteConfig config 
         events = check serializer:serialize(
             data = yamlDoc,
             tagSchema = generateTagHandlesMap(config.yamlTypes, config.schema),
-            blockLevel = config.blockLevel
+            blockLevel = config.blockLevel,
+            delimiter = config.useSingleQuotes ? "'" : "\"",
+            forceQuotes = config.forceQuotes
         ),
         indentationPolicy = config.indentationPolicy,
         tagSchema = {},

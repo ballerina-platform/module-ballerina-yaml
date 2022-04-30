@@ -10,6 +10,8 @@ public type WriteConfig record {|
     int indentationPolicy = 2;
     int blockLevel = 1;
     boolean canonical = false;
+    boolean useSingleQuotes = false;
+    boolean forceQuotes = false;
     YAMLSchema schema = CORE_SCHEMA;
     YAMLType[] yamlTypes = [];
 |};

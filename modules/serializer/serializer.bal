@@ -13,7 +13,7 @@ const string START_INDICATOR = "[\\,|\\[|\\]|\\{|\\}|&\\*|!\\||\\>|\\'|\\\"|%|@|
 # + depthLevel - The current depth level
 # + return - Event tree. Else, an error on failure.
 public function serialize(json data, map<schema:YAMLTypeConstructor> tagSchema, int blockLevel,
-    int depthLevel = 0) returns event:Event[]|SerializingError {
+    string:Char delimiter, boolean forceQuotes, int depthLevel = 0) returns event:Event[]|SerializingError {
     event:Event[] events = [];
 
     string? tag = ();
@@ -38,7 +38,7 @@ public function serialize(json data, map<schema:YAMLTypeConstructor> tagSchema, 
         events.push({startType: event:SEQUENCE, flowStyle: blockLevel <= depthLevel, tag});
 
         foreach json dataItem in data {
-            events = combineArray(events, check serialize(dataItem, tagSchema, blockLevel, depthLevel + 1));
+            events = combineArray(events, check serialize(dataItem, tagSchema, blockLevel, delimiter, forceQuotes, depthLevel + 1));
         }
 
         events.push({endType: event:SEQUENCE});
@@ -52,8 +52,8 @@ public function serialize(json data, map<schema:YAMLTypeConstructor> tagSchema, 
 
         string[] keys = data.keys();
         foreach string key in keys {
-            events = combineArray(events, check serialize(key, tagSchema, blockLevel, depthLevel));
-            events = combineArray(events, check serialize(data[key], tagSchema, blockLevel, depthLevel + 1));
+            events = combineArray(events, check serialize(key, tagSchema, blockLevel, delimiter, forceQuotes, depthLevel));
+            events = combineArray(events, check serialize(data[key], tagSchema, blockLevel, delimiter, forceQuotes, depthLevel + 1));
         }
 
         events.push({endType: event:MAPPING});
@@ -63,10 +63,11 @@ public function serialize(json data, map<schema:YAMLTypeConstructor> tagSchema, 
     // Convert string
     string invalidPlanarRegexPattern = string `(${SPACE_AFTER})|(${SPACE_BEFORE})|(${START_INDICATOR})`;
     tag = typeConstructor == () ? string `${schema:defaultGlobalTagHandle}str` : tag;
-    string value =typeConstructor == () ? data.toString() : (<schema:YAMLTypeConstructor>typeConstructor).represent(data);
+    string value = typeConstructor == () ? data.toString() : (<schema:YAMLTypeConstructor>typeConstructor).represent(data);
 
     events.push({
-        value : regex:matches(value, invalidPlanarRegexPattern) ? string `"${value}"` : value,
+        value: regex:matches(value, invalidPlanarRegexPattern) || forceQuotes
+            ? string `${delimiter}${value}${delimiter}` : value,
         tag
     });
     return events;

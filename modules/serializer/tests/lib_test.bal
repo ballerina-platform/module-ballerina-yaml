@@ -28,7 +28,7 @@ string yamlStr = string `${schema:defaultGlobalTagHandle}str`;
     dataProvider: serializingEventDataGen
 }
 function testGenerateSerializingEvent(json structure, event:Event[] assertingEvents) returns error? {
-    event:Event[] events = check serialize(structure, {}, 1);
+    event:Event[] events = check serialize(structure, {}, 1, "\"", false);
     test:assertEquals(events, assertingEvents);
 }
 
@@ -49,7 +49,7 @@ function serializingEventDataGen() returns map<[json, event:Event[]]> {
     dataProvider: keySerializeDataGen
 }
 function testTagInSerializedEvent(json structure, event:Event[] assertingEvents) returns error? {
-    event:Event[] events = check serialize(structure, schema:getCoreSchemaTags(), 1);
+    event:Event[] events = check serialize(structure, schema:getCoreSchemaTags(), 1, "\"", false);
     test:assertEquals(events, assertingEvents);
 }
 
@@ -80,7 +80,7 @@ function testCustomTag() returns error? {
     };
 
     RGB testingInput = [123, 12, 32];
-    event:Event[] events = check serialize(testingInput, tagHandles, 1);
+    event:Event[] events = check serialize(testingInput, tagHandles, 1, "\"", false);
     event:Event expectedEvent = {startType: event:SEQUENCE, tag: "!rgb"};
 
     test:assertEquals(events[0], expectedEvent);
@@ -88,7 +88,7 @@ function testCustomTag() returns error? {
 
 @test:Config {}
 function testSwitchFlowStyleUponBlockLevel() returns error? {
-    event:Event[] events = check serialize([["value"]], {}, 1);
+    event:Event[] events = check serialize([["value"]], {}, 1, "\"", false);
 
     test:assertFalse((<event:StartEvent>events[0]).flowStyle);
     test:assertTrue((<event:StartEvent>events[1]).flowStyle);
@@ -98,7 +98,7 @@ function testSwitchFlowStyleUponBlockLevel() returns error? {
     dataProvider: invalidPlanarDataGen
 }
 function testQuotesForInvalidPlanarChar(string line) returns error? {
-    event:Event[] events = check serialize(line, {}, 1);
+    event:Event[] events = check serialize(line, {}, 1, "\"", false);
     event:Event expectedEvent = {value: string `"${line}"`, tag: yamlStr};
     test:assertEquals(events[0], expectedEvent);
 }
@@ -111,4 +111,18 @@ function invalidPlanarDataGen() returns map<[string]> {
         "mapping value": [": "],
         "flow indicator": ["}a"]
     };
+}
+
+@test:Config {}
+function testSingleQuotesOption() returns error? {
+    event:Event[] events = check serialize("? value", {}, 1, "'", false);
+    event:Event expectedEvent = {value: "'? value'", tag: yamlStr};
+    test:assertEquals(events[0], expectedEvent);
+}
+
+@test:Config {}
+function testEnforceQuotesOption() returns error? {
+    event:Event[] events = check serialize("value", {}, 1, "\"", true);
+    event:Event expectedEvent = {value: "\"value\"", tag: yamlStr};
+    test:assertEquals(events[0], expectedEvent);
 }

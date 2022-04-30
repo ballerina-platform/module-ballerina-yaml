@@ -1,5 +1,10 @@
 import yaml.event;
+import ballerina/regex;
 import yaml.schema;
+
+const string SPACE_AFTER = "[\\w|\\s]*[\\-|\\?|:|] [\\w|\\s]*";
+const string SPACE_BEFORE = "[\\w|\\s]* #[\\w|\\s]*";
+const string START_INDICATOR = "[\\,|\\[|\\]|\\{|\\}|&\\*|!\\||\\>|\\'|\\\"|%|@|\\`][\\w|\\s]*";
 
 # Generates the event tree for the given Ballerina native data structure.
 #
@@ -56,9 +61,12 @@ public function serialize(json data, map<schema:YAMLTypeConstructor> tagSchema, 
     }
 
     // Convert string
+    string invalidPlanarRegexPattern = string `(${SPACE_AFTER})|(${SPACE_BEFORE})|(${START_INDICATOR})`;
     tag = typeConstructor == () ? string `${schema:defaultGlobalTagHandle}str` : tag;
+    string value =typeConstructor == () ? data.toString() : (<schema:YAMLTypeConstructor>typeConstructor).represent(data);
+
     events.push({
-        value: typeConstructor == () ? data.toString() : (<schema:YAMLTypeConstructor>typeConstructor).represent(data),
+        value : regex:matches(value, invalidPlanarRegexPattern) ? string `"${value}"` : value,
         tag
     });
     return events;

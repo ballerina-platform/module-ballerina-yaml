@@ -35,13 +35,13 @@ function testGenerateSerializingEvent(json structure, event:Event[] assertingEve
 function serializingEventDataGen() returns map<[json, event:Event[]]> {
     return {
         "empty array": [[], [{startType: event:SEQUENCE, tag: yamlSeq}, {endType: event:SEQUENCE}]],
-        "single element array": [["value"], [{startType: event:SEQUENCE, tag: yamlSeq}, {value: "value", tag:yamlStr}, {endType: event:SEQUENCE}]],
-        "multiple elements array": [["value1", "value2"], [{startType: event:SEQUENCE, tag: yamlSeq}, {value: "value1", tag:yamlStr}, {value: "value2", tag:yamlStr}, {endType: event:SEQUENCE}]],
-        "nested array": [[["value"]], [{startType: event:SEQUENCE, tag: yamlSeq}, {startType: event:SEQUENCE, tag: yamlSeq, flowStyle: true}, {value: "value", tag:yamlStr}, {endType: event:SEQUENCE}, {endType: event:SEQUENCE}]],
+        "single element array": [["value"], [{startType: event:SEQUENCE, tag: yamlSeq}, {value: "value", tag: yamlStr}, {endType: event:SEQUENCE}]],
+        "multiple elements array": [["value1", "value2"], [{startType: event:SEQUENCE, tag: yamlSeq}, {value: "value1", tag: yamlStr}, {value: "value2", tag: yamlStr}, {endType: event:SEQUENCE}]],
+        "nested array": [[["value"]], [{startType: event:SEQUENCE, tag: yamlSeq}, {startType: event:SEQUENCE, tag: yamlSeq, flowStyle: true}, {value: "value", tag: yamlStr}, {endType: event:SEQUENCE}, {endType: event:SEQUENCE}]],
         "empty mapping": [{}, [{startType: event:MAPPING, tag: yamlMap}, {endType: event:MAPPING}]],
-        "single element mapping": [{"key": "value"}, [{startType: event:MAPPING, tag: yamlMap}, {value: "key", tag:yamlStr}, {value: "value", tag:yamlStr}, {endType: event:MAPPING}]],
-        "multiple elements mapping": [{"key1": "value1", "key2": "value2"}, [{startType: event:MAPPING, tag: yamlMap}, {value: "key1", tag:yamlStr}, {value: "value1", tag:yamlStr}, {value: "key2", tag:yamlStr}, {value: "value2", tag:yamlStr}, {endType: event:MAPPING}]],
-        "single element": ["value", [{value: "value", tag:yamlStr}]]
+        "single element mapping": [{"key": "value"}, [{startType: event:MAPPING, tag: yamlMap}, {value: "key", tag: yamlStr}, {value: "value", tag: yamlStr}, {endType: event:MAPPING}]],
+        "multiple elements mapping": [{"key1": "value1", "key2": "value2"}, [{startType: event:MAPPING, tag: yamlMap}, {value: "key1", tag: yamlStr}, {value: "value1", tag: yamlStr}, {value: "key2", tag: yamlStr}, {value: "value2", tag: yamlStr}, {endType: event:MAPPING}]],
+        "single element": ["value", [{value: "value", tag: yamlStr}]]
     };
 }
 
@@ -92,4 +92,23 @@ function testSwitchFlowStyleUponBlockLevel() returns error? {
 
     test:assertFalse((<event:StartEvent>events[0]).flowStyle);
     test:assertTrue((<event:StartEvent>events[1]).flowStyle);
+}
+
+@test:Config {
+    dataProvider: invalidPlanarDataGen
+}
+function testQuotesForInvalidPlanarChar(string line) returns error? {
+    event:Event[] events = check serialize(line, {}, 1);
+    event:Event expectedEvent = {value: string `"${line}"`, tag: yamlStr};
+    test:assertEquals(events[0], expectedEvent);
+}
+
+function invalidPlanarDataGen() returns map<[string]> {
+    return {
+        "comment": [" #"],
+        "explicit key": ["? "],
+        "sequence entry": ["- "],
+        "mapping value": [": "],
+        "flow indicator": ["}a"]
+    };
 }

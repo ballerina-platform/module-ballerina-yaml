@@ -47,7 +47,7 @@ public function serialize(json data, map<schema:YAMLTypeConstructor> tagSchema, 
 
         string[] keys = data.keys();
         foreach string key in keys {
-            events.push({value: key});
+            events = combineArray(events, check serialize(key, tagSchema, blockLevel, depthLevel));
             events = combineArray(events, check serialize(data[key], tagSchema, blockLevel, depthLevel + 1));
         }
 

@@ -29,7 +29,7 @@ public function serialize(json data, map<schema:YAMLTypeConstructor> tagSchema, 
 
     // Convert sequence
     if data is json[] {
-        tag = typeConstructor == () ? "tag:yaml.org,2002:seq" : tag;
+        tag = typeConstructor == () ? string `${schema:defaultGlobalTagHandle}seq` : tag;
         events.push({startType: event:SEQUENCE, flowStyle: blockLevel <= depthLevel, tag});
 
         foreach json dataItem in data {
@@ -42,7 +42,7 @@ public function serialize(json data, map<schema:YAMLTypeConstructor> tagSchema, 
 
     // Convert mapping
     if data is map<json> {
-        tag = typeConstructor == () ? "tag:yaml.org,2002:map" : tag;
+        tag = typeConstructor == () ? string `${schema:defaultGlobalTagHandle}map` : tag;
         events.push({startType: event:MAPPING, flowStyle: blockLevel <= depthLevel, tag});
 
         string[] keys = data.keys();
@@ -56,7 +56,7 @@ public function serialize(json data, map<schema:YAMLTypeConstructor> tagSchema, 
     }
 
     // Convert string
-    tag = typeConstructor == () ? "tag:yaml.org,2002:str" : tag;
+    tag = typeConstructor == () ? string `${schema:defaultGlobalTagHandle}str` : tag;
     events.push({
         value: typeConstructor == () ? data.toString() : (<schema:YAMLTypeConstructor>typeConstructor).represent(data),
         tag

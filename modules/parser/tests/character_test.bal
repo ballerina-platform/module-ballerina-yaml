@@ -1,5 +1,6 @@
 import ballerina/test;
 import yaml.event;
+import yaml.schema;
 
 @test:Config {
     dataProvider: lineFoldingDataGen
@@ -40,7 +41,7 @@ function testTagShorthandEvent(string line, string tag) returns error? {
 function tagShorthandDataGen() returns map<[string, string]> {
     return {
         "primary": ["!local value", "!local"],
-        "secondary": ["!!str value", "tag:yaml.org,2002:str"],
+        "secondary": ["!!str value", string `${schema:defaultGlobalTagHandle}str`],
         "named": ["!e!tag value", "tag:named:tag"],
         "escaped": ["!e!tag%21 value", "tag:named:tag!"],
         "double!": ["!%21 value", "!!"]

@@ -1,3 +1,6 @@
+public const string defaultLocalTagHandle = "!";
+public const string defaultGlobalTagHandle = "tag:yaml.org,2002:";
+
 public enum FailSafeSchema {
     MAPPING,
     SEQUENCE,
@@ -12,6 +15,6 @@ public type YAMLTypeConstructor record {|
 |};
 
 public readonly & map<string> defaultTagHandles = {
-    "!": "!",
-    "!!": "tag:yaml.org,2002:"
+    "!": defaultLocalTagHandle,
+    "!!": defaultGlobalTagHandle
 };

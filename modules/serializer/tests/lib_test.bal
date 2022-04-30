@@ -20,6 +20,10 @@ function constructRGB(json data) returns json|schema:TypeError {
     return value;
 }
 
+string yamlSeq = string `${schema:defaultGlobalTagHandle}seq`;
+string yamlMap = string `${schema:defaultGlobalTagHandle}map`;
+string yamlStr = string `${schema:defaultGlobalTagHandle}str`;
+
 @test:Config {
     dataProvider: serializingEventDataGen
 }
@@ -30,14 +34,14 @@ function testGenerateSerializingEvent(json structure, event:Event[] assertingEve
 
 function serializingEventDataGen() returns map<[json, event:Event[]]> {
     return {
-        "empty array": [[], [{startType: event:SEQUENCE}, {endType: event:SEQUENCE}]],
-        "single element array": [["value"], [{startType: event:SEQUENCE}, {value: "value"}, {endType: event:SEQUENCE}]],
-        "multiple elements array": [["value1", "value2"], [{startType: event:SEQUENCE}, {value: "value1"}, {value: "value2"}, {endType: event:SEQUENCE}]],
-        "nested array": [[["value"]], [{startType: event:SEQUENCE}, {startType: event:SEQUENCE, flowStyle: true}, {value: "value"}, {endType: event:SEQUENCE}, {endType: event:SEQUENCE}]],
-        "empty mapping": [{}, [{startType: event:MAPPING}, {endType: event:MAPPING}]],
-        "single element mapping": [{"key": "value"}, [{startType: event:MAPPING}, {value: "key"}, {value: "value"}, {endType: event:MAPPING}]],
-        "multiple elements mapping": [{"key1": "value1", "key2": "value2"}, [{startType: event:MAPPING}, {value: "key1"}, {value: "value1"}, {value: "key2"}, {value: "value2"}, {endType: event:MAPPING}]],
-        "single element": ["value", [{value: "value"}]]
+        "empty array": [[], [{startType: event:SEQUENCE, tag: yamlSeq}, {endType: event:SEQUENCE}]],
+        "single element array": [["value"], [{startType: event:SEQUENCE, tag: yamlSeq}, {value: "value", tag:yamlStr}, {endType: event:SEQUENCE}]],
+        "multiple elements array": [["value1", "value2"], [{startType: event:SEQUENCE, tag: yamlSeq}, {value: "value1", tag:yamlStr}, {value: "value2", tag:yamlStr}, {endType: event:SEQUENCE}]],
+        "nested array": [[["value"]], [{startType: event:SEQUENCE, tag: yamlSeq}, {startType: event:SEQUENCE, tag: yamlSeq, flowStyle: true}, {value: "value", tag:yamlStr}, {endType: event:SEQUENCE}, {endType: event:SEQUENCE}]],
+        "empty mapping": [{}, [{startType: event:MAPPING, tag: yamlMap}, {endType: event:MAPPING}]],
+        "single element mapping": [{"key": "value"}, [{startType: event:MAPPING, tag: yamlMap}, {value: "key", tag:yamlStr}, {value: "value", tag:yamlStr}, {endType: event:MAPPING}]],
+        "multiple elements mapping": [{"key1": "value1", "key2": "value2"}, [{startType: event:MAPPING, tag: yamlMap}, {value: "key1", tag:yamlStr}, {value: "value1", tag:yamlStr}, {value: "key2", tag:yamlStr}, {value: "value2", tag:yamlStr}, {endType: event:MAPPING}]],
+        "single element": ["value", [{value: "value", tag:yamlStr}]]
     };
 }
 
@@ -51,8 +55,8 @@ function testTagInSerializedEvent(json structure, event:Event[] assertingEvents)
 
 function keySerializeDataGen() returns map<[json, event:Event[]]> {
     return {
-        "integer": [1, [{value: "1", tag: "tag:yaml.org,2002:int"}]],
-        "negative integer": [-1, [{value: "-1", tag: "tag:yaml.org,2002:int"}]],
+        "integer": [1, [{value: "1", tag: string `${schema:defaultGlobalTagHandle}int`}]],
+        "negative integer": [-1, [{value: "-1", tag: string `${schema:defaultGlobalTagHandle}int`}]],
         "float": [1.1, [{value: "1.1", tag: "tag:yaml.org,2002:float"}]],
         "boolean": [true, [{value: "true", tag: "tag:yaml.org,2002:bool"}]],
         "null": [(), [{value: "", tag: "tag:yaml.org,2002:null"}]],

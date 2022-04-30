@@ -44,7 +44,12 @@ function testWritingInCanonical(event:Event[] events, string[] expectedOutput) r
 
 function canonicalDataGen() returns map<[event:Event[], string[]]> {
     return {
-        "simple global scalar": [[{value: "1", tag: "tag:yaml.org,2002:int"}], ["!!int 1"]],
-        "simple local scalar": [[{value: "1", tag: "!digit"}], ["!digit 1"]]
+        "flow sequence": [[{startType: event:SEQUENCE, tag: "!custom", flowStyle: true}, {value: "a", tag: "tag:yaml.org,2002:str"}, {value: "1", tag: "tag:yaml.org,2002:int"}, {endType: event:SEQUENCE}], ["!custom [!!str a, !!int 1]"]],
+        "flow mapping": [[{startType: event:MAPPING, tag: "!custom", flowStyle: true}, {value: "a", tag: "tag:yaml.org,2002:str"}, {value: "1", tag: "tag:yaml.org,2002:int"}, {endType: event:MAPPING}], ["!custom {!!str a: !!int 1}"]],
+        "block sequence": [[{startType: event:SEQUENCE}, {startType: event:SEQUENCE, tag: "!custom"}, {value: "a", tag: "tag:yaml.org,2002:str"}, {value: "1", tag: "tag:yaml.org,2002:int"}, {endType: event:SEQUENCE}, {endType: event:SEQUENCE}], ["- !custom", "  - !!str a", "  - !!int 1"]],
+        "empty block sequence": [[{startType: event:SEQUENCE, tag: "!custom"}, {endType: event:SEQUENCE}], ["- !custom"]],
+        "block mapping": [[{startType: event:MAPPING}, {value: "a", tag: "tag:yaml.org,2002:str"}, {startType: event:MAPPING, tag: "!custom"}, {value: "b", tag: "tag:yaml.org,2002:str"}, {value: "1", tag: "tag:yaml.org,2002:int"}, {endType: event:MAPPING}, {endType: event:MAPPING}], ["!!str a: !custom", "  !!str b: !!int 1"]],
+        "global tag scalar": [[{value: "1", tag: "tag:yaml.org,2002:int"}], ["!!int 1"]],
+        "local tag scalar": [[{value: "1", tag: "!digit"}], ["!digit 1"]]
     };
 }

@@ -62,9 +62,9 @@ function write(EmitterState state) returns EmittingError? {
     // Convert sequence collection
     if event is event:StartEvent && event.startType == event:SEQUENCE {
         if event.flowStyle {
-            state.output.push(check writeFlowSequence(state));
+            state.output.push(check writeFlowSequence(state, event.tag));
         } else {
-            check writeBlockSequence(state, "");
+            check writeBlockSequence(state, "", event.tag);
         }
         return;
     }
@@ -72,45 +72,16 @@ function write(EmitterState state) returns EmittingError? {
     // Convert mapping collection
     if event is event:StartEvent && event.startType == event:MAPPING {
         if event.flowStyle {
-            state.output.push(check writeFlowMapping(state));
+            state.output.push(check writeFlowMapping(state, event.tag));
         } else {
-            check writeBlockMapping(state, "");
+            check writeBlockMapping(state, "", event.tag);
         }
         return;
     }
 
     // Convert scalar 
     if event is event:ScalarEvent {
-        state.output.push(reduceTagHandle(event.tag) + " " + event.value.toString());
+        state.output.push(writeNode(state, event.value, event.tag));
         return;
     }
-}
-
-# Obtain the topmost event from the event tree.
-#
-# + state - Current emitter state
-# + return - The topmost event from the current tree.
-function getEvent(EmitterState state) returns event:Event {
-    if state.events.length() < 1 {
-        return {endType: event:STREAM};
-    }
-    return state.events.shift();
-}
-
-function reduceTagHandle(string? tag) returns string {
-    if tag == () {
-        return "";
-    }
-
-    string[] keys = schema:defaultTagHandles.keys();
-
-    string tagHandleReference;
-    foreach string key in keys {
-        tagHandleReference = schema:defaultTagHandles.get(key);
-        if tag.startsWith(tagHandleReference) {
-            return key + tag.substring(tagHandleReference.length());
-        }
-    }
-
-    return string `!<${tag}>`;
 }

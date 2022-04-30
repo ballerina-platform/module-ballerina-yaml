@@ -4,8 +4,8 @@ import yaml.event;
 #
 # + state - Current emitter state
 # + return - YAML string of the flow mapping.
-function writeFlowMapping(EmitterState state) returns string|EmittingError {
-    string line = "{";
+function writeFlowMapping(EmitterState state, string? tag) returns string|EmittingError {
+    string line = writeNode(state, "{", tag);
     event:Event event = getEvent(state);
 
     // Iterate until the end delimiter '}' is detected
@@ -23,7 +23,7 @@ function writeFlowMapping(EmitterState state) returns string|EmittingError {
 
         // Convert a mapping key
         if event is event:ScalarEvent {
-            line += event.value.toString() + ": ";
+            line += writeNode(state, event.value, event.tag) + ": ";
         }
 
         // Obtain the event for mapping value
@@ -31,17 +31,17 @@ function writeFlowMapping(EmitterState state) returns string|EmittingError {
 
         // Convert the scalar
         if event is event:ScalarEvent {
-            line += event.value.toString();
+            line += writeNode(state, event.value, event.tag);
         }
 
         // Check for nested flow collections. Block collections are not allowed.
         if event is event:StartEvent {
             match event.startType {
                 event:SEQUENCE => { // Convert the nested flow sequence
-                    line += check writeFlowSequence(state);
+                    line += check writeFlowSequence(state, event.tag);
                 }
                 event:MAPPING => { // Convert the nested flow mapping
-                    line += check writeFlowMapping(state);
+                    line += check writeFlowMapping(state, event.tag);
                 }
             }
         }
@@ -61,7 +61,7 @@ function writeFlowMapping(EmitterState state) returns string|EmittingError {
 # + state - Current emitter state  
 # + whitespace - Whitespace at the start of it
 # + return - YAML string of the block mapping.
-function writeBlockMapping(EmitterState state, string whitespace) returns EmittingError? {
+function writeBlockMapping(EmitterState state, string whitespace, string? tag) returns EmittingError? {
     event:Event event = getEvent(state);
     string line;
 
@@ -81,7 +81,7 @@ function writeBlockMapping(EmitterState state, string whitespace) returns Emitti
 
         // Convert the mapping key
         if event is event:ScalarEvent {
-            line += whitespace + event.value.toString() + ": ";
+            line += whitespace + writeNode(state, event.value, event.tag) + ": ";
         }
 
         // Obtain the event for mapping value
@@ -89,7 +89,7 @@ function writeBlockMapping(EmitterState state, string whitespace) returns Emitti
 
         // Convert the scalar
         if event is event:ScalarEvent {
-            line += event.value.toString();
+            line += writeNode(state, event.value, event.tag);
             state.output.push(line);
         }
 
@@ -98,18 +98,18 @@ function writeBlockMapping(EmitterState state, string whitespace) returns Emitti
             match event.startType {
                 event:SEQUENCE => {
                     if event.flowStyle { // Convert the nested sequence
-                        state.output.push(line + check writeFlowSequence(state));
+                        state.output.push(line + check writeFlowSequence(state, event.tag));
                     } else {
-                        state.output.push(line);
-                        check writeBlockSequence(state, whitespace);
+                        state.output.push(writeNode(state, line.substring(0, line.length() - 1), event.tag, true));
+                        check writeBlockSequence(state, whitespace, event.tag);
                     }
                 }
                 event:MAPPING => { // Convert the nested mapping
                     if event.flowStyle {
-                        state.output.push(line + check writeFlowMapping(state));
+                        state.output.push(line + check writeFlowMapping(state, event.tag));
                     } else {
-                        state.output.push(line);
-                        check writeBlockMapping(state, whitespace + state.indent);
+                        state.output.push(writeNode(state, line.substring(0, line.length() - 1), event.tag, true));
+                        check writeBlockMapping(state, whitespace + state.indent, event.tag);
                     }
                 }
             }

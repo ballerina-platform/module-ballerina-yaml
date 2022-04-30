@@ -273,7 +273,7 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
     }
 
     // Check for first character of planar scalar
-    if matchRegexPattern(state, [PRINTABLE_PATTERN], [LINE_BREAK_PATTERN, BOM_PATTERN, WHITESPACE_PATTERN, INDICATOR_PATTERN]) {
+    if isPlainSafe(state) {
         return scanMappingValueKey(state, PLANAR_CHAR, scanPlanarChar);
     }
 
@@ -309,7 +309,7 @@ function contextExplicitKey(LexerState state) returns LexerState|LexicalError {
         }
     }
 
-    if matchRegexPattern(state, [PRINTABLE_PATTERN], [LINE_BREAK_PATTERN, BOM_PATTERN, WHITESPACE_PATTERN, INDICATOR_PATTERN]) {
+    if isPlainSafe(state) {
         if state.numOpenedFlowCollections == 0 {
             check assertIndent(state, 1);
         }
@@ -466,7 +466,7 @@ function contextBlockScalar(LexerState state) returns LexerState|LexicalError {
 
     // There is no sufficient indent to consider printable characters
     if !hasSufficientIndent {
-        if matchRegexPattern(state, [PRINTABLE_PATTERN], [LINE_BREAK_PATTERN, BOM_PATTERN, WHITESPACE_PATTERN, INDICATOR_PATTERN]) {
+        if isPlainSafe(state) {
             state.enforceMapping = true;
             return contextStart(state);
         }

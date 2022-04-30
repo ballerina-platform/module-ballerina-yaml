@@ -47,7 +47,7 @@ function matchRegexPattern(LexerState state, string|string[] inclusionPatterns, 
     if (exclusionPatterns != ()) {
         exclusionPattern = "(?![" + concatenateStringArray(exclusionPatterns) + "])";
     }
-    return regex:matches(state.line[state.index + offset], exclusionPattern + inclusionPattern + "{1}");
+    return regex:matches(<string>state.peek(offset), exclusionPattern + inclusionPattern + "{1}");
 }
 
 # Concatenate one or more strings.
@@ -113,3 +113,6 @@ function processTypeCastingError(LexerState state, json|error value) returns jso
     // Returns the value on success
     return value;
 }
+
+function isPlainSafe(LexerState state) returns boolean
+    => matchRegexPattern(state, [PRINTABLE_PATTERN], [LINE_BREAK_PATTERN, BOM_PATTERN, WHITESPACE_PATTERN, INDICATOR_PATTERN]);

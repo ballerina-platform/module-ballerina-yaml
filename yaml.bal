@@ -35,11 +35,19 @@ public function readAll(string filePath, ReadConfig config = {}) returns json[]|
 # + return - An error on failure
 public function writeDocument(string fileName, json yamlDoc, WriteConfig config = {}) returns error? {
     check openFile(fileName);
+
+    // Obtain the content for the YAML file
     string[] output = check emitter:emit(
-        check serializer:serialize(yamlDoc, {}, config.blockLevel),
-        config.indentationPolicy,
-        {},
-        false
+        events = check serializer:serialize(
+            data = yamlDoc,
+            tagSchema = generateTagHandlesMap(config.yamlTypes, config.schema),
+            blockLevel = config.blockLevel
+        ),
+        indentationPolicy = config.indentationPolicy,
+        tagSchema = {},
+        isStream = false,
+        canonical = config.canonical
     );
+
     check io:fileWriteLines(fileName, output);
 }

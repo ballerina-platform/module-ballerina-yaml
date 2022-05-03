@@ -3,6 +3,7 @@ import yaml.event;
 # Convert a flow sequence into YAML string.
 #
 # + state - Current emitter state
+# + tag - Tag of the start event if exists
 # + return - YAML string of the flow sequence.
 function writeFlowSequence(EmitterState state, string? tag) returns string|EmittingError {
     string line = writeNode(state, "[", tag);
@@ -52,6 +53,7 @@ function writeFlowSequence(EmitterState state, string? tag) returns string|Emitt
 #
 # + state - Current emitter state  
 # + whitespace - Whitespace at the start of it
+# + tag - Tag of the start event if exists
 # + return - YAML string of the block sequence.
 function writeBlockSequence(EmitterState state, string whitespace, string? tag) returns EmittingError? {
     event:Event event = getEvent(state);

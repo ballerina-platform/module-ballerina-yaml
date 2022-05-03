@@ -3,14 +3,16 @@ import yaml.event;
 
 # Represents the variables of the Emitter state.
 #
-# + output - Lines to be written.
+# + output - Lines to be written.  
 # + indent - Total whitespace for a single indent  
+# + canonical - If set, the tag is written explicitly along with the value.
+# + tagSchema - Custom tags for the YAML parser  
 # + events - Event tree to be written
 type EmitterState record {|
     string[] output;
     readonly string indent;
     readonly boolean canonical;
-    map<schema:YAMLTypeConstructor> tagSchema;
+    readonly & map<schema:YAMLTypeConstructor> tagSchema;
     event:Event[] events;
 |};
 
@@ -18,13 +20,15 @@ type EmitterState record {|
 #
 # + events - Event tree to be converted  
 # + indentationPolicy - Number of whitespace for an indent  
-# + isStream - Whether the event tree is a stream
+# + canonical - If set, the tag is written explicitly along with the value.
+# + tagSchema - Custom tags for the YAML parser
+# + isStream - Whether the event tree is a stream  
 # + return - YAML string lines
 public function emit(event:Event[] events,
     int indentationPolicy,
-    map<schema:YAMLTypeConstructor> tagSchema,
-    boolean isStream = false,
-    boolean canonical = false) returns string[]|EmittingError {
+    boolean canonical,
+    readonly & map<schema:YAMLTypeConstructor> tagSchema,
+    boolean isStream = false) returns string[]|EmittingError {
 
     // Setup the total whitespace for an indentation
     string indent = "";

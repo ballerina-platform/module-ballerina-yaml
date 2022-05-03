@@ -3,6 +3,7 @@ import yaml.event;
 # Convert a flow mapping into YAML string.
 #
 # + state - Current emitter state
+# + tag - Tag of the start event if exists
 # + return - YAML string of the flow mapping.
 function writeFlowMapping(EmitterState state, string? tag) returns string|EmittingError {
     string line = writeNode(state, "{", tag);
@@ -59,7 +60,8 @@ function writeFlowMapping(EmitterState state, string? tag) returns string|Emitti
 # Convert a block mapping into YAML string.
 #
 # + state - Current emitter state  
-# + whitespace - Whitespace at the start of it
+# + whitespace - Whitespace at the start of it  
+# + tag - Tag of the start event if exists
 # + return - YAML string of the block mapping.
 function writeBlockMapping(EmitterState state, string whitespace, string? tag) returns EmittingError? {
     event:Event event = getEvent(state);

@@ -8,8 +8,11 @@ const string START_INDICATOR = "[\\,|\\[|\\]|\\{|\\}|&\\*|!\\||\\>|\\'|\\\"|%|@|
 
 # Generates the event tree for the given Ballerina native data structure.
 #
-# + data - Ballerina native data structure
-# + blockLevel - The depth of the block nodes 
+# + data - Ballerina native data structure  
+# + tagSchema - Custom YAML tags for the parser
+# + blockLevel - The depth of the block nodes  
+# + delimiter - The type of quotes used to surround scalar values
+# + forceQuotes - Only use quotes for scalar values
 # + depthLevel - The current depth level
 # + return - Event tree. Else, an error on failure.
 public function serialize(json data, map<schema:YAMLTypeConstructor> tagSchema, int blockLevel,

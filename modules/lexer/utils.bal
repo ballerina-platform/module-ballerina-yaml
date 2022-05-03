@@ -114,5 +114,9 @@ function processTypeCastingError(LexerState state, json|error value) returns jso
     return value;
 }
 
+# Returns true if the current character is planar safe.
+#
+# + state - Current lexer state/
+# + return - Return true if a planar safe character is found.
 function isPlainSafe(LexerState state) returns boolean
     => matchRegexPattern(state, [PRINTABLE_PATTERN], [LINE_BREAK_PATTERN, BOM_PATTERN, WHITESPACE_PATTERN, INDICATOR_PATTERN]);

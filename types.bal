@@ -4,6 +4,9 @@ import yaml.schema;
 #
 # + indentationPolicy - Number of whitespace for an indentation  
 # + blockLevel - The maximum depth level for a block collection.  
+# + canonical - If set, the tags are written along with the nodes.
+# + useSingleQuotes - If set, single quotes are used to surround scalars.
+# + forceQuotes - If set, all the scalars are surrounded by quotes.  
 # + schema - YAML schema used for writing  
 # + yamlTypes - Custom YAML types for the schema
 public type WriteConfig record {|

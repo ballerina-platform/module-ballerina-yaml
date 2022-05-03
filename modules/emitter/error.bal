@@ -1,10 +1,10 @@
 # Represents an error caused by emitter
 type EmittingError distinct error;
 
-# Generates a Emitting Error.
+# Generates a Emitting error.
 #
-# + message - message string
-# + return - Constructed Emitting Error message  
+# + message - Error message
+# + return - Constructed Emitting error message  
 function generateError(string message) returns EmittingError {
     return error EmittingError(string `Emitting Error: ${message}.`);
 }

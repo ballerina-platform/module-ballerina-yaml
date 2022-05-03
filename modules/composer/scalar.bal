@@ -62,6 +62,13 @@ function checkAnchor(ComposerState state, event:StartEvent|event:ScalarEvent eve
     }
 }
 
+# Construct the ballerina data structures from the fail safe schema data.
+#
+# + state - Current composer state
+# + data - Original fail safe schema data
+# + kind - Fail safe schema type
+# + tag - Tag of the data if exists
+# + return - Constructed ballerina data
 function castData(ComposerState state, json data,
     schema:FailSafeSchema kind, string? tag) returns json|ComposingError|schema:TypeError {
     // Check for explicit keys 

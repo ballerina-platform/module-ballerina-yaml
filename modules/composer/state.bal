@@ -1,13 +1,18 @@
 import yaml.parser;
 import yaml.schema;
-import yaml.event;
 
 # Represents the state of the Composer
 public class ComposerState {
+    # Current parser state.
     parser:ParserState parserState;
-    event:Event? buffer = ();
+
+    # Hash map of the anchor to the respective Ballerina data.
     map<json> anchorBuffer = {};
+
+    # Flag is set if the end of the document is reached.
     boolean docTerminated = false;
+
+    # Custom tag schema for the YAML parser.
     map<schema:YAMLTypeConstructor> tagSchema = {};
 
     public function init(string[] lines, map<schema:YAMLTypeConstructor> tagSchema) returns parser:ParsingError? {

@@ -9,7 +9,7 @@ string yamlInt = string `${schema:defaultGlobalTagHandle}int`;
     dataProvider: simpleEventDataGen
 }
 function testWritingSimpleEvent(event:Event[] events, string[] expectedOutput) returns error? {
-    string[] output = check emit(events, 2, false, {});
+    string[] output = check emit(events, 2, false, {}, false);
     test:assertEquals(output, expectedOutput);
 }
 
@@ -34,7 +34,7 @@ function simpleEventDataGen() returns map<[event:Event[], string[]]> {
 
 @test:Config {}
 function testMultipleRootEventsForOneDocument() returns error? {
-    string[]|EmittingError output = emit([{value: "first root"}, {value: "second root"}], 2, false, {});
+    string[]|EmittingError output = emit([{value: "first root"}, {value: "second root"}], 2, false, {}, false);
     test:assertTrue(output is EmittingError);
 }
 
@@ -42,7 +42,7 @@ function testMultipleRootEventsForOneDocument() returns error? {
     dataProvider: canonicalDataGen
 }
 function testWritingInCanonical(event:Event[] events, string[] expectedOutput) returns error? {
-    string[] output = check emit(events, 2, true, {});
+    string[] output = check emit(events, 2, true, {}, false);
     test:assertEquals(output, expectedOutput);
 }
 
@@ -56,4 +56,10 @@ function canonicalDataGen() returns map<[event:Event[], string[]]> {
         "global tag scalar": [[{value: "1", tag: yamlInt}], ["!!int 1"]],
         "local tag scalar": [[{value: "1", tag: "!digit"}], ["!digit 1"]]
     };
+}
+
+@test:Config {}
+function testWriteStream() returns error? {
+    string[] output = check emit([{value: "1", tag: yamlInt}, {value: "2", tag: yamlInt}], 2, false, {}, true);
+    test:assertEquals(output, ["1", "...", "2", "..."]);
 }

@@ -28,7 +28,7 @@ public function emit(event:Event[] events,
     int indentationPolicy,
     boolean canonical,
     readonly & map<schema:YAMLTypeConstructor> tagSchema,
-    boolean isStream = false) returns string[]|EmittingError {
+    boolean isStream) returns string[]|EmittingError {
 
     // Setup the total whitespace for an indentation
     string indent = "";
@@ -45,7 +45,10 @@ public function emit(event:Event[] events,
     };
 
     if isStream { // Write YAML stream
-        // TODO: Write YAML streams
+        while state.events.length() > 0 {
+            check write(state);
+            state.output.push("...");    
+        }
     } else { // Write a single YAML document
         check write(state);
         if state.events.length() > 0 {

@@ -38,12 +38,22 @@ public type YAMLType record {|
     *schema:YAMLTypeConstructor;
 |};
 
+# Represents the basic YAML types available in the Fail safe schema.
+# 
+# + MAPPING - YAML mapping collection
+# + SEQUENCE - YAML sequence collection
+# + STRING - YAML scalar string
 public enum FailSafeSchema {
     MAPPING,
     SEQUENCE,
     STRING
 }
 
+# Represents the YAML schema available for the parser.
+# 
+# + FAILSAFE_SCHEMA - Generic schema that works for any YAML document
+# + JSON_SCHEMA - Schema supports all the basic JSON types
+# + CORE_SCHEMA - An extension of JSON schema that allows more human-readable presentation
 public enum YAMLSchema {
     FAILSAFE_SCHEMA,
     JSON_SCHEMA,

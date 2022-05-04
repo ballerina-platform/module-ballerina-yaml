@@ -72,10 +72,7 @@ function testCustomTag() returns error? {
     tagHandles["!rgb"] = {
         kind: schema:SEQUENCE,
         construct: constructRGB,
-        identity: function(json data) returns boolean {
-            RGB|error output = data.cloneWithType();
-            return output is RGB;
-        },
+        identity: schema:generateIdentityFunction(RGB),
         represent: function(json data) returns string => data.toString()
     };
 

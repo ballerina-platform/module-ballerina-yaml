@@ -1,5 +1,4 @@
 import yaml.schema;
-
 # Configurations for writing a YAML document.
 #
 # + indentationPolicy - Number of whitespace for an indentation  
@@ -31,15 +30,20 @@ public type ReadConfig record {|
 # Represents the attributes of the custom YAML type.
 #
 # + tag - YAML tag for the custom type  
-# + ballerinaType - The equivalent Ballerina type for the YAML tag
+# + ballerinaType - The equivalent Ballerina type for the YAML tag  
+# + kind - Fail safe schema type
+# + construct - Function to generate the Ballerina data structure.  
+# + represent - Function to convert the Ballerina data structure to YAML.
 public type YAMLType record {|
     string tag;
     typedesc<json> ballerinaType;
-    *schema:YAMLTypeConstructor;
+    FailSafeSchema kind;
+    function (json data) returns json|schema:TypeError construct;
+    function (json data) returns string represent;
 |};
 
 # Represents the basic YAML types available in the Fail safe schema.
-# 
+#
 # + MAPPING - YAML mapping collection
 # + SEQUENCE - YAML sequence collection
 # + STRING - YAML scalar string
@@ -50,7 +54,7 @@ public enum FailSafeSchema {
 }
 
 # Represents the YAML schema available for the parser.
-# 
+#
 # + FAILSAFE_SCHEMA - Generic schema that works for any YAML document
 # + JSON_SCHEMA - Schema supports all the basic JSON types
 # + CORE_SCHEMA - An extension of JSON schema that allows more human-readable presentation

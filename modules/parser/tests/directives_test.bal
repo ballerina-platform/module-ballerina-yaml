@@ -5,18 +5,15 @@ import yaml.event;
     groups: ["directives"]
 }
 function testAccurateYAMLDirective() returns error? {
-    ParserState state = check new (["%YAML 1.3", "---"]);
+    ParserState state = check new (["%YAML 1.3"]);
     _ = check parse(state, docType = ANY_DOCUMENT);
-
     test:assertEquals(state.yamlVersion, 1.3);
 }
 
 @test:Config {}
 function testYAMLVersionsOfMultipleDocuments() returns error? {
-    ParserState state = check new (["%YAML 1.3", "---", "...", "%YAML 1.1", "---"]);
+    ParserState state = check new (["%YAML 1.3", "---", "...", "%YAML 1.1"]);
     _ = check parse(state, docType = DIRECTIVE_DOCUMENT);
-    test:assertEquals(state.yamlVersion, 1.3);
-
     _ = check parse(state, docType = BARE_DOCUMENT);
     _ = check parse(state, docType = DIRECTIVE_DOCUMENT);
     test:assertEquals(state.yamlVersion, 1.1);

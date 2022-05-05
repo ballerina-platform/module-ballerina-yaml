@@ -17,7 +17,7 @@ public function composeDocument(ComposerState state, event:Event? eventParam = (
         return ();
     }
 
-    if event is event:StartEvent && event.startType == event:DOCUMENT {
+    if event is event:EndEvent && event.endType == event:DOCUMENT {
         event = check checkEvent(state);
     }
 

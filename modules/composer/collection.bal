@@ -32,13 +32,6 @@ function composeSequence(ComposerState state, boolean flowStyle) returns json[]|
             }
         }
 
-        if event is event:StartEvent && event.startType == event:DOCUMENT {
-            if !flowStyle {
-                break;
-            }
-            return generateError(state, "Expected a sequence end event");
-        }
-
         sequence.push(check composeNode(state, event));
         event = check checkEvent(state);
     }
@@ -73,13 +66,6 @@ function composeMapping(ComposerState state, boolean flowStyle) returns map<json
                     return generateError(state, "Expected a mapping end event");
                 }
             }
-        }
-
-        if event is event:StartEvent && event.startType == event:DOCUMENT {
-            if !flowStyle {
-                break;
-            }
-            return generateError(state, "Expected a sequence end event");
         }
 
         if !(event is event:StartEvent|event:ScalarEvent) {

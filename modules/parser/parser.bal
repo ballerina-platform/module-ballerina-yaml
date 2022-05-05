@@ -65,11 +65,6 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
             }
             return check parse(state, docType = DIRECTIVE_DOCUMENT);
         }
-        lexer:DIRECTIVE_MARKER => {
-            return {
-                startType: event:DOCUMENT
-            };
-        }
         lexer:DOUBLE_QUOTE_DELIMITER|lexer:SINGLE_QUOTE_DELIMITER|lexer:PLANAR_CHAR => {
             return appendData(state, option, peeked = true);
         }
@@ -188,7 +183,7 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
         lexer:SEQUENCE_START => {
             return {startType: event:SEQUENCE, flowStyle: true};
         }
-        lexer:DOCUMENT_MARKER => {
+        lexer:DOCUMENT_MARKER|lexer:DIRECTIVE_MARKER => {
             state.lexerState.resetState();
             state.yamlVersion = ();
             return {endType: event:DOCUMENT};

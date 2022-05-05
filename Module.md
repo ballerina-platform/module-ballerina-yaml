@@ -1,8 +1,6 @@
-# Ballerina YAML Parser
+## Overview
 
-![Build](https://github.com/nipunayf/module-ballerina-yaml/actions/workflows/ci.yml/badge.svg)
-
-`Ballerina YAML Parser` converts a given YAML file to a Ballerina data structure, and vice-versa. 
+Ballerina YAML Parser converts a given YAML file to a Ballerina data structure, and vice-versa. 
 
 Initially, import the `nipunayf/yaml` into your Ballerina project.
 

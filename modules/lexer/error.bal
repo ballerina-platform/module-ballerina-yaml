@@ -1,12 +1,12 @@
 import yaml.common;
 
-# Represents an error caused by the lexical analyzer
+# Represents an error caused during the lexical analyzing.
 public type LexicalError ScanningError|common:IndentationError;
 
 # Represents an error that is generated when an invalid character for a lexeme is detected.
 public type ScanningError distinct error<common:ReadErrorDetails>;
 
-# Generate an error message based on the template error message
+# Generate an error message based on the template,
 # "Invalid character '${char}' for a '${token}'"
 #
 # + state - Current lexer state  
@@ -17,7 +17,7 @@ function generateInvalidCharacterError(LexerState state, string context) returns
     string message = string `Invalid character '${currentChar}' for a '${context}'.`;
     return error ScanningError(
         message,
-        line = state.lineNumber + 1,
+        line = state.lineNumber,
         column = state.index,
         actual = currentChar
     );
@@ -26,15 +26,15 @@ function generateInvalidCharacterError(LexerState state, string context) returns
 function generateScanningError(LexerState state, string message) returns ScanningError =>
     error ScanningError(
         message + ".",
-        line = state.lineNumber + 1,
+        line = state.lineNumber,
         column = state.index,
-        actual = <string:Char>state.peek()
+        actual = state.peek()
     );
 
 function generateIndentationError(LexerState state, string message) returns common:IndentationError =>
     error common:IndentationError(
         message + ".",
-        line = state.lineNumber + 1,
+        line = state.lineNumber,
         column = state.index,
-        actual = <string:Char>state.peek()
+        actual = state.peek()
     );

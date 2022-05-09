@@ -46,14 +46,14 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
     // Only directive tokens are allowed in directive document
     if docType == DIRECTIVE_DOCUMENT
         && !(state.currentToken.token == lexer:DIRECTIVE || state.currentToken.token == lexer:DIRECTIVE_MARKER) {
-        return generateError(state, string `'${state.currentToken.token}' is not allowed in a directive document`);
+        return generateGrammarError(state, string `'${state.currentToken.token}' is not allowed in a directive document`);
     }
 
     match state.currentToken.token {
         lexer:DIRECTIVE => {
             // Directives are not allowed in bare documents
             if docType == BARE_DOCUMENT {
-                return generateError(state, "Directives are not allowed in a bare document");
+                return generateGrammarError(state, "Directives are not allowed in a bare document");
             }
 
             if (state.currentToken.value == "YAML") { // YAML directive
@@ -132,7 +132,7 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
         lexer:MAPPING_VALUE => { // Empty node as the key
             lexer:Indentation? indentation = state.currentToken.indentation;
             if indentation == () {
-                return generateError(state, "Empty key requires an indentation");
+                return generateIndentationError(state, "Empty key requires an indentation");
             }
             check separate(state);
             match indentation.change {
@@ -160,7 +160,7 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
         }
         lexer:SEQUENCE_ENTRY => {
             if state.currentToken.indentation == () {
-                return generateError(state, "Block sequence must have an indentation");
+                return generateIndentationError(state, "Block sequence must have an indentation");
             }
             match (<lexer:Indentation>state.currentToken.indentation).change {
                 1 => { // Indent increase
@@ -200,5 +200,6 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
             return {value};
         }
     }
-    return generateError(state, string `Invalid token '${state.currentToken.token}' as the first for generating an event`);
+
+    return generateGrammarError(state, string `Invalid token '${state.currentToken.token}' as the first for generating an event`);
 }

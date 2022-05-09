@@ -2,9 +2,9 @@ import yaml.common;
 import ballerina/regex;
 import yaml.schema;
 
-const string SPACE_AFTER = "[\\w|\\s]*[\\-|\\?|:|] [\\w|\\s]*";
-const string SPACE_BEFORE = "[\\w|\\s]* #[\\w|\\s]*";
-const string START_INDICATOR = "[\\,|\\[|\\]|\\{|\\}|&\\*|!\\||\\>|\\'|\\\"|%|@|\\`][\\w|\\s]*";
+const string INVALID_PLANAR_PATTERN = "([\\w|\\s]*[\\-|\\?|:|] [\\w|\\s]*)|"
+    + "([\\w|\\s]* #[\\w|\\s]*)|"
+    + "([\\,|\\[|\\]|\\{|\\}|&\\*|!\\||\\>|\\'|\\\"|%|@|\\`][\\w|\\s]*)";
 
 # Generates the event tree for the given Ballerina native data structure.
 #
@@ -64,12 +64,11 @@ public function serialize(json data, map<schema:YAMLTypeConstructor> tagSchema, 
     }
 
     // Convert string
-    string invalidPlanarRegexPattern = string `(${SPACE_AFTER})|(${SPACE_BEFORE})|(${START_INDICATOR})`;
     tag = typeConstructor == () ? string `${schema:defaultGlobalTagHandle}str` : tag;
     string value = typeConstructor == () ? data.toString() : (<schema:YAMLTypeConstructor>typeConstructor).represent(data);
 
     events.push({
-        value: regex:matches(value, invalidPlanarRegexPattern) || forceQuotes
+        value: regex:matches(value, INVALID_PLANAR_PATTERN) || forceQuotes
             ? string `${delimiter}${value}${delimiter}` : value,
         tag
     });

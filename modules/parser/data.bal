@@ -115,7 +115,7 @@ function content(ParserState state, boolean peeked) returns string|common:Collec
         }
         lexer:LITERAL|lexer:FOLDED => {
             if state.lexerState.isFlowCollection() {
-                return generateError(state, "Cannot have a block node inside a flow node");
+                return generateGrammarError(state, "Cannot have a block node inside a flow node");
             }
             return blockScalar(state, state.currentToken.token == lexer:FOLDED);
         }
@@ -143,7 +143,7 @@ function content(ParserState state, boolean peeked) returns string|common:Collec
         }
     }
 
-    return generateError(state, formatExpectErrorMessage(state.currentToken.token, "<data-node>", state.prevToken));
+    return generateExpectError(state, "<data-node>", state.prevToken);
 }
 
 # Verifies the grammar production for separation between nodes.
@@ -200,5 +200,5 @@ function separate(ParserState state, boolean optional = false, boolean allowEmpt
         }
     }
 
-    return generateError(state, formatExpectErrorMessage(state.currentToken.token, [lexer:EOL, lexer:SEPARATION_IN_LINE], state.currentToken.token));
+    return generateExpectError(state, [lexer:EOL, lexer:SEPARATION_IN_LINE], state.currentToken.token);
 }

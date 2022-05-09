@@ -19,7 +19,7 @@ function constructEvent(ParserState state, map<json> m1, map<json>? m2 = ()) ret
 
     error|common:Event processedMap = returnMap.cloneWithType(common:Event);
 
-    return processedMap is common:Event ? processedMap : generateError(state, 'error:message(processedMap));
+    return processedMap is common:Event ? processedMap : common:generateConversionError('error:message(processedMap));
 }
 
 # Trims the trailing whitespace of a string.
@@ -99,19 +99,19 @@ function checkToken(ParserState state, lexer:YAMLToken|lexer:YAMLToken[] expecte
         return;
     }
 
-    // Automatically generates a template error message if there is no custom message.
-    string errorMessage = customMessage.length() == 0
-                                ? formatExpectErrorMessage(state.currentToken.token, expectedTokens, state.prevToken)
-                                : customMessage;
-
     // Generate an error if the expected token differ from the actual token.
+    // Automatically generates a template error message if there is no custom message.
     if (expectedTokens is lexer:YAMLToken) {
         if (token.token != expectedTokens) {
-            return generateError(state, errorMessage);
+            return customMessage.length() == 0 
+                ? generateExpectError(state, expectedTokens, state.prevToken) 
+                : generateGrammarError(state, customMessage);
         }
     } else {
         if (expectedTokens.indexOf(token.token) == ()) {
-            return generateError(state, errorMessage);
+            return customMessage.length() == 0 
+                ? generateExpectError(state, expectedTokens, state.prevToken) 
+                : generateGrammarError(state, customMessage);
         }
     }
 }
@@ -124,7 +124,7 @@ function checkToken(ParserState state, lexer:YAMLToken|lexer:YAMLToken[] expecte
 function processTypeCastingError(ParserState state, json|error value) returns json|ParsingError {
     // Check if the type casting has any errors
     if value is error {
-        return generateError(state, "Invalid value for assignment");
+        return generateGrammarError(state, "Invalid value for assignment");
     }
 
     // Returns the value on success
@@ -146,7 +146,7 @@ function verifyKey(ParserState state, boolean isSingleLine) returns lexer:Lexica
     state.updateLexerContext(lexer:LEXER_START);
     check checkToken(state, peek = true);
     if state.tokenBuffer.token == lexer:MAPPING_VALUE && !isSingleLine {
-        return generateError(state, "Single-quoted keys cannot span multiple lines");
+        return generateGrammarError(state, "Single-quoted keys cannot span multiple lines");
     }
 }
 
@@ -167,7 +167,7 @@ function generateCompleteTagName(ParserState state, string tagHandle, string tag
             tagHandleName = schema:defaultTagHandles.get(tagHandle);
         }
         else {
-            return generateError(state, string `'${tagHandle}' tag handle is not defined`);
+            return generateAliasingError(state, string `'${tagHandle}' tag handle is not defined`);
         }
     }
 

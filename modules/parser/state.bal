@@ -50,7 +50,7 @@ public class ParserState {
     function initLexer(string message = "Unexpected end of stream") returns ParsingError? {
         self.lineIndex += 1;
         if (self.lineIndex >= self.numLines) {
-            return generateError(self, message);
+            return generateGrammarError(self, message);
         }
         self.lexerState.line = self.lines[self.lineIndex];
         self.lexerState.index = 0;

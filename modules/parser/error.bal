@@ -9,8 +9,8 @@ public type GrammarError distinct error<common:ReadErrorDetails>;
 # Generate an error message based on the template,
 # "Expected ${expectedTokens} after ${beforeToken}, but found ${actualToken}"
 #
-# + currentToken - Current token 
-# + expectedTokens - Expected tokens for the grammar production
+# + state - Current parser state
+# + expectedTokens - Expected tokens for the grammar production  
 # + beforeToken - Token before the current one
 # + return - Formatted error message
 function generateExpectError(ParserState state,
@@ -34,14 +34,21 @@ function generateExpectError(ParserState state,
 # Generate an error message based on the template,
 # "Duplicate key exists for ${value}"
 #
+# + state - Current parser state
 # + value - Any value name. Commonly used to indicate keys.  
 # + valueType - Possible types - key, table, value
 # + return - Formatted error message
 function generateDuplicateError(ParserState state, string value, string valueType = "key") returns GrammarError
     => generateGrammarError(state, string `Duplicate ${valueType} exists for '${value}'`);
 
-function generateInvalidTokenError(ParserState state, string context) returns GrammarError
-    => generateGrammarError(state, string `Invalid token '${state.currentToken.token}' inside the ${context}`, context = context);
+# Generate an error message based on the template,
+# "Invalid token '${actual}' inside the ${production}"
+#
+# + state - Current parser state
+# + production - Production at which the invalid token appear
+# + return - Formatted error message
+function generateInvalidTokenError(ParserState state, string production) returns GrammarError
+    => generateGrammarError(state, string `Invalid token '${state.currentToken.token}' inside the ${production}`, context = production);
 
 function generateGrammarError(ParserState state, string message,
     json? expected = (), json? context = ()) returns GrammarError

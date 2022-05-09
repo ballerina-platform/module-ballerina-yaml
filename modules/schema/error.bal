@@ -10,5 +10,4 @@ public type ConstructionError distinct error;
 #
 # + message - Error message details
 # + return - Constructed Type Error message
-function generateError(string message) returns ConstructionError =>
-    error ConstructionError(message);
+function generateError(string message) returns ConstructionError => error(message);

@@ -53,7 +53,7 @@ function generateInvalidTokenError(ParserState state, string production) returns
 
 function generateGrammarError(ParserState state, string message,
     json? expected = (), json? context = ()) returns GrammarError
-        => error GrammarError(
+        => error(
             message + ".",
             line = state.getLineNumber(),
             column = state.lexerState.index,
@@ -62,7 +62,7 @@ function generateGrammarError(ParserState state, string message,
         );
 
 function generateIndentationError(ParserState state, string message) returns common:IndentationError
-    => error common:IndentationError(
+    => error(
         message + ".",
         line = state.getLineNumber(),
         column = state.lexerState.index,
@@ -70,7 +70,7 @@ function generateIndentationError(ParserState state, string message) returns com
     );
 
 function generateAliasingError(ParserState state, string message) returns common:AliasingError
-    => error common:AliasingError(
+    => error(
         message + ".",
         line = state.getLineNumber(),
         column = state.lexerState.index,

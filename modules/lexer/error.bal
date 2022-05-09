@@ -15,7 +15,7 @@ public type ScanningError distinct error<common:ReadErrorDetails>;
 function generateInvalidCharacterError(LexerState state, string context) returns ScanningError {
     string:Char currentChar = <string:Char>state.peek();
     string message = string `Invalid character '${currentChar}' for a '${context}'.`;
-    return error ScanningError(
+    return error(
         message,
         line = state.lineNumber,
         column = state.index,
@@ -24,7 +24,7 @@ function generateInvalidCharacterError(LexerState state, string context) returns
 }
 
 function generateScanningError(LexerState state, string message) returns ScanningError =>
-    error ScanningError(
+    error(
         message + ".",
         line = state.lineNumber,
         column = state.index,
@@ -32,7 +32,7 @@ function generateScanningError(LexerState state, string message) returns Scannin
     );
 
 function generateIndentationError(LexerState state, string message) returns common:IndentationError =>
-    error common:IndentationError(
+    error(
         message + ".",
         line = state.lineNumber,
         column = state.index,

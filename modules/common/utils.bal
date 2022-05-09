@@ -1,5 +1,5 @@
 public function generateConversionError(string message) returns ConversionError =>
-    error ConversionError(message);
+    error(message);
 
 # Check errors during type casting to Ballerina types.
 #

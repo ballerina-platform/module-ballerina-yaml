@@ -34,7 +34,7 @@ function checkIndent(LexerState state, int? mapIndex = ()) returns Indentation|L
                     collection: [state.indents.pop().collection]
                 };
             } else {
-                return generateError(state, "Block mapping cannot have the same indent as a block sequence");
+                return generateIndentationError(state, "Block mapping cannot have the same indent as a block sequence");
             }
         }
 
@@ -98,7 +98,7 @@ function checkIndent(LexerState state, int? mapIndex = ()) returns Indentation|L
         }
     }
 
-    return generateError(state, "Invalid indentation");
+    return generateIndentationError(state, "Invalid indentation");
 }
 
 # Check if the current index has sufficient indent.
@@ -108,6 +108,6 @@ function checkIndent(LexerState state, int? mapIndex = ()) returns Indentation|L
 # + return - An error if the indent is not sufficient
 function assertIndent(LexerState state, int offset = 0) returns LexicalError? {
     if state.index < state.indent + offset {
-        return generateError(state, "Invalid indentation");
+        return generateIndentationError(state, "Invalid indentation");
     }
 }

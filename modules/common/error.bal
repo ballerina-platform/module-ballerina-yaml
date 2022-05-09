@@ -1,8 +1,10 @@
-public const string ERR_REASON_INVALID_INDENTATION = "InvalidIndentation";
-public const string ERR_REASON_INVALID_SCHEMA = "InvalidSchema";
-public const string ERR_REASON_ALIASING_FAIL = "AliasingFail";
-public const string ERR_REASON_LEXEME_VIOLATION = "LexemeViolation";
-public const string ERR_REASON_GRAMMAR_VIOLATION = "GrammarViolation";
+public type IndentationError distinct error<ReadErrorDetails>;
+
+public type SchemaError distinct error<ReadErrorDetails>;
+
+public type TypeError distinct error<ReadErrorDetails>;
+
+public type AliasingError distinct error<ReadErrorDetails>;
 
 # Represents the error details when reading a YAML document.
 #
@@ -12,11 +14,11 @@ public const string ERR_REASON_GRAMMAR_VIOLATION = "GrammarViolation";
 # + actual - The actual violated yaml string
 # + expected - Expected yaml strings for the violated string
 public type ReadErrorDetails record {
-    string message;
     int line;
     int column;
     json actual;
     json[]? expected = ();
+    string? context = ();
 };
 
 # Represents the error details when writing a YAML document.
@@ -25,7 +27,7 @@ public type ReadErrorDetails record {
 # + actual - The actual violated yaml string
 # + expected - Expected yaml strings for the violated string
 public type WriteErrorDetails record {|
-    string message;
     json actual;
     json[]? expected = ();
+    string? context = ();
 |};

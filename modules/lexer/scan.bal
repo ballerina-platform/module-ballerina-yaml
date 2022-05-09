@@ -35,7 +35,7 @@ function scanEscapedCharacter(LexerState state) returns LexicalError? {
             return;
         }
     }
-    return generateError(state, formatErrorMessage(<string>state.peek(), "escaped character"));
+    return generateInvalidCharacterError(state, "escaped character");
 }
 
 # Process the hex codes under the unicode escaped character.
@@ -48,7 +48,7 @@ function scanUnicodeEscapedCharacters(LexerState state, string escapedChar, int 
 
     // Check if the required digits do not overflow the current line.
     if state.line.length() <= length + state.index {
-        return generateError(state, "Expected " + length.toString() + " characters for the '\\" + escapedChar + "' unicode escape");
+        return generateScanningError(state, "Expected " + length.toString() + " characters for the '\\" + escapedChar + "' unicode escape");
     }
 
     string unicodeDigits = "";
@@ -60,19 +60,19 @@ function scanUnicodeEscapedCharacters(LexerState state, string escapedChar, int 
             unicodeDigits += <string>state.peek();
             continue;
         }
-        return generateError(state, formatErrorMessage(<string>state.peek(), "unicode hex escape"));
+        return generateInvalidCharacterError(state, "unicode hex escape");
     }
 
     // Check if the lexeme can be converted to hexadecimal
     int|error hexResult = 'int:fromHexString(unicodeDigits);
     if hexResult is error {
-        return generateError(state, 'error:message(hexResult));
+        return generateScanningError(state, 'error:message(hexResult));
     }
 
     // Check if there exists a unicode string for the hexadecimal value
     string|error unicodeResult = 'string:fromCodePointInt(hexResult);
     if unicodeResult is error {
-        return generateError(state, 'error:message(unicodeResult));
+        return generateScanningError(state, 'error:message(unicodeResult));
     }
 
     state.lexeme += unicodeResult;
@@ -101,7 +101,7 @@ function scanDoubleQuoteChar(LexerState state) returns boolean|LexicalError {
         return true;
     }
 
-    return generateError(state, formatErrorMessage(<string>state.peek(), DOUBLE_QUOTE_CHAR));
+    return generateInvalidCharacterError(state, DOUBLE_QUOTE_CHAR);
 }
 
 # Process double quoted scalar values.
@@ -125,7 +125,7 @@ function scanSingleQuotedChar(LexerState state) returns boolean|LexicalError {
         return true;
     }
 
-    return generateError(state, formatErrorMessage(<string>state.peek(), SINGLE_QUOTE_CHAR));
+    return generateInvalidCharacterError(state, SINGLE_QUOTE_CHAR);
 }
 
 # Process planar scalar values.
@@ -189,7 +189,7 @@ function scanPlanarChar(LexerState state) returns boolean|LexicalError {
         return true;
     }
 
-    return generateError(state, formatErrorMessage(<string>state.peek(), PLANAR_CHAR));
+    return generateInvalidCharacterError(state, PLANAR_CHAR);
 }
 
 # Process block scalar values.
@@ -226,7 +226,7 @@ function scanTagCharacter(LexerState state) returns boolean|LexicalError {
         return false;
     }
 
-    return generateError(state, formatErrorMessage(<string>state.peek(), TAG));
+    return generateInvalidCharacterError(state, TAG);
 }
 
 # Scan the lexeme for URI characters
@@ -257,7 +257,7 @@ function scanURICharacter(boolean isVerbatim = false) returns function (LexerSta
             return true;
         }
 
-        return generateError(state, formatErrorMessage(<string>state.peek(), "URI character"));
+        return generateInvalidCharacterError(state, "URI character");
     };
 }
 
@@ -310,7 +310,7 @@ function scanTagHandle(boolean differentiate = false) returns function (LexerSta
             return true;
         }
 
-        return generateError(state, formatErrorMessage(<string>state.peek(), TAG_HANDLE));
+        return generateInvalidCharacterError(state, TAG_HANDLE);
     };
 }
 
@@ -382,14 +382,14 @@ function scanMappingValueKey(LexerState state, YAMLToken outputToken, function (
             token.indentation = check checkIndent(state, startIndent);
             return token;
         }
-        return generateError(state, "Invalid indentation");
+        return generateIndentationError(state, "Insufficient indentation for a scalar");
     }
     if state.peek() == ":" && !state.isFlowCollection() {
         token.indentation = check checkIndent(state, startIndent);
         return token;
     }
     state.forward(-numWhitespace);
-    return enforceMapping ? generateError(state, "Invalid Indentation") : token;
+    return enforceMapping ? generateIndentationError(state, "Insufficient indentation for a scalar") : token;
 }
 
 # Differentiate the single and double quoted keys against the key of a mapping.
@@ -419,7 +419,7 @@ function scanMappingValueKeyWithDelimiter(LexerState state, YAMLToken outputToke
             state.delimiterStartIndex = -1;
             return token;
         }
-        return generateError(state, "Invalid indentation");
+        return generateIndentationError(state, "Insufficient indentation for a scalar");
     }
     if state.peek() == ":" && !state.isFlowCollection() {
         token.indentation = check checkIndent(state, state.delimiterStartIndex);
@@ -427,5 +427,5 @@ function scanMappingValueKeyWithDelimiter(LexerState state, YAMLToken outputToke
         return token;
     }
     state.forward(-numWhitespace);
-    return enforceMapping ? generateError(state, "Invalid Indentation") : token;
+    return enforceMapping ? generateIndentationError(state, "Insufficient indentation for a scalar") : token;
 }

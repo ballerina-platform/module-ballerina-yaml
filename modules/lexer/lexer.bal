@@ -61,7 +61,7 @@ public function scan(LexerState state) returns LexerState|LexicalError {
             return iterate(state, scanTagCharacter, TAG);
         }
 
-        return generateError(state, formatErrorMessage(<string>state.peek(), "primary tag"));
+        return generateInvalidCharacterError(state, "primary tag");
     }
 
     // Generate EOL token at the last index
@@ -105,7 +105,7 @@ public function scan(LexerState state) returns LexerState|LexicalError {
             return contextBlockScalar(state);
         }
         _ => {
-            return generateError(state, "Invalid state");
+            return generateScanningError(state, "Invalid context for the lexer");
         }
     }
 

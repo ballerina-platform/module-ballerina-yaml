@@ -25,7 +25,7 @@ function iterate(LexerState state, function (LexerState state) returns boolean|L
     state.index = state.line.length() - 1;
 
     // If the lexer does not expect an end delimiter at EOL, returns the token. Else it an error.
-    return message.length() == 0 ? state.tokenize(successToken) : generateError(state, message);
+    return message.length() == 0 ? state.tokenize(successToken) : generateScanningError(state, message);
 }
 
 # Check if the given character matches the regex pattern.
@@ -75,7 +75,7 @@ function tokensInSequence(LexerState state, string chars, YAMLToken successToken
     foreach string char in chars {
         // The expected character is not found
         if (state.peek() == () || !checkCharacter(state, char)) {
-            return generateError(state, string `Expected '${char}' for ${successToken}`);
+            return generateScanningError(state, string `Expected '${char}' for ${successToken}`);
         }
         state.forward();
     }
@@ -107,7 +107,7 @@ function checkCharacter(LexerState state, string|string[] expectedCharacters, in
 function processTypeCastingError(LexerState state, json|error value) returns json|LexicalError {
     // Check if the type casting has any errors
     if value is error {
-        return generateError(state, "Invalid value for assignment");
+        return generateScanningError(state, "Invalid value for assignment");
     }
 
     // Returns the value on success

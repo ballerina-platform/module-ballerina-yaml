@@ -35,7 +35,7 @@ function contextDoubleQuote(LexerState state) returns LexerState|LexicalError {
         return iterate(state, scanDoubleQuoteChar, DOUBLE_QUOTE_CHAR);
     }
 
-    return generateError(state, formatErrorMessage(<string>state.peek(), "double-quoted flow style"));
+    return generateInvalidCharacterError(state, "double-quoted flow style");
 }
 
 # Scan the lexemes for single quoted scalars.
@@ -71,7 +71,7 @@ function contextSingleQuote(LexerState state) returns LexerState|LexicalError {
         return iterate(state, scanSingleQuotedChar, SINGLE_QUOTE_CHAR);
     }
 
-    return generateError(state, formatErrorMessage(<string>state.peek(), "single-quoted flow style"));
+    return generateInvalidCharacterError(state, "single-quoted flow style");
 }
 
 # Scan the lexemes for YAML version directive.
@@ -94,7 +94,7 @@ function contextYamlDirective(LexerState state) returns LexerState|LexicalError 
         return state.tokenize(DOT);
     }
 
-    return generateError(state, formatErrorMessage(<string>state.peek(), "version number"));
+    return generateInvalidCharacterError(state, "version number");
 }
 
 # Scan the lexemes that are without any explicit context.
@@ -165,7 +165,7 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
                     return check tokensInSequence(state, "YAML", DIRECTIVE);
                 }
                 _ => {
-                    return generateError(state, formatErrorMessage(<string>state.peek(), DIRECTIVE));
+                    return generateInvalidCharacterError(state, DIRECTIVE);
                 }
             }
         }
@@ -176,12 +176,12 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
                     state.forward(2);
 
                     if state.peek() == "!" && state.peek(1) == ">" {
-                        return generateError(state, "'verbatim tag' are not resolved. Hence, '!' is invalid");
+                        return generateScanningError(state, "'verbatim tag' are not resolved. Hence, '!' is invalid");
                     }
 
                     return matchRegexPattern(state, [URI_CHAR_PATTERN, WORD_PATTERN]) ?
                             iterate(state, scanURICharacter(true), TAG, true)
-                            : generateError(state, "Expected a 'uri-char' after '<' in a 'verbatim tag'");
+                            : generateScanningError(state, "Expected a 'uri-char' after '<' in a 'verbatim tag'");
                 }
                 " "|"\t"|() => { // Non-specific tag
                     state.lexeme = "!";
@@ -277,7 +277,7 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
         return scanMappingValueKey(state, PLANAR_CHAR, scanPlanarChar);
     }
 
-    return generateError(state, formatErrorMessage(<string>state.peek(), "<yaml-document>"));
+    return generateInvalidCharacterError(state, "<yaml-document>");
 }
 
 # Scan the lexemes for Explicit key scalar.
@@ -305,7 +305,7 @@ function contextExplicitKey(LexerState state) returns LexerState|LexicalError {
             if state.indents[state.indents.length() - 1].index == state.index {
                 return state.tokenize(MAPPING_VALUE);
             }
-            return generateError(state, "Invalid indentation");
+            return generateIndentationError(state, "Invalid indentation for an explicit key");
         }
     }
 
@@ -342,7 +342,7 @@ function contextTagHandle(LexerState state) returns LexerState|LexicalError {
                 return state.tokenize(TAG_HANDLE);
             }
             () => {
-                return generateError(state, string `Expected a ${SEPARATION_IN_LINE} after primary tag handle`);
+                return generateScanningError(state, string `Expected a ${SEPARATION_IN_LINE} after primary tag handle`);
             }
             _ => { // Check for named tag handles
                 state.lexeme = "!";
@@ -357,7 +357,7 @@ function contextTagHandle(LexerState state) returns LexerState|LexicalError {
         return check iterate(state, scanWhitespace, SEPARATION_IN_LINE);
     }
 
-    return generateError(state, "Expected '!' to start the tag handle");
+    return generateScanningError(state, "Expected '!' to start the tag handle");
 }
 
 # Scan the lexemes for YAML tag prefix directive.
@@ -388,7 +388,7 @@ function contextTagPrefix(LexerState state) returns LexerState|LexicalError {
         return check iterate(state, scanWhitespace, SEPARATION_IN_LINE);
     }
 
-    return generateError(state, formatErrorMessage(<string>state.peek(), TAG_PREFIX));
+    return generateInvalidCharacterError(state, TAG_PREFIX);
 }
 
 # Scan the lexemes for tag node properties.
@@ -419,7 +419,7 @@ function contextTagNode(LexerState state) returns LexerState|LexicalError {
         return check iterate(state, scanWhitespace, SEPARATION_IN_LINE);
     }
 
-    return generateError(state, formatErrorMessage(<string>state.peek(), TAG));
+    return generateInvalidCharacterError(state, TAG);
 }
 
 # Scan the lexemes for block header of a block scalar.
@@ -445,7 +445,7 @@ function contextBlockHeader(LexerState state) returns LexerState|LexicalError {
         return state.tokenize(CHOMPING_INDICATOR);
     }
 
-    return generateError(state, formatErrorMessage(<string>state.peek(), "<block-header>"));
+    return generateInvalidCharacterError(state, "<block-header>");
 }
 
 # Scan the lexemes for block scalar.
@@ -489,7 +489,7 @@ function contextBlockScalar(LexerState state) returns LexerState|LexicalError {
                 return state.tokenize(EMPTY_LINE);
             }
             _ => { // Other characters are not allowed when the indentation is less
-                return generateError(state, "Insufficient indent to process literal characters");
+                return generateIndentationError(state, "Insufficient indent to process literal characters");
             }
         }
     }
@@ -507,7 +507,7 @@ function contextBlockScalar(LexerState state) returns LexerState|LexicalError {
                     return state.tokenize(EMPTY_LINE);
                 }
                 _ => {
-                    return generateError(state, formatErrorMessage(<string>state.peek(), TRAILING_COMMENT));
+                    return generateInvalidCharacterError(state, TRAILING_COMMENT);
                 }
             }
         }
@@ -536,5 +536,6 @@ function contextBlockScalar(LexerState state) returns LexerState|LexicalError {
         return iterate(state, scanPrintableChar, PRINTABLE_CHAR);
     }
 
-    return generateError(state, formatErrorMessage(<string>state.peek(), LITERAL));
+
+    return generateInvalidCharacterError(state, LITERAL);
 }

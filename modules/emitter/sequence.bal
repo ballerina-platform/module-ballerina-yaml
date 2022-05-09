@@ -17,7 +17,7 @@ function writeFlowSequence(EmitterState state, string? tag) returns string|Emitt
                     break;
                 }
                 _ => { // Any other end events are not accepted
-                    return generateError("Expected the flow sequence to be terminated");
+                    return generateExpectedEndEventError(event, {endType: common:SEQUENCE});
                 }
             }
         }
@@ -70,7 +70,7 @@ function writeBlockSequence(EmitterState state, string whitespace, string? tag) 
                     break;
                 }
                 common:MAPPING => { // End mapping events are not allowed
-                    return generateError("Expected the block sequence to be terminated");
+                    return generateExpectedEndEventError(event, {endType: common:SEQUENCE});
                 }
             }
         }

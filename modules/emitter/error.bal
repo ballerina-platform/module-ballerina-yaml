@@ -1,10 +1,23 @@
-# Represents an error caused by emitter
-type EmittingError distinct error;
+import yaml.common;
 
-# Generates a Emitting error.
+# Represents an error caused during emitting.
+type EmittingError distinct error<common:WriteErrorDetails>;
+
+# # Generate an error message based on the template,
+# "Expected ${expectedTokens} after ${beforeToken}, but found ${actualToken}"
 #
-# + message - Error message
-# + return - Constructed Emitting error message  
-function generateError(string message) returns EmittingError {
-    return error EmittingError(string `Emitting Error: ${message}.`);
-}
+# + actualEndEvent - Obtained invalid event  
+# + expectedEndEvent - Next expected event of the stream
+# + return - Formatted error message
+function generateExpectedEndEventError(
+    common:EndEvent actualEndEvent, common:EndEvent expectedEndEvent) returns EmittingError =>
+        generateEmittingError(common:generateExpectedEndEventErrorMessage(actualEndEvent, expectedEndEvent),
+            actualEndEvent, expectedEndEvent);
+
+function generateEmittingError(string message, common:Event actualValue, common:Event? expectedValue = ())
+    returns EmittingError =>
+        error(
+            message,
+            actual = actualValue,
+            expected = expectedValue
+        );

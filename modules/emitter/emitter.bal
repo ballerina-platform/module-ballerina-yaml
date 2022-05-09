@@ -47,12 +47,12 @@ public function emit(common:Event[] events,
     if isStream { // Write YAML stream
         while state.events.length() > 0 {
             check write(state);
-            state.output.push("...");    
+            state.output.push("...");
         }
     } else { // Write a single YAML document
         check write(state);
         if state.events.length() > 0 {
-            return generateError("There can only be one root event for a document");
+            return generateEmittingError("There can only be one root event for a document", getEvent(state));
         }
     }
 

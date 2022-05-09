@@ -18,12 +18,9 @@ type ComposeError distinct error<common:ReadErrorDetails>;
 # + expectedEndEvent - Next expected event of the stream
 # + return - Formatted error message
 function generateExpectedEndEventError(ComposerState state,
-    common:EndEvent actualEndEvent, common:EndEvent expectedEndEvent) returns ComposeError {
-    string actualEvent = "-" + actualEndEvent.endType;
-    string expectedEvent = "-" + expectedEndEvent.endType;
-    return generateComposeError(state, string `Expected '${expectedEvent}' before '-${actualEvent}'`,
-        actualEvent, expectedEvent);
-}
+    common:EndEvent actualEndEvent, common:EndEvent expectedEndEvent) returns ComposeError =>
+        generateComposeError(state, common:generateExpectedEndEventErrorMessage(actualEndEvent, expectedEndEvent),
+            actualEndEvent, expectedEndEvent);
 
 function generateAliasingError(ComposerState state, string message, common:Event actualEvent)
     returns common:AliasingError =>

@@ -1,5 +1,5 @@
 import yaml.lexer;
-import yaml.event;
+import yaml.common;
 
 public class ParserState {
     # Properties for the TOML lines
@@ -27,7 +27,7 @@ public class ParserState {
     # YAML version of the document.
     float? yamlVersion = ();
 
-    event:Event[] eventBuffer = [];
+    common:Event[] eventBuffer = [];
 
     public function init(string[] lines) returns ParsingError? {
         self.lines = lines;

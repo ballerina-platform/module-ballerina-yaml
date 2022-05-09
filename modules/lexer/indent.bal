@@ -1,4 +1,4 @@
-import yaml.event;
+import yaml.common;
 
 # Represents an indent of a block collection
 #
@@ -6,7 +6,7 @@ import yaml.event;
 # + collection - Collection with that indent
 type Indent record {|
     int index;
-    event:Collection collection;
+    common:Collection collection;
 |};
 
 # Validates the indentation of block collections.
@@ -19,16 +19,16 @@ type Indent record {|
 function checkIndent(LexerState state, int? mapIndex = ()) returns Indentation|LexicalError {
     int startIndex = mapIndex == () ? state.index - 1 : mapIndex;
 
-    event:Collection collection = mapIndex == () ? event:SEQUENCE : event:MAPPING;
+    common:Collection collection = mapIndex == () ? common:SEQUENCE : common:MAPPING;
 
     if state.indent == startIndex {
-        event:Collection[] existingIndentType = from Indent indent in state.indents
+        common:Collection[] existingIndentType = from Indent indent in state.indents
             where indent.index == startIndex
             select indent.collection;
 
         // The current token is a mapping key and a sequence entry exists for the indent
-        if mapIndex is int && existingIndentType.indexOf(<event:Collection>event:SEQUENCE) is int {
-            if existingIndentType.indexOf(<event:Collection>event:MAPPING) is int {
+        if mapIndex is int && existingIndentType.indexOf(<common:Collection>common:SEQUENCE) is int {
+            if existingIndentType.indexOf(<common:Collection>common:MAPPING) is int {
                 return {
                     change: -1,
                     collection: [state.indents.pop().collection]
@@ -39,17 +39,17 @@ function checkIndent(LexerState state, int? mapIndex = ()) returns Indentation|L
         }
 
         // The current token is a sequence entry and a mapping key exists for the indent
-        if mapIndex is () && existingIndentType.indexOf(<event:Collection>event:MAPPING) is int {
-            if existingIndentType.indexOf(<event:Collection>event:SEQUENCE) is int {
+        if mapIndex is () && existingIndentType.indexOf(<common:Collection>common:MAPPING) is int {
+            if existingIndentType.indexOf(<common:Collection>common:SEQUENCE) is int {
                 return {
                     change: 0,
                     collection: []
                 };
             } else {
-                state.indents.push({index: startIndex, collection: event:SEQUENCE});
+                state.indents.push({index: startIndex, collection: common:SEQUENCE});
                 return {
                     change: 1,
-                    collection: [event:SEQUENCE]
+                    collection: [common:SEQUENCE]
                 };
             }
         }
@@ -70,7 +70,7 @@ function checkIndent(LexerState state, int? mapIndex = ()) returns Indentation|L
     }
 
     Indent? removedIndent = ();
-    event:Collection[] returnCollection = [];
+    common:Collection[] returnCollection = [];
     while state.indent > startIndex {
         removedIndent = state.indents.pop();
         state.indent = (<Indent>removedIndent).index;
@@ -79,7 +79,7 @@ function checkIndent(LexerState state, int? mapIndex = ()) returns Indentation|L
 
     if state.indents.length() > 0 && removedIndent is Indent {
         Indent removedSecondIndent = state.indents.pop();
-        if removedSecondIndent.index == startIndex && collection == event:MAPPING {
+        if removedSecondIndent.index == startIndex && collection == common:MAPPING {
             returnCollection.push(removedIndent.collection);
             removedIndent = removedSecondIndent;
         } else {

@@ -134,9 +134,9 @@ dependencies = [
 ]
 modules = [
 	{org = "nipunayf", packageName = "yaml", moduleName = "yaml"},
+	{org = "nipunayf", packageName = "yaml", moduleName = "yaml.common"},
 	{org = "nipunayf", packageName = "yaml", moduleName = "yaml.composer"},
 	{org = "nipunayf", packageName = "yaml", moduleName = "yaml.emitter"},
-	{org = "nipunayf", packageName = "yaml", moduleName = "yaml.event"},
 	{org = "nipunayf", packageName = "yaml", moduleName = "yaml.lexer"},
 	{org = "nipunayf", packageName = "yaml", moduleName = "yaml.parser"},
 	{org = "nipunayf", packageName = "yaml", moduleName = "yaml.schema"},

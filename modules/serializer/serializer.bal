@@ -1,4 +1,4 @@
-import yaml.event;
+import yaml.common;
 import ballerina/regex;
 import yaml.schema;
 
@@ -16,8 +16,8 @@ const string START_INDICATOR = "[\\,|\\[|\\]|\\{|\\}|&\\*|!\\||\\>|\\'|\\\"|%|@|
 # + depthLevel - The current depth level
 # + return - Event tree. Else, an error on failure.
 public function serialize(json data, map<schema:YAMLTypeConstructor> tagSchema, int blockLevel,
-    string:Char delimiter, boolean forceQuotes, int depthLevel = 0) returns event:Event[]|SerializingError {
-    event:Event[] events = [];
+    string:Char delimiter, boolean forceQuotes, int depthLevel = 0) returns common:Event[]|SerializingError {
+    common:Event[] events = [];
 
     string? tag = ();
     schema:YAMLTypeConstructor? typeConstructor = ();
@@ -38,20 +38,20 @@ public function serialize(json data, map<schema:YAMLTypeConstructor> tagSchema, 
     // Convert sequence
     if data is json[] {
         tag = typeConstructor == () ? string `${schema:defaultGlobalTagHandle}seq` : tag;
-        events.push({startType: event:SEQUENCE, flowStyle: blockLevel <= depthLevel, tag});
+        events.push({startType: common:SEQUENCE, flowStyle: blockLevel <= depthLevel, tag});
 
         foreach json dataItem in data {
             events = combineArray(events, check serialize(dataItem, tagSchema, blockLevel, delimiter, forceQuotes, depthLevel + 1));
         }
 
-        events.push({endType: event:SEQUENCE});
+        events.push({endType: common:SEQUENCE});
         return events;
     }
 
     // Convert mapping
     if data is map<json> {
         tag = typeConstructor == () ? string `${schema:defaultGlobalTagHandle}map` : tag;
-        events.push({startType: event:MAPPING, flowStyle: blockLevel <= depthLevel, tag});
+        events.push({startType: common:MAPPING, flowStyle: blockLevel <= depthLevel, tag});
 
         string[] keys = data.keys();
         foreach string key in keys {
@@ -59,7 +59,7 @@ public function serialize(json data, map<schema:YAMLTypeConstructor> tagSchema, 
             events = combineArray(events, check serialize(data[key], tagSchema, blockLevel, delimiter, forceQuotes, depthLevel + 1));
         }
 
-        events.push({endType: event:MAPPING});
+        events.push({endType: common:MAPPING});
         return events;
     }
 
@@ -81,10 +81,10 @@ public function serialize(json data, map<schema:YAMLTypeConstructor> tagSchema, 
 # + firstEventsList - First event tree  
 # + secondEventsList - Second event tree
 # + return - Combined event tree
-function combineArray(event:Event[] firstEventsList, event:Event[] secondEventsList) returns event:Event[] {
-    event:Event[] returnEventsList = firstEventsList.clone();
+function combineArray(common:Event[] firstEventsList, common:Event[] secondEventsList) returns common:Event[] {
+    common:Event[] returnEventsList = firstEventsList.clone();
 
-    secondEventsList.forEach(function(event:Event event) {
+    secondEventsList.forEach(function(common:Event event) {
         returnEventsList.push(event);
     });
 

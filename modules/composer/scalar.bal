@@ -1,5 +1,5 @@
 import yaml.parser;
-import yaml.event;
+import yaml.common;
 import yaml.schema;
 import yaml.lexer;
 
@@ -8,29 +8,29 @@ import yaml.lexer;
 # + state - Current composer state
 # + event - Node event to be composed
 # + return - Native Ballerina data on success
-function composeNode(ComposerState state, event:Event event) returns json|lexer:LexicalError|parser:ParsingError|ComposingError|schema:TypeError {
+function composeNode(ComposerState state, common:Event event) returns json|lexer:LexicalError|parser:ParsingError|ComposingError|schema:TypeError {
     json output;
 
     // Check for aliases
-    if event is event:AliasEvent {
+    if event is common:AliasEvent {
         return state.anchorBuffer.hasKey(event.alias)
             ? state.anchorBuffer[event.alias]
             : generateError(state, string `The anchor '${event.alias}' does not exist`);
     }
 
     // Ignore end events
-    if event is event:EndEvent {
+    if event is common:EndEvent {
         return;
     }
 
     // Check for collections
-    if event is event:StartEvent {
+    if event is common:StartEvent {
         output = {};
         match event.startType {
-            event:SEQUENCE => { // Check for +SEQ
+            common:SEQUENCE => { // Check for +SEQ
                 output = check castData(state, check composeSequence(state, event.flowStyle), schema:SEQUENCE, event.tag);
             }
-            event:MAPPING => {
+            common:MAPPING => {
                 output = check castData(state, check composeMapping(state, event.flowStyle), schema:MAPPING, event.tag);
             }
             _ => {
@@ -53,7 +53,7 @@ function composeNode(ComposerState state, event:Event event) returns json|lexer:
 # + event - The event representing the alias name 
 # + assignedValue - Anchored value to to the alias
 # + return - An error on failure
-function checkAnchor(ComposerState state, event:StartEvent|event:ScalarEvent event, json assignedValue) returns ComposingError? {
+function checkAnchor(ComposerState state, common:StartEvent|common:ScalarEvent event, json assignedValue) returns ComposingError? {
     if event.anchor != () {
         if state.anchorBuffer.hasKey(<string>event.anchor) {
             return generateError(state, string `Duplicate anchor definition of '${<string>event.anchor}'`);

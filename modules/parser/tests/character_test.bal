@@ -1,5 +1,5 @@
 import ballerina/test;
-import yaml.event;
+import yaml.common;
 import yaml.schema;
 
 @test:Config {
@@ -82,46 +82,46 @@ function nodeSeparateDataGen() returns map<[string[], string]> {
 @test:Config {}
 function testAliasEvent() returns error? {
     ParserState state = check new (["*anchor"]);
-    event:Event event = check parse(state);
+    common:Event event = check parse(state);
 
-    test:assertEquals((<event:AliasEvent>event).alias, "anchor");
+    test:assertEquals((<common:AliasEvent>event).alias, "anchor");
 }
 
 @test:Config {
     dataProvider: endEventDataGen
 }
-function testEndEvent(string line, event:Collection endType) returns error? {
+function testEndEvent(string line, common:Collection endType) returns error? {
     ParserState state = check new ([line]);
-    event:Event event = check parse(state);
+    common:Event event = check parse(state);
 
-    test:assertEquals((<event:EndEvent>event).endType, endType);
+    test:assertEquals((<common:EndEvent>event).endType, endType);
 }
 
-function endEventDataGen() returns map<[string, event:Collection]> {
+function endEventDataGen() returns map<[string, common:Collection]> {
     return {
-        "end-sequence": ["]", event:SEQUENCE],
-        "end-mapping": ["}", event:MAPPING],
-        "end-document": ["...", event:DOCUMENT],
-        "end-stream": ["", event:STREAM]
+        "end-sequence": ["]", common:SEQUENCE],
+        "end-mapping": ["}", common:MAPPING],
+        "end-document": ["...", common:DOCUMENT],
+        "end-stream": ["", common:STREAM]
     };
 }
 
 @test:Config {
     dataProvider: startEventDataGen
 }
-function testStartEvent(string line, event:Collection eventType, string? anchor) returns error? {
+function testStartEvent(string line, common:Collection eventType, string? anchor) returns error? {
     ParserState state = check new ([line]);
-    event:Event event = check parse(state);
+    common:Event event = check parse(state);
 
-    test:assertEquals((<event:StartEvent>event).startType, eventType);
-    test:assertEquals((<event:StartEvent>event).anchor, anchor);
+    test:assertEquals((<common:StartEvent>event).startType, eventType);
+    test:assertEquals((<common:StartEvent>event).anchor, anchor);
 }
 
-function startEventDataGen() returns map<[string, event:Collection, string?]> {
+function startEventDataGen() returns map<[string, common:Collection, string?]> {
     return {
-        "mapping-start with tag": ["&anchor {", event:MAPPING, "anchor"],
-        "mapping-start": ["{", event:MAPPING, ()],
-        "sequence-start with tag": ["&anchor [", event:SEQUENCE, "anchor"],
-        "sequence-start": ["[", event:SEQUENCE, ()]
+        "mapping-start with tag": ["&anchor {", common:MAPPING, "anchor"],
+        "mapping-start": ["{", common:MAPPING, ()],
+        "sequence-start with tag": ["&anchor [", common:SEQUENCE, "anchor"],
+        "sequence-start": ["[", common:SEQUENCE, ()]
     };
 }

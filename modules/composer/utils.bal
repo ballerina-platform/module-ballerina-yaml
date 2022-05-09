@@ -1,5 +1,5 @@
 import yaml.parser;
-import yaml.event;
+import yaml.common;
 import yaml.lexer;
 
 # Obtain the next event
@@ -9,10 +9,10 @@ import yaml.lexer;
 # + docType - Expected YAML document
 # + return - Next event on success
 function checkEvent(ComposerState state, parser:ParserOption option = parser:DEFAULT,
-    parser:DocumentType docType = parser:BARE_DOCUMENT) returns event:Event|lexer:LexicalError|parser:ParsingError {
+    parser:DocumentType docType = parser:BARE_DOCUMENT) returns common:Event|lexer:LexicalError|parser:ParsingError {
     
     if state.docTerminated {
-        return {endType: event:DOCUMENT};
+        return {endType: common:DOCUMENT};
     }
     return parser:parse(state.parserState, option, docType);
 }
@@ -21,5 +21,5 @@ function checkEvent(ComposerState state, parser:ParserOption option = parser:DEF
 #
 # + event - Current event
 # + return - True if the end of the document is reached
-function isEndOfDocument(event:Event event) returns boolean =>
-    event is event:EndEvent && (event.endType == event:STREAM || event.endType == event:DOCUMENT);
+function isEndOfDocument(common:Event event) returns boolean =>
+    event is common:EndEvent && (event.endType == common:STREAM || event.endType == common:DOCUMENT);

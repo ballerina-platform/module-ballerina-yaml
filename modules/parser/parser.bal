@@ -1,5 +1,5 @@
 import yaml.lexer;
-import yaml.event;
+import yaml.common;
 
 public enum ParserOption {
     DEFAULT,
@@ -19,7 +19,7 @@ public enum DocumentType {
 # + option - Expected values inside a mapping collection  
 # + docType - Document type to be parsed
 # + return - Parsed event on success. Else, a lexical or a parsing error on failure.
-public function parse(ParserState state, ParserOption option = DEFAULT, DocumentType docType = BARE_DOCUMENT) returns event:Event|lexer:LexicalError|ParsingError {
+public function parse(ParserState state, ParserOption option = DEFAULT, DocumentType docType = BARE_DOCUMENT) returns common:Event|lexer:LexicalError|ParsingError {
     // Empty the event buffer before getting new tokens
     if state.eventBuffer.length() > 0 {
         return state.eventBuffer.shift();
@@ -36,7 +36,7 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
     if state.currentToken.token == lexer:EOL || state.currentToken.token == lexer:EMPTY_LINE {
         if state.lineIndex >= state.numLines - 1 {
             return {
-                endType: event:STREAM
+                endType: common:STREAM
             };
         }
         check state.initLexer();
@@ -138,13 +138,13 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
             match indentation.change {
                 1 => { // Increase in indent
                     state.eventBuffer.push({value: ()});
-                    return {startType: event:MAPPING};
+                    return {startType: common:MAPPING};
                 }
                 0 => { // Same indent
                     return {value: ()};
                 }
                 -1 => { // Decrease in indent
-                    foreach event:Collection collectionItem in indentation.collection {
+                    foreach common:Collection collectionItem in indentation.collection {
                         state.eventBuffer.push({endType: collectionItem});
                     }
                     return state.eventBuffer.shift();
@@ -164,13 +164,13 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
             }
             match (<lexer:Indentation>state.currentToken.indentation).change {
                 1 => { // Indent increase
-                    return {startType: event:SEQUENCE};
+                    return {startType: common:SEQUENCE};
                 }
                 0 => { // Sequence entry
                     return parse(state);
                 }
                 -1 => { //Indent decrease 
-                    foreach event:Collection collectionItem in (<lexer:Indentation>state.currentToken.indentation).collection {
+                    foreach common:Collection collectionItem in (<lexer:Indentation>state.currentToken.indentation).collection {
                         state.eventBuffer.push({endType: collectionItem});
                     }
                     return state.eventBuffer.shift();
@@ -178,21 +178,21 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
             }
         }
         lexer:MAPPING_START => {
-            return {startType: event:MAPPING, flowStyle: true};
+            return {startType: common:MAPPING, flowStyle: true};
         }
         lexer:SEQUENCE_START => {
-            return {startType: event:SEQUENCE, flowStyle: true};
+            return {startType: common:SEQUENCE, flowStyle: true};
         }
         lexer:DOCUMENT_MARKER|lexer:DIRECTIVE_MARKER => {
             state.lexerState.resetState();
             state.yamlVersion = ();
-            return {endType: event:DOCUMENT};
+            return {endType: common:DOCUMENT};
         }
         lexer:SEQUENCE_END => {
-            return {endType: event:SEQUENCE};
+            return {endType: common:SEQUENCE};
         }
         lexer:MAPPING_END => {
-            return {endType: event:MAPPING};
+            return {endType: common:MAPPING};
         }
         lexer:LITERAL|lexer:FOLDED => {
             state.updateLexerContext(lexer:LEXER_LITERAL);

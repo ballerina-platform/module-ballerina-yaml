@@ -1,5 +1,5 @@
 import ballerina/test;
-import yaml.event;
+import yaml.common;
 
 @test:Config {
     groups: ["directives"]
@@ -95,7 +95,7 @@ function testInvalidDirectiveInBareDocument() returns error? {
     ParserState state = check new (["---", "%TAG ! local"]);
 
     _ = check parse(state, docType = ANY_DOCUMENT);
-    error|event:Event err = parse(state);
+    error|common:Event err = parse(state);
 
     test:assertTrue(err is ParsingError);
 }

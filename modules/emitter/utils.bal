@@ -1,13 +1,13 @@
 import yaml.schema;
-import yaml.event;
+import yaml.common;
 
 # Obtain the topmost event from the event tree.
 #
 # + state - Current emitter state
 # + return - The topmost event from the current tree.
-function getEvent(EmitterState state) returns event:Event {
+function getEvent(EmitterState state) returns common:Event {
     if state.events.length() < 1 {
-        return {endType: event:STREAM};
+        return {endType: common:STREAM};
     }
     return state.events.shift();
 }

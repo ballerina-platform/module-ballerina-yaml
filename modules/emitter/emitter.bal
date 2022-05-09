@@ -1,5 +1,5 @@
 import yaml.schema;
-import yaml.event;
+import yaml.common;
 
 # Represents the variables of the Emitter state.
 #
@@ -13,7 +13,7 @@ type EmitterState record {|
     readonly string indent;
     readonly boolean canonical;
     readonly & map<schema:YAMLTypeConstructor> tagSchema;
-    event:Event[] events;
+    common:Event[] events;
 |};
 
 # Obtain the output string lines for given event trees.
@@ -24,7 +24,7 @@ type EmitterState record {|
 # + tagSchema - Custom tags for the YAML parser
 # + isStream - Whether the event tree is a stream  
 # + return - YAML string lines
-public function emit(event:Event[] events,
+public function emit(common:Event[] events,
     int indentationPolicy,
     boolean canonical,
     readonly & map<schema:YAMLTypeConstructor> tagSchema,
@@ -64,10 +64,10 @@ public function emit(event:Event[] events,
 # + state - Current emitter state
 # + return - An error on failure
 function write(EmitterState state) returns EmittingError? {
-    event:Event event = getEvent(state);
+    common:Event event = getEvent(state);
 
     // Convert sequence collection
-    if event is event:StartEvent && event.startType == event:SEQUENCE {
+    if event is common:StartEvent && event.startType == common:SEQUENCE {
         if event.flowStyle {
             state.output.push(check writeFlowSequence(state, event.tag));
         } else {
@@ -77,7 +77,7 @@ function write(EmitterState state) returns EmittingError? {
     }
 
     // Convert mapping collection
-    if event is event:StartEvent && event.startType == event:MAPPING {
+    if event is common:StartEvent && event.startType == common:MAPPING {
         if event.flowStyle {
             state.output.push(check writeFlowMapping(state, event.tag));
         } else {
@@ -87,7 +87,7 @@ function write(EmitterState state) returns EmittingError? {
     }
 
     // Convert scalar 
-    if event is event:ScalarEvent {
+    if event is common:ScalarEvent {
         state.output.push(writeNode(state, event.value, event.tag));
         return;
     }

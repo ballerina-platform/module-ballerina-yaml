@@ -1,5 +1,5 @@
 import ballerina/test;
-import yaml.event;
+import yaml.common;
 
 @test:Config {
     dataProvider: blockScalarEventDataGen
@@ -33,20 +33,20 @@ function blockScalarEventDataGen() returns map<[string[], string]> {
 @test:Config {
     dataProvider: blockScalarInCollection
 }
-function testBlockScalarsInCollection(string[] lines, event:Event[] eventTree) returns error? {
+function testBlockScalarsInCollection(string[] lines, common:Event[] eventTree) returns error? {
     ParserState state = check new (lines);
 
-    foreach event:Event item in eventTree {
-        event:Event event = check parse(state);
+    foreach common:Event item in eventTree {
+        common:Event event = check parse(state);
         test:assertEquals(event, item);
     }
 }
 
-function blockScalarInCollection() returns map<[string[], event:Event[]]> {
+function blockScalarInCollection() returns map<[string[], common:Event[]]> {
     return {
-        "folded scalar as mapping value": [["key1: >-", " first", " second", "key2: third"], [{startType: event:MAPPING}, {value: "key1"}, {value: "first second"}, {value: "key2"}, {value: "third"}]],
-        "folded scalar as sequence entry": [["- >-", " first", " second", "- third"], [{startType: event:SEQUENCE}, {value: "first second"}, {value: "third"}]],
-        "folded scalar after trailing comment": [["- >-", " first", "# trailing comment", "- third"], [{startType: event:SEQUENCE}, {value: "first"}, {value: "third"}]]
+        "folded scalar as mapping value": [["key1: >-", " first", " second", "key2: third"], [{startType: common:MAPPING}, {value: "key1"}, {value: "first second"}, {value: "key2"}, {value: "third"}]],
+        "folded scalar as sequence entry": [["- >-", " first", " second", "- third"], [{startType: common:SEQUENCE}, {value: "first second"}, {value: "third"}]],
+        "folded scalar after trailing comment": [["- >-", " first", "# trailing comment", "- third"], [{startType: common:SEQUENCE}, {value: "first"}, {value: "third"}]]
     };
 }
 

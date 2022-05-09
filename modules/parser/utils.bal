@@ -1,5 +1,5 @@
 import yaml.lexer;
-import yaml.event;
+import yaml.common;
 import yaml.schema;
 
 # Generates an event my combining to map<json> objects.
@@ -8,7 +8,7 @@ import yaml.schema;
 # + m1 - The first map structure
 # + m2 - The second map structure
 # + return - The constructed event after combined.
-function constructEvent(ParserState state, map<json> m1, map<json>? m2 = ()) returns event:Event|ParsingError {
+function constructEvent(ParserState state, map<json> m1, map<json>? m2 = ()) returns common:Event|ParsingError {
     map<json> returnMap = m1.clone();
 
     if m2 != () {
@@ -17,9 +17,9 @@ function constructEvent(ParserState state, map<json> m1, map<json>? m2 = ()) ret
         });
     }
 
-    error|event:Event processedMap = returnMap.cloneWithType(event:Event);
+    error|common:Event processedMap = returnMap.cloneWithType(common:Event);
 
-    return processedMap is event:Event ? processedMap : generateError(state, 'error:message(processedMap));
+    return processedMap is common:Event ? processedMap : generateError(state, 'error:message(processedMap));
 }
 
 # Trims the trailing whitespace of a string.

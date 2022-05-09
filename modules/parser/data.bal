@@ -1,5 +1,5 @@
 import yaml.lexer;
-import yaml.event;
+import yaml.common;
 
 # Merge tag structure with the respective data.
 #
@@ -8,15 +8,15 @@ import yaml.event;
 # + tagStructure - Constructed tag structure if exists  
 # + peeked - If the expected token is already in the state
 # + return - The constructed scalar or start event on success.
-function appendData(ParserState state, ParserOption option, map<json> tagStructure = {}, boolean peeked = false) returns event:Event|lexer:LexicalError|ParsingError {
+function appendData(ParserState state, ParserOption option, map<json> tagStructure = {}, boolean peeked = false) returns common:Event|lexer:LexicalError|ParsingError {
     lexer:Indentation? indentation = ();
     if state.explicitKey {
         indentation = state.currentToken.indentation;
         check separate(state, true);
     }
 
-    string|event:Collection? value = check content(state, peeked);
-    event:Event? buffer = ();
+    string|common:Collection? value = check content(state, peeked);
+    common:Event? buffer = ();
 
     if !state.explicitKey {
         indentation = state.currentToken.indentation;
@@ -57,7 +57,7 @@ function appendData(ParserState state, ParserOption option, map<json> tagStructu
         match indentation.change {
             1 => { // Increased
                 // Block sequence
-                if value is event:SEQUENCE {
+                if value is common:SEQUENCE {
                     return constructEvent(state, tagStructure, {startType: indentation.collection.pop()});
                 }
                 // Block mapping
@@ -66,14 +66,14 @@ function appendData(ParserState state, ParserOption option, map<json> tagStructu
             }
             -1 => { // Decreased 
                 buffer = {endType: indentation.collection.shift()};
-                foreach event:Collection collectionItem in indentation.collection {
+                foreach common:Collection collectionItem in indentation.collection {
                     state.eventBuffer.push({endType: collectionItem});
                 }
             }
         }
     }
 
-    event:Event event = check constructEvent(state, tagStructure, value is event:Collection ? {startType: value} : {value});
+    common:Event event = check constructEvent(state, tagStructure, value is common:Collection ? {startType: value} : {value});
 
     if buffer == () {
         return event;
@@ -87,7 +87,7 @@ function appendData(ParserState state, ParserOption option, map<json> tagStructu
 # + state - Current parser state  
 # + peeked - If the expected token is already in the state
 # + return - String if a scalar event. The respective collection if a start event. Else, returns an error.
-function content(ParserState state, boolean peeked) returns string|event:Collection|lexer:LexicalError|ParsingError|() {
+function content(ParserState state, boolean peeked) returns string|common:Collection|lexer:LexicalError|ParsingError|() {
     state.updateLexerContext(state.explicitKey ? lexer:LEXER_EXPLICIT_KEY : lexer:LEXER_START);
 
     if !peeked {
@@ -108,10 +108,10 @@ function content(ParserState state, boolean peeked) returns string|event:Collect
             return planarScalar(state);
         }
         lexer:SEQUENCE_START|lexer:SEQUENCE_ENTRY => {
-            return event:SEQUENCE;
+            return common:SEQUENCE;
         }
         lexer:MAPPING_START => {
-            return event:MAPPING;
+            return common:MAPPING;
         }
         lexer:LITERAL|lexer:FOLDED => {
             if state.lexerState.isFlowCollection() {
@@ -133,7 +133,7 @@ function content(ParserState state, boolean peeked) returns string|event:Collect
             }
             lexer:MAPPING_END => {
                 state.eventBuffer.push({value: ()});
-                state.eventBuffer.push({endType: event:MAPPING});
+                state.eventBuffer.push({endType: common:MAPPING});
                 return;
             }
             lexer:EOL => { // Only the mapping key

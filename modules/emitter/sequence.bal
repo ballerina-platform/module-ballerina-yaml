@@ -1,4 +1,4 @@
-import yaml.event;
+import yaml.common;
 
 # Convert a flow sequence into YAML string.
 #
@@ -7,33 +7,33 @@ import yaml.event;
 # + return - YAML string of the flow sequence.
 function writeFlowSequence(EmitterState state, string? tag) returns string|EmittingError {
     string line = writeNode(state, "[", tag);
-    event:Event event = getEvent(state);
+    common:Event event = getEvent(state);
 
     // Iterate until the end delimiter ']' is detected
     while true {
-        if event is event:EndEvent {
+        if event is common:EndEvent {
             match event.endType {
-                event:SEQUENCE => { // End delimiter is detected
+                common:SEQUENCE => { // End delimiter is detected
                     break;
                 }
                 _ => { // Any other end events are not accepted
-                    return generateError("Expected the flow mapping to be terminated");
+                    return generateError("Expected the flow sequence to be terminated");
                 }
             }
         }
 
         // Convert the scalar
-        if event is event:ScalarEvent {
+        if event is common:ScalarEvent {
             line += writeNode(state, event.value, event.tag);
         }
 
         // Check for nested flow collections. Block collections are not allowed.
-        if event is event:StartEvent {
+        if event is common:StartEvent {
             match event.startType {
-                event:SEQUENCE => { // Convert the nested flow sequence
+                common:SEQUENCE => { // Convert the nested flow sequence
                     line += check writeFlowSequence(state, event.tag);
                 }
-                event:MAPPING => { // Convert the nested flow mapping
+                common:MAPPING => { // Convert the nested flow mapping
                     line += check writeFlowMapping(state, event.tag);
                 }
             }
@@ -56,34 +56,34 @@ function writeFlowSequence(EmitterState state, string? tag) returns string|Emitt
 # + tag - Tag of the start event if exists
 # + return - YAML string of the block sequence.
 function writeBlockSequence(EmitterState state, string whitespace, string? tag) returns EmittingError? {
-    event:Event event = getEvent(state);
+    common:Event event = getEvent(state);
     boolean emptySequence = true;
 
     // Iterate until and end event is detected
     while true {
-        if event is event:EndEvent {
+        if event is common:EndEvent {
             match event.endType {
-                event:SEQUENCE|event:STREAM => { // Terminate for these events
+                common:SEQUENCE|common:STREAM => { // Terminate for these events
                     if emptySequence {
                         state.output.push(whitespace + writeNode(state, "-", tag, true));
                     }
                     break;
                 }
-                event:MAPPING => { // End mapping events are not allowed
-                    return generateError("Expected the block mapping to be terminated");
+                common:MAPPING => { // End mapping events are not allowed
+                    return generateError("Expected the block sequence to be terminated");
                 }
             }
         }
 
         // Convert scalar event
-        if event is event:ScalarEvent {
+        if event is common:ScalarEvent {
             state.output.push(string `${whitespace}- ${writeNode(state, event.value, event.tag)}`);
         }
 
         // Check for nested collections
-        if event is event:StartEvent {
+        if event is common:StartEvent {
             match event.startType {
-                event:SEQUENCE => { // Convert the nested sequence
+                common:SEQUENCE => { // Convert the nested sequence
                     if event.flowStyle {
                         state.output.push(whitespace + "- " + check writeFlowSequence(state, event.tag));
                     } else {
@@ -91,7 +91,7 @@ function writeBlockSequence(EmitterState state, string whitespace, string? tag) 
                         check writeBlockSequence(state, whitespace + state.indent, event.tag);
                     }
                 }
-                event:MAPPING => { // Convert the nested mapping
+                common:MAPPING => { // Convert the nested mapping
                     if event.flowStyle {
                         state.output.push(whitespace + "- " + check writeFlowMapping(state, event.tag));
                     } else {

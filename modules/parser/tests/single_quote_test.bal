@@ -1,5 +1,5 @@
 import ballerina/test;
-import yaml.event;
+import yaml.common;
 
 @test:Config {
     dataProvider: singleQuoteDataGen
@@ -28,14 +28,14 @@ function testMultilinePlanarEvent() returns error? {
 function testFlowKeyEvent(string line, string? key, string? value) returns error? {
     ParserState state = check new([line]);
 
-    event:Event event = check parse(state);
-    test:assertEquals((<event:StartEvent>event).startType, event:MAPPING);
+    common:Event event = check parse(state);
+    test:assertEquals((<common:StartEvent>event).startType, common:MAPPING);
 
     event = check parse(state);
-    test:assertEquals((<event:ScalarEvent>event).value, key);
+    test:assertEquals((<common:ScalarEvent>event).value, key);
 
     event = check parse(state);
-    test:assertEquals((<event:ScalarEvent>event).value, value);
+    test:assertEquals((<common:ScalarEvent>event).value, value);
 }
 
 function flowKeyDataGen() returns map<[string, string?, string?]> {
@@ -57,15 +57,15 @@ function flowKeyDataGen() returns map<[string, string?, string?]> {
 function testMultipleMapEntriesEvent(string[] arr, string?[] keys, string?[] values) returns error? {
     ParserState state = check new(arr);
 
-    event:Event event = check parse(state);
-    test:assertEquals((<event:StartEvent>event).startType, event:MAPPING);
+    common:Event event = check parse(state);
+    test:assertEquals((<common:StartEvent>event).startType, common:MAPPING);
 
     foreach int i in 0 ... values.length() - 1 {
         event = check parse(state);
-        test:assertEquals((<event:ScalarEvent>event).value, keys[i]);
+        test:assertEquals((<common:ScalarEvent>event).value, keys[i]);
 
         event = check parse(state);
-        test:assertEquals((<event:ScalarEvent>event).value, values[i]);
+        test:assertEquals((<common:ScalarEvent>event).value, values[i]);
     }
 }
 

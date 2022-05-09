@@ -17,7 +17,7 @@ function composeSequence(ComposerState state, boolean flowStyle) returns json[]|
         if event is common:EndEvent {
             match event.endType {
                 common:MAPPING => {
-                    return generateError(state, "Expected a sequence end event");
+                    return generateExpectedEndEventError(state, event, {endType: common:SEQUENCE});
                 }
                 common:SEQUENCE => {
                     break;
@@ -27,7 +27,7 @@ function composeSequence(ComposerState state, boolean flowStyle) returns json[]|
                     if !flowStyle {
                         break;
                     }
-                    return generateError(state, "Expected a sequence end event");
+                    return generateExpectedEndEventError(state, event, {endType: common:SEQUENCE});
                 }
             }
         }
@@ -56,20 +56,20 @@ function composeMapping(ComposerState state, boolean flowStyle) returns map<json
                     break;
                 }
                 common:SEQUENCE => {
-                    return generateError(state, "Expected a mapping end event");
+                    return generateExpectedEndEventError(state, event, {endType: common:MAPPING});
                 }
                 common:DOCUMENT|common:STREAM => {
                     state.docTerminated = event.endType == common:DOCUMENT;
                     if !flowStyle {
                         break;
                     }
-                    return generateError(state, "Expected a mapping end event");
+                    return generateExpectedEndEventError(state, event, {endType: common:MAPPING});
                 }
             }
         }
 
         if !(event is common:StartEvent|common:ScalarEvent) {
-            return generateError(state, "Expected a key for a mapping");
+            return generateComposeError(state, "Expected either a start event or a scalar as a key", event);
         }
 
         // Compose the key

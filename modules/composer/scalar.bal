@@ -15,7 +15,7 @@ function composeNode(ComposerState state, common:Event event) returns json|lexer
     if event is common:AliasEvent {
         return state.anchorBuffer.hasKey(event.alias)
             ? state.anchorBuffer[event.alias]
-            : generateError(state, string `The anchor '${event.alias}' does not exist`);
+            : generateAliasingError(state, string `The anchor '${event.alias}' does not exist`, event);
     }
 
     // Ignore end events
@@ -34,7 +34,7 @@ function composeNode(ComposerState state, common:Event event) returns json|lexer
                 output = check castData(state, check composeMapping(state, event.flowStyle), schema:MAPPING, event.tag);
             }
             _ => {
-                return generateError(state, "Only sequence and mapping are allowed as node start events");
+                return generateComposeError(state, "Only sequence and mapping are allowed as node start events", event);
             }
         }
         check checkAnchor(state, event, output);
@@ -56,7 +56,7 @@ function composeNode(ComposerState state, common:Event event) returns json|lexer
 function checkAnchor(ComposerState state, common:StartEvent|common:ScalarEvent event, json assignedValue) returns ComposingError? {
     if event.anchor != () {
         if state.anchorBuffer.hasKey(<string>event.anchor) {
-            return generateError(state, string `Duplicate anchor definition of '${<string>event.anchor}'`);
+            return generateAliasingError(state, string `Duplicate anchor definition of '${<string>event.anchor}'`, event);
         }
         state.anchorBuffer[<string>event.anchor] = assignedValue;
     }
@@ -74,13 +74,14 @@ function castData(ComposerState state, json data,
     // Check for explicit keys 
     if tag != () {
         if !state.tagSchema.hasKey(tag) {
-            return generateError(state, string `There is no tag schema for '${tag}'`);
+            return generateComposeError(state, string `There is no tag schema for '${tag}'`, data);
         }
         schema:YAMLTypeConstructor typeConstructor = state.tagSchema.get(tag);
 
         if kind != typeConstructor.kind {
-            return generateError(state,
-                string `Expected '${typeConstructor.kind}' kind for the '${tag}' tag but found '${kind}'`);
+            return generateComposeError(state,
+                string `Expected '${typeConstructor.kind}' kind for the '${tag}' tag but found '${kind}'`,
+                data);
         }
 
         return typeConstructor.construct(data);

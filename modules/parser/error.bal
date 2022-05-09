@@ -2,7 +2,8 @@ import yaml.common;
 import yaml.lexer;
 
 # Represents an error caused during the parsing.
-public type ParsingError GrammarError|common:IndentationError|common:AliasingError|common:ConversionError;
+public type ParsingError GrammarError|lexer:LexicalError|
+    common:IndentationError|common:AliasingError|common:ConversionError;
 
 public type GrammarError distinct error<common:ReadErrorDetails>;
 

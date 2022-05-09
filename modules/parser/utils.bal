@@ -74,7 +74,7 @@ function trimHeadWhitespace(string value) returns string {
 # + customMessage - Error message to be displayed if the expected token not found  
 # + peek - Stores the token in the buffer
 # + return - Parsing error if not found
-function checkToken(ParserState state, lexer:YAMLToken|lexer:YAMLToken[] expectedTokens = lexer:DUMMY, string customMessage = "", boolean peek = false) returns (lexer:LexicalError|ParsingError)? {
+function checkToken(ParserState state, lexer:YAMLToken|lexer:YAMLToken[] expectedTokens = lexer:DUMMY, string customMessage = "", boolean peek = false) returns (ParsingError)? {
     lexer:Token token;
 
     // Obtain a token form the lexer if there is none in the buffer.
@@ -121,7 +121,7 @@ function checkToken(ParserState state, lexer:YAMLToken|lexer:YAMLToken[] expecte
 # + state - Current parser state  
 # + isSingleLine - If the scalar only spanned for one line.
 # + return - An error on invalid key.
-function verifyKey(ParserState state, boolean isSingleLine) returns lexer:LexicalError|ParsingError|() {
+function verifyKey(ParserState state, boolean isSingleLine) returns ParsingError|() {
     // Explicit keys can span multiple lines. 
     if state.explicitKey {
         return;

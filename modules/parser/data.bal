@@ -8,7 +8,7 @@ import yaml.common;
 # + tagStructure - Constructed tag structure if exists  
 # + peeked - If the expected token is already in the state
 # + return - The constructed scalar or start event on success.
-function appendData(ParserState state, ParserOption option, map<json> tagStructure = {}, boolean peeked = false) returns common:Event|lexer:LexicalError|ParsingError {
+function appendData(ParserState state, ParserOption option, map<json> tagStructure = {}, boolean peeked = false) returns common:Event|ParsingError {
     lexer:Indentation? indentation = ();
     if state.explicitKey {
         indentation = state.currentToken.indentation;
@@ -87,7 +87,7 @@ function appendData(ParserState state, ParserOption option, map<json> tagStructu
 # + state - Current parser state  
 # + peeked - If the expected token is already in the state
 # + return - String if a scalar event. The respective collection if a start event. Else, returns an error.
-function content(ParserState state, boolean peeked) returns string|common:Collection|lexer:LexicalError|ParsingError|() {
+function content(ParserState state, boolean peeked) returns string|common:Collection|ParsingError|() {
     state.updateLexerContext(state.explicitKey ? lexer:LEXER_EXPLICIT_KEY : lexer:LEXER_START);
 
     if !peeked {
@@ -152,7 +152,7 @@ function content(ParserState state, boolean peeked) returns string|common:Collec
 # + optional - If the separation is optional  
 # + allowEmptyNode - If it is possible to have an empty node.
 # + return - An error on invalid separation.
-function separate(ParserState state, boolean optional = false, boolean allowEmptyNode = false) returns ()|lexer:LexicalError|ParsingError {
+function separate(ParserState state, boolean optional = false, boolean allowEmptyNode = false) returns ()|ParsingError {
     state.updateLexerContext(lexer:LEXER_START);
     check checkToken(state, peek = true);
 

@@ -23,7 +23,7 @@ function nodeTag(ParserState state) returns [string?, string?]|ParsingError|lexe
     return [tagHandle, tagPrefix];
 }
 
-function nodeAnchor(ParserState state) returns string?|lexer:LexicalError|ParsingError {
+function nodeAnchor(ParserState state) returns string?|ParsingError {
     string? anchor = ();
     if state.tokenBuffer.token == lexer:ANCHOR {
         check checkToken(state);

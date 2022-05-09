@@ -19,7 +19,7 @@ public enum DocumentType {
 # + option - Expected values inside a mapping collection  
 # + docType - Document type to be parsed
 # + return - Parsed event on success. Else, a lexical or a parsing error on failure.
-public function parse(ParserState state, ParserOption option = DEFAULT, DocumentType docType = BARE_DOCUMENT) returns common:Event|lexer:LexicalError|ParsingError {
+public function parse(ParserState state, ParserOption option = DEFAULT, DocumentType docType = BARE_DOCUMENT) returns common:Event|ParsingError {
     // Empty the event buffer before getting new tokens
     if state.eventBuffer.length() > 0 {
         return state.eventBuffer.shift();

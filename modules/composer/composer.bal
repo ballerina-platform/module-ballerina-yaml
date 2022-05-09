@@ -8,7 +8,7 @@ import yaml.schema;
 # + state - Initiated composer state  
 # + eventParam - Passed the expected event if already fetched
 # + return - Native Ballerina data structure on success
-public function composeDocument(ComposerState state, common:Event? eventParam = ()) returns json|parser:ParsingError|lexer:LexicalError|ComposingError|schema:TypeError {
+public function composeDocument(ComposerState state, common:Event? eventParam = ()) returns json|parser:ParsingError|lexer:LexicalError|ComposingError|schema:SchemaError {
     // Obtain the root event
     common:Event event = eventParam is () ? check checkEvent(state) : eventParam;
 
@@ -34,7 +34,7 @@ public function composeDocument(ComposerState state, common:Event? eventParam = 
 #
 # + state - Initiated composer state  
 # + return - Native Ballerina data structure on success
-public function composeStream(ComposerState state) returns json[]|parser:ParsingError|lexer:LexicalError|ComposingError|schema:TypeError {
+public function composeStream(ComposerState state) returns json[]|parser:ParsingError|lexer:LexicalError|ComposingError|schema:SchemaError {
     json[] output = [];
     common:Event event = check checkEvent(state);
 

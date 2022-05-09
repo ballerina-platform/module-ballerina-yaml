@@ -1,26 +1,28 @@
-function constructSimpleNull(json data) returns json|TypeError =>
-    constructWithRegex("null", data, "null", function(string s) returns json|TypeError => ());
+import yaml.common;
 
-function constructSimpleBool(json data) returns json|TypeError =>
+function constructSimpleNull(json data) returns json|SchemaError =>
+    constructWithRegex("null", data, "null", function(string s) returns json|SchemaError => ());
+
+function constructSimpleBool(json data) returns json|SchemaError =>
     constructWithRegex("true|false", data, "bool",
-    function(string s) returns json|TypeError => processTypeCastingError('boolean:fromString(s)));
+    function(string s) returns json|SchemaError => common:processTypeCastingError('boolean:fromString(s)));
 
-function constructSimpleInteger(json data) returns json|TypeError =>
+function constructSimpleInteger(json data) returns json|SchemaError =>
     constructWithRegex("-?(0|[1-9][0-9]*)", data, "int",
-    function(string s) returns json|TypeError => processTypeCastingError('int:fromString(s)));
+    function(string s) returns json|SchemaError => common:processTypeCastingError('int:fromString(s)));
 
-function constructSimpleFloat(json data) returns json|TypeError =>
+function constructSimpleFloat(json data) returns json|SchemaError =>
     constructWithRegex("-?(0|[1-9][0-9]*)(\\.[0-9]*)?([eE][-+]?[0-9]+)?", data, "float",
-    function(string s) returns json|TypeError => processTypeCastingError('float:fromString(s)));
+    function(string s) returns json|SchemaError => common:processTypeCastingError('float:fromString(s)));
 
-function constructNull(json data) returns json|TypeError =>
-    constructWithRegex("null|Null|NULL|~", data, "null", function(string s) returns json|TypeError => ());
+function constructNull(json data) returns json|SchemaError =>
+    constructWithRegex("null|Null|NULL|~", data, "null", function(string s) returns json|SchemaError => ());
 
-function constructBool(json data) returns json|TypeError =>
+function constructBool(json data) returns json|SchemaError =>
     constructWithRegex("true|True|TRUE|false|False|FALSE", data, "bool",
-    function(string s) returns json|TypeError => processTypeCastingError('boolean:fromString(s)));
+    function(string s) returns json|SchemaError => common:processTypeCastingError('boolean:fromString(s)));
 
-function constructInteger(json data) returns json|TypeError {
+function constructInteger(json data) returns json|SchemaError {
     string value = data.toString();
 
     // Process integers in different base
@@ -31,7 +33,7 @@ function constructInteger(json data) returns json|TypeError {
                 int power = 1;
                 int length = value.length() - 3;
                 foreach int i in 0 ... length {
-                    int digit = <int>(check processTypeCastingError('int:fromString(value[length + 2 - i])));
+                    int digit = <int>(check common:processTypeCastingError('int:fromString(value[length + 2 - i])));
                     if digit > 7 || digit < 1 {
                         return generateError(string `Invalid digit '${digit}' for the octal base`);
                     }
@@ -41,17 +43,17 @@ function constructInteger(json data) returns json|TypeError {
                 return output;
             }
             "x" => { // Cast to a hexadecimal integer
-                return processTypeCastingError('int:fromHexString(value.substring((2))));
+                return common:processTypeCastingError('int:fromHexString(value.substring((2))));
             }
         }
     }
 
     // Cast to a decimal integer
     return constructWithRegex("[-+]?[0-9]+", data, "int",
-        function(string s) returns json|TypeError => processTypeCastingError('int:fromString(s)));
+        function(string s) returns json|SchemaError => common:processTypeCastingError('int:fromString(s)));
 }
 
-function constructFloat(json data) returns json|TypeError {
+function constructFloat(json data) returns json|SchemaError {
     string value = data.toString();
 
     // Process the float symbols
@@ -77,7 +79,7 @@ function constructFloat(json data) returns json|TypeError {
 
     // Cast to float numbers
     return constructWithRegex("[-+]?(\\.[0-9]+|[0-9]+(\\.[0-9]*)?)([eE][-+]?[0-9]+)?", data, "float",
-        function(string s) returns json|TypeError => processTypeCastingError('float:fromString(s)));
+        function(string s) returns json|SchemaError => common:processTypeCastingError('float:fromString(s)));
 }
 
 function representFloat(json data) returns string {

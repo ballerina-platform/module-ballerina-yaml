@@ -4,7 +4,7 @@ import yaml.common;
 
 type RGB [int, int, int];
 
-function constructRGB(json data) returns json|schema:TypeError {
+function constructRGB(json data) returns json|schema:SchemaError {
     RGB|error value = data.cloneWithType();
 
     if value is error {

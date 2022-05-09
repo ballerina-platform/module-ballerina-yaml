@@ -1,3 +1,5 @@
+import yaml.common;
+
 # Represents the current context of the Lexer.
 public enum Context {
     LEXER_START,
@@ -430,7 +432,7 @@ function contextBlockHeader(LexerState state) returns LexerState|LexicalError {
     // Check for indentation indicators and adjust the current indent
     if matchRegexPattern(state, "1-9") {
         state.captureIndent = false;
-        state.addIndent += <int>(check processTypeCastingError(state, 'int:fromString(<string>state.peek()))) - 1;
+        state.addIndent += <int>(check common:processTypeCastingError('int:fromString(<string>state.peek()))) - 1;
         state.forward();
     }
 

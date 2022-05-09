@@ -8,7 +8,7 @@ import yaml.schema;
 # + state - Current composer state
 # + flowStyle - If a collection is flow sequence
 # + return - Constructed Ballerina array on success
-function composeSequence(ComposerState state, boolean flowStyle) returns json[]|lexer:LexicalError|parser:ParsingError|ComposingError|schema:TypeError {
+function composeSequence(ComposerState state, boolean flowStyle) returns json[]|lexer:LexicalError|parser:ParsingError|ComposingError|schema:SchemaError {
     json[] sequence = [];
     common:Event event = check checkEvent(state);
 
@@ -44,7 +44,7 @@ function composeSequence(ComposerState state, boolean flowStyle) returns json[]|
 # + state - Current composer state
 # + flowStyle - If a collection is flow mapping
 # + return - Constructed Ballerina array on success
-function composeMapping(ComposerState state, boolean flowStyle) returns map<json>|lexer:LexicalError|parser:ParsingError|ComposingError|schema:TypeError {
+function composeMapping(ComposerState state, boolean flowStyle) returns map<json>|lexer:LexicalError|parser:ParsingError|ComposingError|schema:SchemaError {
     map<json> structure = {};
     common:Event event = check checkEvent(state, parser:EXPECT_KEY);
 

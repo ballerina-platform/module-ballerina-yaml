@@ -116,21 +116,6 @@ function checkToken(ParserState state, lexer:YAMLToken|lexer:YAMLToken[] expecte
     }
 }
 
-# Check errors during type casting to Ballerina types.
-#
-# + state - Current parser state
-# + value - Value to be type casted.
-# + return - Value as a Ballerina data type  
-function processTypeCastingError(ParserState state, json|error value) returns json|ParsingError {
-    // Check if the type casting has any errors
-    if value is error {
-        return generateGrammarError(state, "Invalid value for assignment");
-    }
-
-    // Returns the value on success
-    return value;
-}
-
 # Check if the given key adheres to either a explicit or a implicit key.
 #
 # + state - Current parser state  

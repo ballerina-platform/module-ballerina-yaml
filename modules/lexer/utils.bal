@@ -99,21 +99,6 @@ function checkCharacter(LexerState state, string|string[] expectedCharacters, in
     return true;
 }
 
-# Check errors during type casting to Ballerina types.
-#
-# + state - Current lexer state
-# + value - Value to be type casted.
-# + return - Value as a Ballerina data type  
-function processTypeCastingError(LexerState state, json|error value) returns json|LexicalError {
-    // Check if the type casting has any errors
-    if value is error {
-        return generateScanningError(state, "Invalid value for assignment");
-    }
-
-    // Returns the value on success
-    return value;
-}
-
 # Returns true if the current character is planar safe.
 #
 # + state - Current lexer state/

@@ -8,7 +8,7 @@ import yaml.lexer;
 # + state - Current composer state
 # + event - Node event to be composed
 # + return - Native Ballerina data on success
-function composeNode(ComposerState state, common:Event event) returns json|lexer:LexicalError|parser:ParsingError|ComposingError|schema:TypeError {
+function composeNode(ComposerState state, common:Event event) returns json|lexer:LexicalError|parser:ParsingError|ComposingError|schema:SchemaError {
     json output;
 
     // Check for aliases
@@ -70,7 +70,7 @@ function checkAnchor(ComposerState state, common:StartEvent|common:ScalarEvent e
 # + tag - Tag of the data if exists
 # + return - Constructed ballerina data
 function castData(ComposerState state, json data,
-    schema:FailSafeSchema kind, string? tag) returns json|ComposingError|schema:TypeError {
+    schema:FailSafeSchema kind, string? tag) returns json|ComposingError|schema:SchemaError {
     // Check for explicit keys 
     if tag != () {
         if !state.tagSchema.hasKey(tag) {
@@ -90,9 +90,9 @@ function castData(ComposerState state, json data,
     string[] yamlKeys = state.tagSchema.keys();
     foreach string yamlKey in yamlKeys {
         schema:YAMLTypeConstructor typeConstructor = state.tagSchema.get(yamlKey);
-        json|schema:TypeError result = typeConstructor.construct(data);
+        json|schema:SchemaError result = typeConstructor.construct(data);
 
-        if result is schema:TypeError || kind != typeConstructor.kind {
+        if result is schema:SchemaError || kind != typeConstructor.kind {
             continue;
         }
 

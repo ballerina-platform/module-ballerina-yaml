@@ -38,7 +38,7 @@ public type YAMLType record {|
     string tag;
     typedesc<json> ballerinaType;
     FailSafeSchema kind;
-    function (json data) returns json|schema:TypeError construct;
+    function (json data) returns json|schema:SchemaError construct;
     function (json data) returns string represent;
 |};
 

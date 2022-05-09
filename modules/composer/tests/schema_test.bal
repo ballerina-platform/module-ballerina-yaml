@@ -3,7 +3,7 @@ import yaml.schema;
 
 type RGB [int, int, int];
 
-function constructRGB(json data) returns json|schema:TypeError {
+function constructRGB(json data) returns json|schema:SchemaError {
     RGB|error value = data.cloneWithType();
 
     if value is error {
@@ -101,5 +101,5 @@ function testInvalidCustomTag() returns error? {
     ComposerState state = check new (["!rgb [256, 12, 32]"], tagHandles);
     json|error output = composeDocument(state);
 
-    test:assertTrue(output is schema:TypeError);
+    test:assertTrue(output is schema:SchemaError);
 }

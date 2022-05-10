@@ -1,8 +1,12 @@
+# Represents an error caused when failed to alias an anchor.
+public type AliasingError distinct error<ReadErrorDetails>;
+
+# Represents an error caused when the indentation is not correct.
 public type IndentationError distinct error<ReadErrorDetails>;
 
+# Represents an error caused by the Ballerina lang when converting a data type.
 public type ConversionError distinct error;
 
-public type AliasingError distinct error<ReadErrorDetails>;
 
 # Represents the error details when reading a YAML document.
 #

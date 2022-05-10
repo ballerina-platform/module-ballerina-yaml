@@ -7,8 +7,8 @@ import yaml.schema;
 public type ComposingError ComposeError|parser:ParsingError|lexer:LexicalError|
     schema:SchemaError|common:AliasingError;
 
-# Represents an error caused by composer
-type ComposeError distinct error<common:ReadErrorDetails>;
+# Represents an error caused for an invalid compose.
+public type ComposeError distinct error<common:ReadErrorDetails>;
 
 # # Generate an error message based on the template,
 # "Expected ${expectedTokens} after ${beforeToken}, but found ${actualToken}"

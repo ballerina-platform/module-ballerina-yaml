@@ -1,7 +1,7 @@
 import yaml.common;
 
-# Represents an error caused during emitting.
-type EmittingError distinct error<common:WriteErrorDetails>;
+# Represents an error caused during the emitting.
+public type EmittingError distinct error<common:WriteErrorDetails>;
 
 # # Generate an error message based on the template,
 # "Expected ${expectedTokens} after ${beforeToken}, but found ${actualToken}"

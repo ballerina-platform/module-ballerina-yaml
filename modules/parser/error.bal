@@ -5,6 +5,7 @@ import yaml.lexer;
 public type ParsingError GrammarError|lexer:LexicalError|
     common:IndentationError|common:AliasingError|common:ConversionError;
 
+# Represents an error caused for an invalid grammar production.
 public type GrammarError distinct error<common:ReadErrorDetails>;
 
 # Generate an error message based on the template,

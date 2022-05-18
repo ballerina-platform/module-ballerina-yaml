@@ -83,6 +83,7 @@ function contextSingleQuote(LexerState state) returns LexerState|LexicalError {
 function contextYamlDirective(LexerState state) returns LexerState|LexicalError {
     // Ignore any comments
     if state.peek() == "#" {
+        state.forward(-1);
         return state.tokenize(EOL);
     }
 
@@ -113,6 +114,7 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
             return (state.peek() == () && isFirstChar) ? state.tokenize(EMPTY_LINE) : state;
         }
         "#" => { // Ignore comments
+            state.forward(-1);
             return state.tokenize(EOL);
         }
     }
@@ -328,6 +330,7 @@ function contextExplicitKey(LexerState state) returns LexerState|LexicalError {
 function contextTagHandle(LexerState state) returns LexerState|LexicalError {
     // Ignore any comments
     if state.peek() == "#" {
+        state.forward(-1);
         return state.tokenize(EOL);
     }
 
@@ -369,6 +372,7 @@ function contextTagHandle(LexerState state) returns LexerState|LexicalError {
 function contextTagPrefix(LexerState state) returns LexerState|LexicalError {
     // Ignore any comments
     if state.peek() == "#" {
+        state.forward(-1);
         return state.tokenize(EOL);
     }
 

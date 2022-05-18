@@ -9,11 +9,7 @@ public function composeDocument(ComposerState state, common:Event? eventParam = 
     // Obtain the root event
     common:Event event = eventParam is () ? check checkEvent(state) : eventParam;
 
-    // Return an empty document if end is reached
-    if isEndOfDocument(event) {
-        return ();
-    }
-
+    // Ignore the markers at the start of the document
     if event is common:EndEvent && event.endType == common:DOCUMENT {
         event = check checkEvent(state);
     }

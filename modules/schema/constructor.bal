@@ -13,7 +13,7 @@ function constructSimpleInteger(json data) returns json|SchemaError =>
 
 function constructSimpleFloat(json data) returns json|SchemaError =>
     constructWithRegex("-?(0|[1-9][0-9]*)(\\.[0-9]*)?([eE][-+]?[0-9]+)?", data, "float",
-    function(string s) returns json|SchemaError => common:processTypeCastingError('float:fromString(s)));
+    function(string s) returns json|SchemaError => common:processTypeCastingError('decimal:fromString(s)));
 
 function constructNull(json data) returns json|SchemaError =>
     constructWithRegex("null|Null|NULL|~", data, "null", function(string s) returns json|SchemaError => ());
@@ -24,6 +24,10 @@ function constructBool(json data) returns json|SchemaError =>
 
 function constructInteger(json data) returns json|SchemaError {
     string value = data.toString();
+
+    if value.length() == 0 {
+        return generateError("An integer cannot be empty");
+    }
 
     // Process integers in different base
     if value[0] == "0" {
@@ -55,6 +59,10 @@ function constructInteger(json data) returns json|SchemaError {
 
 function constructFloat(json data) returns json|SchemaError {
     string value = data.toString();
+    
+    if value.length() == 0 {
+        return generateError("An integer cannot be empty");
+    }
 
     // Process the float symbols
     match value[0] {
@@ -79,7 +87,7 @@ function constructFloat(json data) returns json|SchemaError {
 
     // Cast to float numbers
     return constructWithRegex("[-+]?(\\.[0-9]+|[0-9]+(\\.[0-9]*)?)([eE][-+]?[0-9]+)?", data, "float",
-        function(string s) returns json|SchemaError => common:processTypeCastingError('float:fromString(s)));
+        function(string s) returns json|SchemaError => common:processTypeCastingError('decimal:fromString(s)));
 }
 
 function representFloat(json data) returns string {

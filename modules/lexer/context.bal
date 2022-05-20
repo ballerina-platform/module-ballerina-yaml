@@ -106,7 +106,7 @@ function contextYamlDirective(LexerState state) returns LexerState|LexicalError 
 # + return - Tokenized token
 function contextStart(LexerState state) returns LexerState|LexicalError {
     match state.peek() {
-        " " => {
+        " "|"\t" => {
             // Return empty line if there is only whitespace
             // Else, return separation in line
             boolean isFirstChar = state.index == 0;
@@ -220,7 +220,7 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
             _ = state.tokenize(MAPPING_VALUE);
 
             // Capture the for empty key mapping values
-            if state.index == 0 || state.line.trim()[0] == ":" && state.numOpenedFlowCollections == 0 {
+            if (state.index == 0 || state.line.trim()[0] == ":") && state.numOpenedFlowCollections == 0 {
                 state.indentation = check checkIndent(state, state.index - 1);
             }
             return state;
@@ -408,7 +408,7 @@ function contextTagNode(LexerState state) returns LexerState|LexicalError {
         return iterate(state, scanAnchorName, ANCHOR);
     }
 
-    // Match the tag with the t ag character pattern
+    // Match the tag with the tag character pattern
     if matchRegexPattern(state, [URI_CHAR_PATTERN, WORD_PATTERN], exclusionPatterns = ["!", FLOW_INDICATOR_PATTERN]) {
         return iterate(state, scanTagCharacter, TAG);
     }

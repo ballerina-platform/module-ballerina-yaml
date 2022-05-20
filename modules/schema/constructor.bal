@@ -78,7 +78,7 @@ function constructFloat(json data) returns json|SchemaError {
         }
         "+"|"-" => {
             // Cast to infinity
-            if (value.substring(2) == "inf" || value.substring(2) == "Inf" || value.substring(2) == "INF")
+            if value.substring(2) == "inf" || value.substring(2) == "Inf" || value.substring(2) == "INF"
                 && value[1] == "." {
                 return value[0] == "-" ? -'float:Infinity : 'float:Infinity;
             }

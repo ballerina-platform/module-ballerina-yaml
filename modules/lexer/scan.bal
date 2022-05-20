@@ -161,7 +161,7 @@ function scanPlanarChar(LexerState state) returns boolean|LexicalError {
 
     // Check for comments with a space before it
     if state.peek() == "#" {
-        if state.peek(-1) == " " {
+        if state.peek(-1) == " " || state.peek(-1) == "\t" {
             state.forward(-numWhitespace);
             return true;
         }
@@ -331,8 +331,8 @@ function scanAnchorName(LexerState state) returns boolean|LexicalError {
 # + state - Current lexer state
 # + return - False to continue. True to terminate the token.
 function scanWhitespace(LexerState state) returns boolean {
-    if state.peek() == " " {
-        state.lexeme += " ";
+    if state.peek() == " " || state.peek() == "\t" {
+        state.lexeme += <string>state.peek();
         return false;
     }
     return true;

@@ -358,7 +358,7 @@ function contextTagHandle(LexerState state) returns LexerState|LexicalError {
     }
 
     // Check for separation-in-space before the tag prefix
-    if state.peek() == " " {
+    if state.peek() == " " || state.peek() == "\t" {
         return check iterate(state, scanWhitespace, SEPARATION_IN_LINE);
     }
 
@@ -541,7 +541,6 @@ function contextBlockScalar(LexerState state) returns LexerState|LexicalError {
     if matchRegexPattern(state, PRINTABLE_PATTERN, [BOM_PATTERN, LINE_BREAK_PATTERN]) {
         return iterate(state, scanPrintableChar, PRINTABLE_CHAR);
     }
-
 
     return generateInvalidCharacterError(state, LITERAL);
 }

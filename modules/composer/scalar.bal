@@ -73,6 +73,13 @@ function castData(ComposerState state, json data,
     schema:FailSafeSchema kind, string? tag) returns json|ComposingError|schema:SchemaError {
     // Check for explicit keys 
     if tag != () {
+        // Return without casting if the tag is in YAML core schema
+        if tag == schema:defaultGlobalTagHandle + "str"
+            || tag == schema:defaultGlobalTagHandle + "map"
+            || tag == schema:defaultGlobalTagHandle + "seq" {
+                return data;
+            }
+
         if !state.tagSchema.hasKey(tag) {
             return generateComposeError(state, string `There is no tag schema for '${tag}'`, data);
         }

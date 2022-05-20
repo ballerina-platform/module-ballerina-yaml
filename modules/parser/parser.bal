@@ -56,7 +56,7 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
                 return generateGrammarError(state, "Directives are not allowed in a bare document");
             }
 
-            if (state.currentToken.value == "YAML") { // YAML directive
+            if state.currentToken.value == "YAML" { // YAML directive
                 check yamlDirective(state);
                 check checkToken(state, [lexer:SEPARATION_IN_LINE, lexer:EOL]);
             } else { // TAG directive

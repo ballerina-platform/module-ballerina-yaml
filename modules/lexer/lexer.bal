@@ -65,11 +65,11 @@ public function scan(LexerState state) returns LexerState|LexicalError {
     }
 
     // Generate EOL token at the last index
-    if (state.index >= state.line.length()) {
+    if state.index >= state.line.length() {
         return state.index == 0 ? state.tokenize(EMPTY_LINE) : state.tokenize(EOL);
     }
 
-    if (matchRegexPattern(state, LINE_BREAK_PATTERN)) {
+    if matchRegexPattern(state, LINE_BREAK_PATTERN) {
         return state.tokenize(LINE_BREAK);
     }
 

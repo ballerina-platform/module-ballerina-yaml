@@ -19,7 +19,7 @@ function generateExpectError(ParserState state,
     lexer:YAMLToken|lexer:YAMLToken[]|string expectedTokens, lexer:YAMLToken beforeToken) returns ParsingError {
 
     string expectedTokensMessage;
-    if (expectedTokens is lexer:YAMLToken[]) { // If multiple tokens
+    if expectedTokens is lexer:YAMLToken[] { // If multiple tokens
         string tempMessage = expectedTokens.reduce(function(string message, lexer:YAMLToken token) returns string {
             return message + " '" + token + "' or";
         }, "");

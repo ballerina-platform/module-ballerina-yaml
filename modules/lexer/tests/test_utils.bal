@@ -24,7 +24,7 @@ function assertToken(LexerState state, YAMLToken assertingToken, int currentInde
 
     test:assertEquals(token.token, assertingToken);
 
-    if (lexeme != "") {
+    if lexeme != "" {
         test:assertEquals(token.value, lexeme);
     }
 }
@@ -48,7 +48,7 @@ function getToken(LexerState state, int currentIndex) returns Token|error {
     LexerState updatedState = state;
     Token token;
 
-    if (currentIndex == 0) {
+    if currentIndex == 0 {
         updatedState = check scan(state);
         token = updatedState.getToken();
     } else {

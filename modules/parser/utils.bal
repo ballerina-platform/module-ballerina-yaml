@@ -95,20 +95,20 @@ function checkToken(ParserState state, lexer:YAMLToken|lexer:YAMLToken[] expecte
     }
 
     // Bypass error handling.
-    if (expectedTokens == lexer:DUMMY) {
+    if expectedTokens == lexer:DUMMY {
         return;
     }
 
     // Generate an error if the expected token differ from the actual token.
     // Automatically generates a template error message if there is no custom message.
-    if (expectedTokens is lexer:YAMLToken) {
-        if (token.token != expectedTokens) {
+    if expectedTokens is lexer:YAMLToken {
+        if token.token != expectedTokens {
             return customMessage.length() == 0 
                 ? generateExpectError(state, expectedTokens, state.prevToken) 
                 : generateGrammarError(state, customMessage);
         }
     } else {
-        if (expectedTokens.indexOf(token.token) == ()) {
+        if expectedTokens.indexOf(token.token) == () {
             return customMessage.length() == 0 
                 ? generateExpectError(state, expectedTokens, state.prevToken) 
                 : generateGrammarError(state, customMessage);

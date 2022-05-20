@@ -18,7 +18,7 @@ function tagDirective(ParserState state) returns (ParsingError)? {
     check checkToken(state, lexer:SEPARATION_IN_LINE);
 
     // Tag handles cannot be redefined
-    if (state.customTagHandles.hasKey(tagHandle)) {
+    if state.customTagHandles.hasKey(tagHandle) {
         return generateDuplicateError(state, tagHandle);
     }
 

@@ -7,7 +7,7 @@ function scanEscapedCharacter(LexerState state) returns LexicalError? {
     string currentChar;
 
     // Process double escape character
-    if (state.peek() == ()) {
+    if state.peek() == () {
         state.lexeme += "\\";
         return;
     } else {
@@ -15,7 +15,7 @@ function scanEscapedCharacter(LexerState state) returns LexicalError? {
     }
 
     // Check for predefined escape characters
-    if (escapedCharMap.hasKey(currentChar)) {
+    if escapedCharMap.hasKey(currentChar) {
         state.lexeme += <string>escapedCharMap[currentChar];
         return;
     }
@@ -90,7 +90,7 @@ function scanDoubleQuoteChar(LexerState state) returns boolean|LexicalError {
     }
 
     // Process escaped characters
-    if (state.peek() == "\\") {
+    if state.peek() == "\\" {
         state.forward();
         check scanEscapedCharacter(state);
         return false;
@@ -236,7 +236,7 @@ function scanTagCharacter(LexerState state) returns boolean|LexicalError {
 function scanURICharacter(boolean isVerbatim = false) returns function (LexerState state) returns boolean|LexicalError {
     return function(LexerState state) returns boolean|LexicalError {
         // Check for URI characters
-        if (matchRegexPattern(state, [URI_CHAR_PATTERN, WORD_PATTERN])) {
+        if matchRegexPattern(state, [URI_CHAR_PATTERN, WORD_PATTERN]) {
             state.lexeme += <string>state.peek();
             return false;
         }
@@ -268,7 +268,7 @@ function scanURICharacter(boolean isVerbatim = false) returns function (LexerSta
 function scanTagHandle(boolean differentiate = false) returns function (LexerState state) returns boolean|LexicalError {
     return function(LexerState state) returns boolean|LexicalError {
         // Scan the word of the name tag.
-        if (matchRegexPattern(state, WORD_PATTERN)) {
+        if matchRegexPattern(state, WORD_PATTERN) {
             state.lexeme += <string>state.peek();
             // Store the complete primary tag if another '!' cannot be detected.
             if differentiate && state.peek(1) == () {
@@ -319,7 +319,7 @@ function scanTagHandle(boolean differentiate = false) returns function (LexerSta
 # + state - Current lexer state
 # + return - False to continue. True to terminate the token. An error on failure.
 function scanAnchorName(LexerState state) returns boolean|LexicalError {
-    if (matchRegexPattern(state, [PRINTABLE_PATTERN], [LINE_BREAK_PATTERN, BOM_PATTERN, FLOW_INDICATOR_PATTERN, WHITESPACE_PATTERN])) {
+    if matchRegexPattern(state, [PRINTABLE_PATTERN], [LINE_BREAK_PATTERN, BOM_PATTERN, FLOW_INDICATOR_PATTERN, WHITESPACE_PATTERN]) {
         state.lexeme += <string>state.peek();
         return false;
     }
@@ -344,7 +344,7 @@ function scanWhitespace(LexerState state) returns boolean {
 # + return - Generates a function which checks the lexemes for the given number system.  
 function scanDigit(string digitPattern) returns function (LexerState state) returns boolean|LexicalError {
     return function(LexerState state) returns boolean|LexicalError {
-        if (matchRegexPattern(state, digitPattern)) {
+        if matchRegexPattern(state, digitPattern) {
             state.lexeme += <string>state.peek();
             return false;
         }

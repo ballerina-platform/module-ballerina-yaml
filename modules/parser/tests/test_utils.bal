@@ -53,7 +53,7 @@ function assertParsingError(string|string[] lines, boolean isLexical = false, in
         err = parse(state, docType = ANY_DOCUMENT);
     }
 
-    if (isLexical) {
+    if isLexical {
         test:assertTrue(err is lexer:LexicalError);
     } else {
         test:assertTrue(err is ParsingError);

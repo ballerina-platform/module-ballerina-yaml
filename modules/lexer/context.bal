@@ -88,7 +88,7 @@ function contextYamlDirective(LexerState state) returns LexerState|LexicalError 
     }
 
     // Check for decimal digits
-    if (matchRegexPattern(state, DECIMAL_DIGIT_PATTERN)) {
+    if matchRegexPattern(state, DECIMAL_DIGIT_PATTERN) {
         return iterate(state, scanDigit(DECIMAL_DIGIT_PATTERN), DECIMAL);
     }
 
@@ -119,7 +119,7 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
         }
     }
 
-    if (matchRegexPattern(state, BOM_PATTERN)) {
+    if matchRegexPattern(state, BOM_PATTERN) {
         return state.tokenize(BOM);
     }
 
@@ -220,7 +220,7 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
             _ = state.tokenize(MAPPING_VALUE);
 
             // Capture the for empty key mapping values
-            if (state.index == 0 || state.line.trim()[0] == ":") && state.numOpenedFlowCollections == 0 {
+            if state.index == 0 || state.line.trim()[0] == ":" && state.numOpenedFlowCollections == 0 {
                 state.indentation = check checkIndent(state, state.index - 1);
             }
             return state;
@@ -441,7 +441,7 @@ function contextBlockHeader(LexerState state) returns LexerState|LexicalError {
     }
 
     // If the indentation indicator is at the tail
-    if (state.index >= state.line.length()) {
+    if state.index >= state.line.length() {
         return state.tokenize(EOL);
     }
 
@@ -520,7 +520,7 @@ function contextBlockScalar(LexerState state) returns LexerState|LexicalError {
     }
 
     // Generate an empty lines that have less index.
-    if (state.index >= state.line.length()) {
+    if state.index >= state.line.length() {
         return state.tokenize(EMPTY_LINE);
     }
 

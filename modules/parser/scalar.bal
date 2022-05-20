@@ -21,25 +21,30 @@ function doubleQuoteScalar(ParserState state) returns ParsingError|string {
 
                 // Check for double escaped character
                 if lexeme.length() > 0 && lexeme[lexeme.length() - 1] == "\\" {
-                    lexeme = lexeme.substring(0, lexeme.length() - 2);
                     escaped = true;
-                    lexemeBuffer += lexeme;
+                    lexemeBuffer += lexeme.substring(0, lexeme.length() - 1);
                 } else if !isFirstLine {
                     if escaped {
                         escaped = false;
                     } else { // Trim the white space if not escaped
                         lexemeBuffer = trimTailWhitespace(lexemeBuffer);
+                        if !emptyLine { // Add a white space if there are not preceding empty lines
+                            lexemeBuffer += " ";
+                        }
                     }
 
-                    if emptyLine {
-                        emptyLine = false;
-                    } else { // Add a white space if there are not preceding empty lines
-                        lexemeBuffer += " ";
+                    string tempLexeme = trimHeadWhitespace(lexeme);
+                    if tempLexeme.length() > 0 && tempLexeme[0] == "\\" {
+                        lexemeBuffer += tempLexeme.substring(1);
+                    } else {
+                        lexemeBuffer += trimHeadWhitespace(lexeme);
                     }
-
-                    lexemeBuffer += trimHeadWhitespace(lexeme);
                 } else {
                     lexemeBuffer += lexeme;
+                }
+
+                if emptyLine {
+                    emptyLine = false;
                 }
             }
             lexer:EOL => { // Processing new lines

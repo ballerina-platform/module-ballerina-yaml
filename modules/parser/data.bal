@@ -119,6 +119,9 @@ function content(ParserState state, boolean peeked) returns string|common:Collec
             }
             return blockScalar(state, state.currentToken.token == lexer:FOLDED);
         }
+        lexer:SEPARATOR|lexer:MAPPING_VALUE => {
+            return "";
+        }
     }
 
     // Check for empty nodes with explicit keys

@@ -226,6 +226,11 @@ function scanTagCharacter(LexerState state) returns boolean|LexicalError {
         return false;
     }
 
+    // Check for separator in flow style collections.
+    if state.peek() == "," {
+        return true;
+    }
+
     return generateInvalidCharacterError(state, TAG);
 }
 

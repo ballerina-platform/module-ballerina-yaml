@@ -83,7 +83,7 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
             string tagPrefix = state.currentToken.value;
 
             // Check if there is a separate 
-            check separate(state);
+            check separate(state, true);
 
             // Obtain the anchor if there exists
             string? anchor = check nodeAnchor(state);

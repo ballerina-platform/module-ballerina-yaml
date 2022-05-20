@@ -23,9 +23,8 @@ function doubleQuoteScalar(ParserState state) returns ParsingError|string {
                 if lexeme.length() > 0 && lexeme[lexeme.length() - 1] == "\\" {
                     lexeme = lexeme.substring(0, lexeme.length() - 2);
                     escaped = true;
-                }
-
-                    else if !isFirstLine {
+                    lexemeBuffer += lexeme;
+                } else if !isFirstLine {
                     if escaped {
                         escaped = false;
                     } else { // Trim the white space if not escaped
@@ -37,9 +36,11 @@ function doubleQuoteScalar(ParserState state) returns ParsingError|string {
                     } else { // Add a white space if there are not preceding empty lines
                         lexemeBuffer += " ";
                     }
-                }
 
-                lexemeBuffer += lexeme;
+                    lexemeBuffer += trimHeadWhitespace(lexeme);
+                } else {
+                    lexemeBuffer += lexeme;
+                }
             }
             lexer:EOL => { // Processing new lines
                 if !escaped { // If not escaped, trim the trailing white spaces

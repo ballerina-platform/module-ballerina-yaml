@@ -31,7 +31,8 @@ final readonly & map<string> escapedCharMap = {
     "_": "\u{a0}",
     "L": "\u{2028}",
     "P": "\u{2029}",
-    " ": "\\\u{20}"
+    " ": "\u{20}",
+    "\t": "\t"
 };
 
 # Generates a Token for the next immediate lexeme.

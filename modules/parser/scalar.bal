@@ -32,13 +32,7 @@ function doubleQuoteScalar(ParserState state) returns ParsingError|string {
                             lexemeBuffer += " ";
                         }
                     }
-
-                    string tempLexeme = trimHeadWhitespace(lexeme);
-                    if tempLexeme.length() > 0 && tempLexeme[0] == "\\" {
-                        lexemeBuffer += tempLexeme.substring(1);
-                    } else {
-                        lexemeBuffer += trimHeadWhitespace(lexeme);
-                    }
+                    lexemeBuffer += lexeme;
                 } else {
                     lexemeBuffer += lexeme;
                 }
@@ -142,8 +136,8 @@ function singleQuoteScalar(ParserState state) returns ParsingError|string {
 function planarScalar(ParserState state) returns ParsingError|string {
     // Process the first planar char
     string lexemeBuffer = state.currentToken.value;
-    boolean emptyLine = false;
     boolean isFirstLine = true;
+    string newLineBuffer = "";
 
     check checkToken(state, peek = true);
 
@@ -155,8 +149,9 @@ function planarScalar(ParserState state) returns ParsingError|string {
                     break;
                 }
                 check checkToken(state);
-                if emptyLine {
-                    emptyLine = false;
+                if newLineBuffer.length() > 0 {
+                    lexemeBuffer += newLineBuffer;
+                    newLineBuffer = "";
                 } else { // Add a whitespace if there are no preceding empty lines
                     lexemeBuffer += " ";
                 }
@@ -173,8 +168,7 @@ function planarScalar(ParserState state) returns ParsingError|string {
                 check state.initLexer("");
             }
             lexer:EMPTY_LINE => {
-                lexemeBuffer += "\n";
-                emptyLine = true;
+                newLineBuffer += "\n";
                 check checkToken(state);
                 // Terminate at the end of the line
                 if state.lineIndex == state.numLines - 1 {

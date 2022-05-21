@@ -337,7 +337,7 @@ function scanAnchorName(LexerState state) returns boolean|LexicalError {
 # + return - False to continue. True to terminate the token.
 function scanWhitespace(LexerState state) returns boolean {
     if state.peek() == " " || state.peek() == "\t" {
-        state.lexeme += <string>state.peek();
+        // state.lexeme += <string>state.peek();
         return false;
     }
     return true;

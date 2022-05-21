@@ -55,7 +55,7 @@ function trimHeadWhitespace(string value) returns string {
     }
 
     int i = 0;
-    while value[i] == " " || value == "\t" {
+    while value[i] == " " || value[i] == "\t" {
         if i == len - 1 {
             break;
         }

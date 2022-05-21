@@ -39,7 +39,7 @@ public class ParserState {
         self.lexerState.context = context;
     }
 
-    public function getLineNumber() returns int => self.lexerState.lineNumber;
+    public function getLineNumber() returns int => self.lexerState.lineNumber + 1;
 
     public function getIndex() returns int => self.lexerState.index;
 

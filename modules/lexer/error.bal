@@ -17,7 +17,7 @@ function generateInvalidCharacterError(LexerState state, string context) returns
     string message = string `Invalid character '${currentChar}' for a '${context}'.`;
     return error(
         message,
-        line = state.lineNumber,
+        line = state.lineNumber + 1,
         column = state.index,
         actual = currentChar
     );
@@ -26,7 +26,7 @@ function generateInvalidCharacterError(LexerState state, string context) returns
 function generateScanningError(LexerState state, string message) returns ScanningError =>
     error(
         message + ".",
-        line = state.lineNumber,
+        line = state.lineNumber + 1,
         column = state.index,
         actual = state.peek()
     );
@@ -34,7 +34,7 @@ function generateScanningError(LexerState state, string message) returns Scannin
 function generateIndentationError(LexerState state, string message) returns common:IndentationError =>
     error(
         message + ".",
-        line = state.lineNumber,
+        line = state.lineNumber + 1,
         column = state.index,
         actual = state.peek()
     );

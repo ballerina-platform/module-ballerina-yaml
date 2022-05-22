@@ -345,16 +345,17 @@ function scanWhitespace(LexerState state) returns boolean {
 
 # Check for the lexemes to crete an DECIMAL token.
 #
-# + digitPattern - Regex pattern of the number system
-# + return - Generates a function which checks the lexemes for the given number system.  
-function scanDigit(string digitPattern) returns function (LexerState state) returns boolean|LexicalError {
-    return function(LexerState state) returns boolean|LexicalError {
-        if matchRegexPattern(state, digitPattern) {
-            state.lexeme += <string>state.peek();
-            return false;
-        }
+# + state - Current lexer state
+# + return - Generates a function which checks the lexemes for the given number system.
+function scanDigit(LexerState state) returns boolean|LexicalError {
+    if matchRegexPattern(state, DECIMAL_DIGIT_PATTERN) {
+        state.lexeme += <string>state.peek();
+        return false;
+    }
+    if state.peek() == " " || state.peek() == "\t" || state.peek() == "." {
         return true;
-    };
+    }
+    return generateInvalidCharacterError(state, "Digit");
 }
 
 # Differentiate the planar and anchor keys against the key of a mapping.

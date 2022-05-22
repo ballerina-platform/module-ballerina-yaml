@@ -89,7 +89,7 @@ function contextYamlDirective(LexerState state) returns LexerState|LexicalError 
 
     // Check for decimal digits
     if matchRegexPattern(state, DECIMAL_DIGIT_PATTERN) {
-        return iterate(state, scanDigit(DECIMAL_DIGIT_PATTERN), DECIMAL);
+        return iterate(state, scanDigit, DECIMAL);
     }
 
     // Check for decimal point

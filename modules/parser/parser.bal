@@ -35,6 +35,9 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
     // Set the next line if the end of line is detected
     if state.currentToken.token == lexer:EOL || state.currentToken.token == lexer:EMPTY_LINE {
         if state.lineIndex >= state.numLines - 1 {
+            if docType == DIRECTIVE_DOCUMENT {
+                return generateExpectError(state, lexer:DIRECTIVE_MARKER, lexer:DIRECTIVE);
+            }
             return {
                 endType: common:STREAM
             };

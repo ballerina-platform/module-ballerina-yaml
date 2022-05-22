@@ -30,13 +30,13 @@ public function composeDocument(ComposerState state, common:Event? eventParam = 
 # + return - Native Ballerina data structure on success
 public function composeStream(ComposerState state) returns json[]|ComposingError {
     json[] output = [];
-    common:Event event = check checkEvent(state);
+    common:Event event = check checkEvent(state, docType = parser:ANY_DOCUMENT);
 
     // Iterate all the documents
     while !(event is common:EndEvent && event.endType == common:STREAM) {
         output.push(check composeDocument(state, event));
         state.docTerminated = false;
-        event = check checkEvent(state);
+        event = check checkEvent(state, docType = parser:ANY_DOCUMENT);
     }
 
     return output;

@@ -14,7 +14,7 @@ function doubleQuoteScalar(ParserState state) returns ParsingError|string {
     check checkToken(state);
 
     // Iterate the content until the delimiter is found
-    while (state.currentToken.token != lexer:DOUBLE_QUOTE_DELIMITER) {
+    while state.currentToken.token != lexer:DOUBLE_QUOTE_DELIMITER {
         match state.currentToken.token {
             lexer:DOUBLE_QUOTE_CHAR => { // Regular double quoted string char
                 string lexeme = state.currentToken.value;
@@ -45,8 +45,15 @@ function doubleQuoteScalar(ParserState state) returns ParsingError|string {
                 if !escaped { // If not escaped, trim the trailing white spaces
                     lexemeBuffer = trimTailWhitespace(lexemeBuffer);
                 }
+
                 isFirstLine = false;
                 check state.initLexer("Expected to end the multi-line double string");
+
+                // Add a whitespace if the delimiter is on a new line
+                check checkToken(state, peek = true);
+                if state.tokenBuffer.token == lexer:DOUBLE_QUOTE_DELIMITER && !emptyLine {
+                    lexemeBuffer += " ";
+                }
             }
             lexer:EMPTY_LINE => {
                 if isFirstLine { // Whitespace is preserved on the first line
@@ -106,6 +113,12 @@ function singleQuoteScalar(ParserState state) returns ParsingError|string {
                 lexemeBuffer = trimTailWhitespace(lexemeBuffer);
                 isFirstLine = false;
                 check state.initLexer("Expected to end the multi-line double string");
+
+                // Add a whitespace if the delimiter is on a new line
+                check checkToken(state, peek = true);
+                if state.tokenBuffer.token == lexer:SINGLE_QUOTE_DELIMITER && !emptyLine {
+                    lexemeBuffer += " ";
+                }
             }
             lexer:EMPTY_LINE => {
                 if isFirstLine { // Whitespace is preserved on the first line

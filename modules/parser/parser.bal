@@ -65,14 +65,8 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
             }
             return check parse(state, docType = DIRECTIVE_DOCUMENT);
         }
-        lexer:DOUBLE_QUOTE_DELIMITER|lexer:SINGLE_QUOTE_DELIMITER|lexer:PLANAR_CHAR => {
+        lexer:DOUBLE_QUOTE_DELIMITER|lexer:SINGLE_QUOTE_DELIMITER|lexer:PLANAR_CHAR|lexer:ALIAS => {
             return appendData(state, option, peeked = true);
-        }
-        lexer:ALIAS => {
-            string alias = state.currentToken.value;
-            return {
-                    alias
-                };
         }
         lexer:TAG_HANDLE => {
             string tagHandle = state.currentToken.value;

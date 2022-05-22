@@ -15,7 +15,7 @@ function appendData(ParserState state, ParserOption option, map<json> tagStructu
         check separate(state, true);
     }
 
-    string|common:Collection? value = check content(state, peeked);
+    map<json> contentValue = check content(state, peeked);
     common:Event? buffer = ();
 
     if !state.explicitKey {
@@ -57,11 +57,11 @@ function appendData(ParserState state, ParserOption option, map<json> tagStructu
         match indentation.change {
             1 => { // Increased
                 // Block sequence
-                if value is common:SEQUENCE {
+                if contentValue.hasKey("startType") && contentValue.startType == common:SEQUENCE {
                     return constructEvent(state, tagStructure, {startType: indentation.collection.pop()});
                 }
                 // Block mapping
-                state.eventBuffer.push({value});
+                state.eventBuffer.push(check constructEvent(state, contentValue));
                 return constructEvent(state, tagStructure, {startType: indentation.collection.pop()});
             }
             -1 => { // Decreased 
@@ -73,7 +73,7 @@ function appendData(ParserState state, ParserOption option, map<json> tagStructu
         }
     }
 
-    common:Event event = check constructEvent(state, tagStructure, value is common:Collection ? {startType: value} : {value});
+    common:Event event = check constructEvent(state, tagStructure, contentValue);
 
     if buffer == () {
         return event;
@@ -87,7 +87,7 @@ function appendData(ParserState state, ParserOption option, map<json> tagStructu
 # + state - Current parser state  
 # + peeked - If the expected token is already in the state
 # + return - String if a scalar event. The respective collection if a start event. Else, returns an error.
-function content(ParserState state, boolean peeked) returns string|common:Collection|ParsingError|() {
+function content(ParserState state, boolean peeked) returns map<json>|ParsingError {
     state.updateLexerContext(state.explicitKey ? lexer:LEXER_EXPLICIT_KEY : lexer:LEXER_START);
 
     if !peeked {
@@ -98,29 +98,32 @@ function content(ParserState state, boolean peeked) returns string|common:Collec
     match state.currentToken.token {
         lexer:SINGLE_QUOTE_DELIMITER => {
             state.lexerState.isJsonKey = true;
-            return singleQuoteScalar(state);
+            return {value: check singleQuoteScalar(state)};
         }
         lexer:DOUBLE_QUOTE_DELIMITER => {
             state.lexerState.isJsonKey = true;
-            return doubleQuoteScalar(state);
+            return {value: check doubleQuoteScalar(state)};
         }
         lexer:PLANAR_CHAR => {
-            return planarScalar(state);
+            return {value: check planarScalar(state)};
         }
         lexer:SEQUENCE_START|lexer:SEQUENCE_ENTRY => {
-            return common:SEQUENCE;
+            return {startType: common:SEQUENCE};
         }
         lexer:MAPPING_START => {
-            return common:MAPPING;
+            return {startType: common:MAPPING};
         }
         lexer:LITERAL|lexer:FOLDED => {
             if state.lexerState.isFlowCollection() {
                 return generateGrammarError(state, "Cannot have a block node inside a flow node");
             }
-            return blockScalar(state, state.currentToken.token == lexer:FOLDED);
+            return {value: check blockScalar(state, state.currentToken.token == lexer:FOLDED)};
+        }
+        lexer:ALIAS => {
+            return {alias: state.currentToken.value};
         }
         lexer:SEPARATOR|lexer:MAPPING_VALUE => {
-            return "";
+            return {value: ""};
         }
     }
 
@@ -128,20 +131,20 @@ function content(ParserState state, boolean peeked) returns string|common:Collec
     if state.explicitKey {
         match state.currentToken.token {
             lexer:MAPPING_VALUE => {
-                return;
+                return {value: ""};
             }
             lexer:SEPARATOR => {
                 state.eventBuffer.push({value: ()});
-                return;
+                return {value: ""};
             }
             lexer:MAPPING_END => {
                 state.eventBuffer.push({value: ()});
                 state.eventBuffer.push({endType: common:MAPPING});
-                return;
+                return {value: ""};
             }
             lexer:EOL => { // Only the mapping key
                 state.eventBuffer.push({value: ()});
-                return;
+                return {value: ""};
             }
         }
     }

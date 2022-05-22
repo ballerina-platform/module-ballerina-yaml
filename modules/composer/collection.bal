@@ -68,10 +68,6 @@ function composeMapping(ComposerState state, boolean flowStyle) returns map<json
             }
         }
 
-        if !(event is common:StartEvent|common:ScalarEvent) {
-            return generateComposeError(state, "Expected either a start event or a scalar as a key", event);
-        }
-
         // Compose the key
         json key = check composeNode(state, event);
 

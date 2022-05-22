@@ -421,14 +421,12 @@ function scanMappingValueKeyWithDelimiter(LexerState state, YAMLToken outputToke
     if state.index < state.indentStartIndex { // Not sufficient indent to process as a value token
         if state.peek() == ":" && !state.isFlowCollection() { // The token is a mapping key
             token.indentation = check checkIndent(state, state.indentStartIndex);
-            state.indentStartIndex = -1;
             return token;
         }
         return generateIndentationError(state, "Insufficient indentation for a scalar");
     }
     if state.peek() == ":" && !state.isFlowCollection() {
         token.indentation = check checkIndent(state, state.indentStartIndex);
-        state.indentStartIndex = -1;
         return token;
     }
     state.forward(-numWhitespace);

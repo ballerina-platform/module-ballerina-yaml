@@ -68,6 +68,13 @@ function composeMapping(ComposerState state, boolean flowStyle) returns map<json
             }
         }
 
+        // Cannot have a nested block mapping if a value is assigned
+        if event is common:StartEvent && !event.flowStyle {
+            return generateComposeError(state, 
+                "Cannot have nested mapping under a key-pair that is already assigned",
+                event);
+        }
+
         // Compose the key
         json key = check composeNode(state, event);
 

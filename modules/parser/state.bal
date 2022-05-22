@@ -27,6 +27,8 @@ public class ParserState {
     # YAML version of the document.
     float? yamlVersion = ();
 
+    boolean directiveDocument = false;
+
     common:Event[] eventBuffer = [];
 
     public function init(string[] lines) returns ParsingError? {

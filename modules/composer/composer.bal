@@ -1,3 +1,4 @@
+import yaml.parser;
 import yaml.common;
 
 # Compose single YAML document to native Ballerina structure.
@@ -7,11 +8,11 @@ import yaml.common;
 # + return - Native Ballerina data structure on success
 public function composeDocument(ComposerState state, common:Event? eventParam = ()) returns json|ComposingError {
     // Obtain the root event
-    common:Event event = eventParam is () ? check checkEvent(state) : eventParam;
+    common:Event event = eventParam is () ? check checkEvent(state, docType = parser:ANY_DOCUMENT) : eventParam;
 
     // Ignore the markers at the start of the document
-    if event is common:EndEvent && event.endType == common:DOCUMENT {
-        event = check checkEvent(state);
+    while event is common:EndEvent && event.endType == common:DOCUMENT {
+        event = check checkEvent(state, docType = parser:ANY_DOCUMENT);
     }
 
     // Construct the single document

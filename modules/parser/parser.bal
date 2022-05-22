@@ -44,9 +44,11 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
     }
 
     // Only directive tokens are allowed in directive document
-    if docType == DIRECTIVE_DOCUMENT
-        && !(state.currentToken.token == lexer:DIRECTIVE || state.currentToken.token == lexer:DIRECTIVE_MARKER) {
-        return generateGrammarError(state, string `'${state.currentToken.token}' is not allowed in a directive document`);
+    if state.currentToken.token != lexer:DIRECTIVE && state.currentToken.token != lexer:DIRECTIVE_MARKER {
+        if docType == DIRECTIVE_DOCUMENT {
+            return generateGrammarError(state, string `'${state.currentToken.token}' is not allowed in a directive document`);
+        }
+        state.directiveDocument = false;
     }
 
     match state.currentToken.token {
@@ -63,6 +65,14 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
                 check tagDirective(state);
                 check checkToken(state, [lexer:SEPARATION_IN_LINE, lexer:EOL]);
             }
+
+            if state.directiveDocument {
+                return generateGrammarError(state,
+                    "Expected a '<explicit-document>' after directive, but found another directive",
+                    "<explicit-document>",
+                    "<directive-document");
+            }
+            state.directiveDocument = true;
             return check parse(state, docType = DIRECTIVE_DOCUMENT);
         }
         lexer:DOUBLE_QUOTE_DELIMITER|lexer:SINGLE_QUOTE_DELIMITER|lexer:PLANAR_CHAR|lexer:ALIAS => {

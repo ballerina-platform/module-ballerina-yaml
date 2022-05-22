@@ -73,6 +73,9 @@ function multipleMapEntriesDataGen() returns map<[string[], string?[], string?[]
     return {
         "multiple values": [["{first: second ,", "third: forth"], ["first", "third"], ["second", "forth"]],
         "ends with comma": [["{first: second ,", "third: forth ,"], ["first", "third"], ["second", "forth"]],
+        "anchors in mapping": [["&a a: b", "c: &d d"], ["a", "c"], ["b", "d"]],
+        "tags in mapping": [["!a a: b", "c: !d d"], ["a", "c"], ["b", "d"]],
+        "quotes in mapping": [["!a 'a': b", "c: !d 'd'"], ["a", "c"], ["b", "d"]],
         "multiline span": [["key : ", " ", "", " value"], ["key"], ["value"]]
     };
 }

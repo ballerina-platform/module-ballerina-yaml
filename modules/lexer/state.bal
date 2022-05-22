@@ -26,9 +26,6 @@ public class LexerState {
     # Represent the number of opened flow collections  
     int numOpenedFlowCollections = 0;
 
-    # Start index of the scalars with delimiter.
-    int delimiterStartIndex = -1;
-
     # Store the lexeme if it will be scanned again by the next token
     string lexemeBuffer = "";
 
@@ -38,6 +35,9 @@ public class LexerState {
 
     # The lexer is currently processing trailing comments when the flag is set.
     public boolean trailingComment = false;
+
+    # Start index for the mapping value
+    public int indentStartIndex = -1;
 
     # When flag is set, updates the current indent to the indent of the first line
     boolean captureIndent = false;
@@ -64,6 +64,12 @@ public class LexerState {
     function forward(int k = 1) {
         if self.index + k <= self.line.length() {
             self.index += k;
+        }
+    }
+
+    function updateStartIndex() {
+        if self.index < self.indentStartIndex || self.indentStartIndex < 0 {
+            self.indentStartIndex = self.index;
         }
     }
 
@@ -98,8 +104,8 @@ public class LexerState {
     public function resetState() {
         self.addIndent = 1;
         self.captureIndent = false;
-        self.delimiterStartIndex = -1;
         self.enforceMapping = false;
+        self.indentStartIndex = -1;
         self.indent = -1;
         self.indents = [];
         self.lexeme = "";

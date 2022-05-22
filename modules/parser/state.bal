@@ -55,5 +55,6 @@ public class ParserState {
         self.lexerState.line = self.lines[self.lineIndex];
         self.lexerState.index = 0;
         self.lexerState.lineNumber = self.lineIndex;
+        self.lexerState.indentStartIndex = -1;
     }
 }

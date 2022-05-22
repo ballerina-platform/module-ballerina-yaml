@@ -175,6 +175,7 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
         }
         "!" => { // Node tags
             check assertIndent(state, 1);
+            state.updateStartIndex();
             match state.peek(1) {
                 "<" => { // Verbatim tag
                     state.forward(2);
@@ -208,6 +209,7 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
         }
         "&" => {
             check assertIndent(state, 1);
+            state.updateStartIndex();
             state.forward();
             return iterate(state, scanAnchorName, ANCHOR);
         }
@@ -240,11 +242,11 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
             return state;
         }
         "\"" => { // Process double quote flow style value
-            state.delimiterStartIndex = state.index;
+            state.updateStartIndex();
             return state.tokenize(DOUBLE_QUOTE_DELIMITER);
         }
         "'" => {
-            state.delimiterStartIndex = state.index;
+            state.updateStartIndex();
             return state.tokenize(SINGLE_QUOTE_DELIMITER);
         }
         "," => {

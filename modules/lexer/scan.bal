@@ -368,7 +368,7 @@ function scanMappingValueKey(LexerState state, YAMLToken outputToken, function (
     boolean enforceMapping = state.enforceMapping;
     state.enforceMapping = false;
 
-    int startIndent = state.index;
+    state.updateStartIndex();
     LexerState token = check iterate(state, process, outputToken);
 
     if state.isFlowCollection() {
@@ -384,13 +384,13 @@ function scanMappingValueKey(LexerState state, YAMLToken outputToken, function (
 
     if err is LexicalError { // Not sufficient indent to process as a value token
         if state.peek() == ":" && !state.isFlowCollection() { // The token is a mapping key
-            token.indentation = check checkIndent(state, startIndent);
+            token.indentation = check checkIndent(state, state.indentStartIndex);
             return token;
         }
         return generateIndentationError(state, "Insufficient indentation for a scalar");
     }
     if state.peek() == ":" && !state.isFlowCollection() {
-        token.indentation = check checkIndent(state, startIndent);
+        token.indentation = check checkIndent(state, state.indentStartIndex);
         return token;
     }
     state.forward(-numWhitespace);
@@ -418,17 +418,17 @@ function scanMappingValueKeyWithDelimiter(LexerState state, YAMLToken outputToke
         return token;
     }
 
-    if state.index < state.delimiterStartIndex { // Not sufficient indent to process as a value token
+    if state.index < state.indentStartIndex { // Not sufficient indent to process as a value token
         if state.peek() == ":" && !state.isFlowCollection() { // The token is a mapping key
-            token.indentation = check checkIndent(state, state.delimiterStartIndex);
-            state.delimiterStartIndex = -1;
+            token.indentation = check checkIndent(state, state.indentStartIndex);
+            state.indentStartIndex = -1;
             return token;
         }
         return generateIndentationError(state, "Insufficient indentation for a scalar");
     }
     if state.peek() == ":" && !state.isFlowCollection() {
-        token.indentation = check checkIndent(state, state.delimiterStartIndex);
-        state.delimiterStartIndex = -1;
+        token.indentation = check checkIndent(state, state.indentStartIndex);
+        state.indentStartIndex = -1;
         return token;
     }
     state.forward(-numWhitespace);

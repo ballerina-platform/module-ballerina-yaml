@@ -71,7 +71,7 @@ function checkIndent(LexerState state, int? mapIndex = ()) returns Indentation|L
 
     Indent? removedIndent = ();
     common:Collection[] returnCollection = [];
-    while state.indent > startIndex {
+    while state.indent > startIndex && state.indents.length() > 0 {
         removedIndent = state.indents.pop();
         state.indent = (<Indent>removedIndent).index;
         returnCollection.push((<Indent>removedIndent).collection);

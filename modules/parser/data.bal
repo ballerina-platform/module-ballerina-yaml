@@ -45,7 +45,7 @@ function appendData(ParserState state, ParserOption option, map<json> tagStructu
         }
     }
 
-    // If there ano no whitespace, and the current token is ","
+    // If there are no whitespace, and the current token is ","
     if state.currentToken.token == lexer:SEPARATOR {
         check separate(state, true);
         if option == EXPECT_KEY {

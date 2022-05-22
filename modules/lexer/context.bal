@@ -133,9 +133,10 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
 
             // Scan for planar characters
             if matchRegexPattern(state, [PRINTABLE_PATTERN], [LINE_BREAK_PATTERN, BOM_PATTERN, WHITESPACE_PATTERN], 1) {
+                state.updateStartIndex();
                 state.forward();
                 state.lexeme += "-";
-                return iterate(state, scanPlanarChar, PLANAR_CHAR);
+                return scanMappingValueKey(state, PLANAR_CHAR, scanPlanarChar);
             }
 
             // Return block sequence entry
@@ -151,9 +152,10 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
             }
 
             // Scan for planar characters
+            state.updateStartIndex();
             state.forward();
             state.lexeme += ".";
-            return iterate(state, scanPlanarChar, PLANAR_CHAR);
+            return scanMappingValueKey(state, PLANAR_CHAR, scanPlanarChar);
         }
         "*" => {
             state.forward();
@@ -216,13 +218,14 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
         ":" => {
             if !state.isJsonKey && matchRegexPattern(state, [PRINTABLE_PATTERN], [LINE_BREAK_PATTERN, BOM_PATTERN, WHITESPACE_PATTERN], 1) {
                 state.lexeme += ":";
+                state.updateStartIndex();
                 state.forward();
-                return iterate(state, scanPlanarChar, PLANAR_CHAR);
+                return scanMappingValueKey(state, PLANAR_CHAR, scanPlanarChar);
             }
             _ = state.tokenize(MAPPING_VALUE);
 
             // Capture the for empty key mapping values
-            if (state.index == 0 || state.line.trim()[0] == ":") && state.numOpenedFlowCollections == 0 {
+            if state.indentStartIndex == -1 && state.numOpenedFlowCollections == 0 {
                 state.indentation = check checkIndent(state, state.index - 1);
             }
             return state;
@@ -230,8 +233,9 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
         "?" => {
             if matchRegexPattern(state, [PRINTABLE_PATTERN], [LINE_BREAK_PATTERN, BOM_PATTERN, WHITESPACE_PATTERN], 1) {
                 state.lexeme += "?";
+                state.updateStartIndex();
                 state.forward();
-                return iterate(state, scanPlanarChar, PLANAR_CHAR);
+                return scanMappingValueKey(state, PLANAR_CHAR, scanPlanarChar);
             }
             _ = state.tokenize(MAPPING_KEY);
 

@@ -22,6 +22,21 @@ function generateExpectedEndEventError(ComposerState state,
         generateComposeError(state, common:generateExpectedEndEventErrorMessage(actualEndEvent, expectedEndEvent),
             actualEndEvent, expectedEndEvent);
 
+# Generate an error message based on the template,
+# Expected '${expectedKind}' kind for the '${tag}' tag but found '${actualKind}'
+#
+# + state - Current parser state  
+# + actualKind - Actual core schema kind of the data  
+# + expectedKind - Expected core schema kind of the data
+# + tag - Tag of the data
+# + return - Formatted error message
+function generateExpectedKindError(ComposerState state, string actualKind, string expectedKind, string tag)
+    returns ComposeError => generateComposeError(
+        state,
+        string `Expected '${expectedKind}' kind for the '${tag}' tag but found '${actualKind}'`,
+        actualKind,
+        expectedKind);
+
 function generateAliasingError(ComposerState state, string message, common:Event actualEvent)
     returns common:AliasingError =>
         error(

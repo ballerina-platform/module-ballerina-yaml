@@ -73,12 +73,24 @@ function castData(ComposerState state, json data,
     schema:FailSafeSchema kind, string? tag) returns json|ComposingError|schema:SchemaError {
     // Check for explicit keys 
     if tag != () {
-        // Return without casting if the tag is in YAML core schema
-        if tag == schema:defaultGlobalTagHandle + "str"
-            || tag == schema:defaultGlobalTagHandle + "map"
-            || tag == schema:defaultGlobalTagHandle + "seq" {
-                return data;
-            }
+        // Check for the tags in the YAML core schema
+        if tag == schema:defaultGlobalTagHandle + "str" {
+            return kind == schema:STRING
+                ? data
+                : generateExpectedKindError(state, kind, schema:STRING, tag);
+        }
+
+        if tag == schema:defaultGlobalTagHandle + "seq" {
+            return kind == schema:SEQUENCE
+                ? data
+                : generateExpectedKindError(state, kind, schema:SEQUENCE, tag);
+        }
+
+        if tag == schema:defaultGlobalTagHandle + "map" {
+            return kind == schema:MAPPING
+                ? data
+                : generateExpectedKindError(state, kind, schema:MAPPING, tag);
+        }
 
         if !state.tagSchema.hasKey(tag) {
             return generateComposeError(state, string `There is no tag schema for '${tag}'`, data);
@@ -86,9 +98,7 @@ function castData(ComposerState state, json data,
         schema:YAMLTypeConstructor typeConstructor = state.tagSchema.get(tag);
 
         if kind != typeConstructor.kind {
-            return generateComposeError(state,
-                string `Expected '${typeConstructor.kind}' kind for the '${tag}' tag but found '${kind}'`,
-                data);
+            return generateExpectedKindError(state, kind, typeConstructor.kind, tag);
         }
 
         return typeConstructor.construct(data);

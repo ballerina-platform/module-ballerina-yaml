@@ -82,11 +82,7 @@ function nodeComplete(ParserState state, ParserOption option) returns common:Eve
             if tagPrefix == () {
                 tag = ();
             } else {
-                if tagHandle == () {
-                    tag = tagPrefix;
-                } else {
-                    tag = check generateCompleteTagName(state, tagHandle, tagPrefix);
-                }
+                tag = tagHandle == () ? tagPrefix : check generateCompleteTagName(state, tagHandle, tagPrefix);
             }
 
             return appendData(state, option, {tag, anchor});

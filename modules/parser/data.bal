@@ -8,7 +8,9 @@ import yaml.common;
 # + tagStructure - Constructed tag structure if exists  
 # + peeked - If the expected token is already in the state
 # + return - The constructed scalar or start event on success.
-function appendData(ParserState state, ParserOption option, map<json> tagStructure = {}, boolean peeked = false) returns common:Event|ParsingError {
+function appendData(ParserState state, ParserOption option, map<json> tagStructure = {}, boolean peeked = false)
+    returns common:Event|ParsingError {
+
     lexer:Indentation? indentation = ();
     if state.explicitKey {
         indentation = state.currentToken.indentation;
@@ -61,6 +63,11 @@ function appendData(ParserState state, ParserOption option, map<json> tagStructu
                     return constructEvent(state, tagStructure, {startType: indentation.collection.pop()});
                 }
                 // Block mapping
+                // The tag structure corresponds to the key 
+                //     state.eventBuffer.push(check constructEvent(state, tagStructure, contentValue));
+                //     return constructEvent(state, {startType: indentation.collection.pop()});
+
+                // The tag structure corresponds to the entire mapping
                 state.eventBuffer.push(check constructEvent(state, contentValue));
                 return constructEvent(state, tagStructure, {startType: indentation.collection.pop()});
             }
@@ -124,6 +131,16 @@ function content(ParserState state, boolean peeked) returns map<json>|ParsingErr
         }
         lexer:SEPARATOR|lexer:MAPPING_VALUE => {
             return {value: ""};
+        }
+        lexer:ANCHOR|lexer:TAG|lexer:TAG_HANDLE => {
+            common:Event event = check nodeComplete(state, EXPECT_KEY);
+            if event is common:StartEvent && event.startType == common:MAPPING {
+                return {startType: common:MAPPING};
+            }
+            if event is common:ScalarEvent {
+                state.eventBuffer.push(event);
+                return {value: ""};
+            }
         }
     }
 

@@ -158,6 +158,7 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
             return scanMappingValueKey(state, PLANAR_CHAR, scanPlanarChar);
         }
         "*" => {
+            state.updateStartIndex();
             state.forward();
             return scanMappingValueKey(state, ALIAS, scanAnchorName);
         }
@@ -176,7 +177,7 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
             }
         }
         "!" => { // Node tags
-            check assertIndent(state, 1);
+            // check assertIndent(state, 1);
             state.updateStartIndex();
             match state.peek(1) {
                 "<" => { // Verbatim tag
@@ -210,7 +211,7 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
             }
         }
         "&" => {
-            check assertIndent(state, 1);
+            // check assertIndent(state, 1);
             state.updateStartIndex();
             state.forward();
             return iterate(state, scanAnchorName, ANCHOR);
@@ -258,7 +259,7 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
             return state.tokenize(SEPARATOR);
         }
         "[" => {
-            check assertIndent(state, 1);
+            // check assertIndent(state, 1);
             state.numOpenedFlowCollections += 1;
             return state.tokenize(SEQUENCE_START);
         }
@@ -267,7 +268,7 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
             return state.tokenize(SEQUENCE_END);
         }
         "{" => {
-            check assertIndent(state, 1);
+            // check assertIndent(state, 1);
             state.numOpenedFlowCollections += 1;
             return state.tokenize(MAPPING_START);
         }
@@ -321,7 +322,7 @@ function contextExplicitKey(LexerState state) returns LexerState|LexicalError {
 
     if isPlainSafe(state) {
         if state.numOpenedFlowCollections == 0 {
-            check assertIndent(state, 1);
+            // check assertIndent(state, 1);
         }
         return iterate(state, scanPlanarChar, PLANAR_CHAR);
     }

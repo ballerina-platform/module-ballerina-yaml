@@ -324,6 +324,13 @@ function scanTagHandle(boolean differentiate = false) returns function (LexerSta
 # + state - Current lexer state
 # + return - False to continue. True to terminate the token. An error on failure.
 function scanAnchorName(LexerState state) returns boolean|LexicalError {
+    // Check for mapping value with a space after it 
+    if state.peek() == ":" {
+        if !matchRegexPattern(state, [PRINTABLE_PATTERN], [LINE_BREAK_PATTERN, BOM_PATTERN, FLOW_INDICATOR_PATTERN, WHITESPACE_PATTERN], 1) {
+            return true;
+        }
+    }
+
     if matchRegexPattern(state, [PRINTABLE_PATTERN], [LINE_BREAK_PATTERN, BOM_PATTERN, FLOW_INDICATOR_PATTERN, WHITESPACE_PATTERN]) {
         state.lexeme += <string>state.peek();
         return false;

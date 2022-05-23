@@ -81,60 +81,8 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
         lexer:DOUBLE_QUOTE_DELIMITER|lexer:SINGLE_QUOTE_DELIMITER|lexer:PLANAR_CHAR|lexer:ALIAS => {
             return appendData(state, option, peeked = true);
         }
-        lexer:TAG_HANDLE => {
-            string tagHandle = state.currentToken.value;
-
-            // Obtain the tagPrefix associated with the tag handle
-            state.updateLexerContext(lexer:LEXER_TAG_NODE);
-            check checkToken(state, lexer:TAG);
-            string tagPrefix = state.currentToken.value;
-
-            // Check if there is a separate 
-            check separate(state, true);
-
-            // Obtain the anchor if there exists
-            string? anchor = check nodeAnchor(state);
-
-            return appendData(state, option,
-                {tag: check generateCompleteTagName(state, tagHandle, tagPrefix), anchor});
-        }
-        lexer:TAG => {
-            // Obtain the tagPrefix name
-            string tagPrefix = state.currentToken.value;
-
-            // There must be a separate after the tagPrefix
-            check separate(state);
-
-            // Obtain the anchor if there exists
-            string? anchor = check nodeAnchor(state);
-
-            return appendData(state, option, {tag: tagPrefix, anchor});
-        }
-        lexer:ANCHOR => {
-            // Obtain the anchor name
-            string anchor = state.currentToken.value;
-
-            // Check if there is a separate
-            check separate(state);
-
-            // Obtain the tag if there exists
-            string? tagHandle;
-            string? tagPrefix;
-            [tagHandle, tagPrefix] = check nodeTag(state);
-
-            // Construct the complete tag
-            string? tag;
-            if tagPrefix == () {
-                tag = ();
-            } else {
-                if tagHandle == () {
-                    tag = tagPrefix;
-                } else {
-                    tag = check generateCompleteTagName(state, tagHandle, tagPrefix);
-                }
-            }
-
-            return appendData(state, option, {tag, anchor});
+        lexer:TAG|lexer:TAG_HANDLE|lexer:ANCHOR => {
+            return nodeComplete(state, option);
         }
         lexer:MAPPING_VALUE => { // Empty node as the key
             lexer:Indentation? indentation = state.currentToken.indentation;

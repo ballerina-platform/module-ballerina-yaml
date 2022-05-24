@@ -59,5 +59,6 @@ public class ParserState {
         self.lexerState.lineNumber = self.lineIndex;
         self.lexerState.indentStartIndex = -1;
         self.lexerState.tokensForMappingValue = [];
+        self.lexerState.lastEscapedChar = -1;
     }
 }

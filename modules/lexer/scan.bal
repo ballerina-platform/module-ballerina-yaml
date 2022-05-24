@@ -93,6 +93,7 @@ function scanDoubleQuoteChar(LexerState state) returns boolean|LexicalError {
     if state.peek() == "\\" {
         state.forward();
         check scanEscapedCharacter(state);
+        state.lastEscapedChar = state.lexeme.length() - 1;
         return false;
     }
 

@@ -24,9 +24,10 @@ function constructEvent(ParserState state, map<json> m1, map<json>? m2 = ()) ret
 
 # Trims the trailing whitespace of a string.
 #
-# + value - String to be trimmed
+# + value - String to be trimmed  
+# + lastEscapedChar - Last escaped whitespace to be preserved
 # + return - Trimmed string
-function trimTailWhitespace(string value) returns string {
+function trimTailWhitespace(string value, int? lastEscapedChar = ()) returns string {
     int i = value.length() - 1;
 
     if i < 0 {
@@ -34,7 +35,7 @@ function trimTailWhitespace(string value) returns string {
     }
 
     while value[i] == " " || value[i] == "\t" {
-        if i < 1 {
+        if i < 1 || (lastEscapedChar is int && i == lastEscapedChar) {
             break;
         }
         i -= 1;
@@ -103,14 +104,14 @@ function checkToken(ParserState state, lexer:YAMLToken|lexer:YAMLToken[] expecte
     // Automatically generates a template error message if there is no custom message.
     if expectedTokens is lexer:YAMLToken {
         if token.token != expectedTokens {
-            return customMessage.length() == 0 
-                ? generateExpectError(state, expectedTokens, state.prevToken) 
+            return customMessage.length() == 0
+                ? generateExpectError(state, expectedTokens, state.prevToken)
                 : generateGrammarError(state, customMessage);
         }
     } else {
         if expectedTokens.indexOf(token.token) == () {
-            return customMessage.length() == 0 
-                ? generateExpectError(state, expectedTokens, state.prevToken) 
+            return customMessage.length() == 0
+                ? generateExpectError(state, expectedTokens, state.prevToken)
                 : generateGrammarError(state, customMessage);
         }
     }
@@ -123,7 +124,7 @@ function checkToken(ParserState state, lexer:YAMLToken|lexer:YAMLToken[] expecte
 # + return - An error on invalid key.
 function verifyKey(ParserState state, boolean isSingleLine) returns ParsingError|() {
     // Explicit keys can span multiple lines. 
-    if state.explicitKey {
+    if state.explicitKey || state.lexerState.isFlowCollection() {
         return;
     }
 

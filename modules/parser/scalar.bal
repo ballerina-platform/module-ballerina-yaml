@@ -27,7 +27,6 @@ function doubleQuoteScalar(ParserState state) returns ParsingError|string {
                     if escaped {
                         escaped = false;
                     } else { // Trim the white space if not escaped
-                        lexemeBuffer = trimTailWhitespace(lexemeBuffer);
                         if !emptyLine { // Add a white space if there are not preceding empty lines
                             lexemeBuffer += " ";
                         }
@@ -43,7 +42,7 @@ function doubleQuoteScalar(ParserState state) returns ParsingError|string {
             }
             lexer:EOL => { // Processing new lines
                 if !escaped { // If not escaped, trim the trailing white spaces
-                    lexemeBuffer = trimTailWhitespace(lexemeBuffer);
+                    lexemeBuffer = trimTailWhitespace(lexemeBuffer, state.lexerState.lastEscapedChar);
                 }
 
                 isFirstLine = false;
@@ -173,7 +172,7 @@ function planarScalar(ParserState state) returns ParsingError|string {
             lexer:EOL => {
                 check checkToken(state);
 
-                 // Terminate at the end of the line
+                // Terminate at the end of the line
                 if state.lineIndex == state.numLines - 1 {
                     break;
                 }
@@ -181,7 +180,7 @@ function planarScalar(ParserState state) returns ParsingError|string {
 
                 // Keys are allowed if the mapping value is next line
                 check checkToken(state, peek = true);
-                if state.tokenBuffer.token == lexer:MAPPING_VALUE {
+                if state.tokenBuffer.token == lexer:MAPPING_VALUE && state.lexerState.isFlowCollection() {
                     break;
                 }
 
@@ -230,7 +229,10 @@ function blockScalar(ParserState state, boolean isFolded) returns ParsingError|s
         lexer:CHOMPING_INDICATOR => { // Strip and keep chomping indicators
             chompingIndicator = state.currentToken.value;
             check checkToken(state, lexer:EOL);
-            check state.initLexer();
+
+            if state.lineIndex < state.numLines - 1 {
+                check state.initLexer();
+            }
         }
         lexer:EOL => { // Clip chomping indicator
             check state.initLexer();

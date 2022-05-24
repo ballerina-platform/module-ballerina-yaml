@@ -41,6 +41,8 @@ public class LexerState {
 
     public YAMLToken[] tokensForMappingValue = [];
 
+    public int lastEscapedChar = -1;
+
     # When flag is set, updates the current indent to the indent of the first line
     boolean captureIndent = false;
 

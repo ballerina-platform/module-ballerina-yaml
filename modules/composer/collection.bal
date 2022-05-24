@@ -36,7 +36,7 @@ function composeSequence(ComposerState state, boolean flowStyle) returns json[]|
         event = check checkEvent(state);
     }
 
-    return sequence;
+    return (sequence == [] && !flowStyle) ? [null] : sequence;
 }
 
 # Compose the mapping collection into Ballerina map.
@@ -70,7 +70,7 @@ function composeMapping(ComposerState state, boolean flowStyle) returns map<json
 
         // Cannot have a nested block mapping if a value is assigned
         if event is common:StartEvent && !event.flowStyle {
-            return generateComposeError(state, 
+            return generateComposeError(state,
                 "Cannot have nested mapping under a key-pair that is already assigned",
                 event);
         }

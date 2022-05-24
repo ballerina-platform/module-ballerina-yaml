@@ -37,9 +37,9 @@ public class LexerState {
     public boolean trailingComment = false;
 
     # Start index for the mapping value
-    public int indentStartIndex = -1;
+    int indentStartIndex = -1;
 
-    public YAMLToken[] tokensForMappingValue = [];
+    YAMLToken[] tokensForMappingValue = [];
 
     public int lastEscapedChar = -1;
 
@@ -47,6 +47,8 @@ public class LexerState {
     boolean captureIndent = false;
 
     boolean enforceMapping = false;
+
+    boolean tabInWhitespace = false;
 
     # Output TOML token
     YAMLToken token = DUMMY;
@@ -105,6 +107,16 @@ public class LexerState {
             value: lexemeBuffer,
             indentation: indentationBuffer
         };
+    }
+
+    public function setLine(string line, int lineNumber) {
+        self.index = 0;
+        self.line = line;
+        self.lineNumber = lineNumber;
+        self.lastEscapedChar = -1;
+        self.indentStartIndex = -1;
+        self.tokensForMappingValue = [];
+        self.tabInWhitespace = false;
     }
 
     # Reset the current lexer state

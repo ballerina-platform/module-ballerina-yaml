@@ -178,12 +178,6 @@ function planarScalar(ParserState state) returns ParsingError|string {
                 }
                 check state.initLexer();
 
-                // Keys are allowed if the mapping value is next line
-                check checkToken(state, peek = true);
-                if state.tokenBuffer.token == lexer:MAPPING_VALUE && state.lexerState.isFlowCollection() {
-                    break;
-                }
-
                 isFirstLine = false;
             }
             lexer:EMPTY_LINE => {

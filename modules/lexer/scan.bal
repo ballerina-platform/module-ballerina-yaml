@@ -344,7 +344,11 @@ function scanAnchorName(LexerState state) returns boolean|LexicalError {
 # + state - Current lexer state
 # + return - False to continue. True to terminate the token.
 function scanWhitespace(LexerState state) returns boolean {
-    if state.peek() == " " || state.peek() == "\t" {
+    if state.peek() == " " {
+        return false;
+    }
+    if state.peek() == "\t" {
+        state.tabInWhitespace = true;
         return false;
     }
     return true;

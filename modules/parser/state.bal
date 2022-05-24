@@ -21,7 +21,7 @@ public class ParserState {
     lexer:LexerState lexerState = new ();
 
     boolean explicitKey = false;
-    
+
     map<string> customTagHandles = {};
 
     # YAML version of the document.
@@ -54,11 +54,6 @@ public class ParserState {
         if self.lineIndex >= self.numLines {
             return generateGrammarError(self, message);
         }
-        self.lexerState.line = self.lines[self.lineIndex];
-        self.lexerState.index = 0;
-        self.lexerState.lineNumber = self.lineIndex;
-        self.lexerState.indentStartIndex = -1;
-        self.lexerState.tokensForMappingValue = [];
-        self.lexerState.lastEscapedChar = -1;
+        self.lexerState.setLine(self.lines[self.lineIndex], self.lineIndex);
     }
 }

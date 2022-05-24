@@ -124,7 +124,7 @@ function checkToken(ParserState state, lexer:YAMLToken|lexer:YAMLToken[] expecte
 # + return - An error on invalid key.
 function verifyKey(ParserState state, boolean isSingleLine) returns ParsingError|() {
     // Explicit keys can span multiple lines. 
-    if state.explicitKey || state.lexerState.isFlowCollection() {
+    if state.explicitKey {
         return;
     }
 

@@ -477,7 +477,7 @@ function contextBlockScalar(LexerState state) returns LexerState|LexicalError {
 
     // Check if the line has sufficient indent to be process as a block scalar.
     boolean hasSufficientIndent = true;
-    foreach int i in 0 ... (state.indent < 0 ? 0 : state.indent) + state.addIndent - 1 {
+    foreach int i in 0 ... state.indent + state.addIndent - 1 {
         if !(state.peek() == " ") {
             hasSufficientIndent = false;
             break;
@@ -496,14 +496,11 @@ function contextBlockScalar(LexerState state) returns LexerState|LexicalError {
             "#" => { // Generate beginning of the trailing comment
                 return state.trailingComment ? state.tokenize(EOL) : state.tokenize(TRAILING_COMMENT);
             }
-            "'"|"\"" => { // Possible flow scalar
+            "'"|"\""|"." => { // Possible flow scalar
                 state.enforceMapping = true;
                 return contextStart(state);
             }
-            ":" => {
-                return contextStart(state);
-            }
-            "-" => { // Possible sequence entry
+            ":"|"-" => {
                 return contextStart(state);
             }
             () => { // Empty lines are allowed in trailing comments
@@ -554,6 +551,12 @@ function contextBlockScalar(LexerState state) returns LexerState|LexicalError {
 
     if state.index >= state.line.length() {
         return state.tokenize(EOL);
+    }
+
+    // Check for document end markers
+    if (state.peek() == "." && state.peek(1) == "." && state.peek(2) == ".")
+        || (state.peek() == "-" && state.peek(1) == "-" && state.peek(2) == "-") {
+            return contextStart(state);
     }
 
     // Scan printable character

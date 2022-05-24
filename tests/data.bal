@@ -14,10 +14,11 @@ function yamlDataGen() returns map<[string, json, boolean, boolean]>|error {
         string dirName = item.absPath.substring(<int>item.absPath.indexOf("resources") + 10);
 
         if testFiles[0].dir {
-            int i = 0;
             foreach file:MetaData subItem in testFiles {
-                i += 1;
-                check addTestCase(testMetaData, subItem, dirName, "#" + i.toString());
+                check addTestCase(testMetaData, subItem, dirName,
+                    "#" + (subItem["absPath"][subItem["absPath"].length() - 4] == "/" 
+                        ? subItem["absPath"].substring(subItem["absPath"].length() - 3)
+                        : subItem["absPath"].substring(subItem["absPath"].length() - 2)));
             }
         }
         else {
@@ -30,7 +31,7 @@ function yamlDataGen() returns map<[string, json, boolean, boolean]>|error {
 
 function addTestCase(map<[string, json, boolean, boolean]> testMetaData, file:MetaData metaData, string dirName, string? annexData = ()) returns error? {
     string dirPath = metaData.absPath + "/";
-    string testCase = dirName + "-" + check io:fileReadString(dirPath + "===") + (annexData ?: "");
+    string testCase = string `${dirName}${annexData ?: ""}-${check io:fileReadString(dirPath + "===")}`;
     string yamlPath = dirPath + "in.yaml";
     string jsonPath = dirPath + "in.json";
     boolean isStream = check file:test(dirPath + "stream", file:EXISTS);

@@ -1,6 +1,11 @@
 import yaml.lexer;
 import yaml.common;
 
+type TagStructure record {|
+    string? anchor = ();
+    string? tag = ();
+|};
+
 # Merge tag structure with the respective data.
 #
 # + state - Current parser state  
@@ -8,7 +13,8 @@ import yaml.common;
 # + tagStructure - Constructed tag structure if exists  
 # + peeked - If the expected token is already in the state
 # + return - The constructed scalar or start event on success.
-function appendData(ParserState state, ParserOption option, map<json> tagStructure = {}, boolean peeked = false)
+function appendData(ParserState state, ParserOption option,
+    TagStructure tagStructure = {}, boolean peeked = false)
     returns common:Event|ParsingError {
 
     lexer:Indentation? indentation = ();
@@ -60,16 +66,12 @@ function appendData(ParserState state, ParserOption option, map<json> tagStructu
             1 => { // Increased
                 // Block sequence
                 if contentValue.hasKey("startType") && contentValue.startType == common:SEQUENCE {
-                    return constructEvent(state, tagStructure, {startType: indentation.collection.pop()});
+                    return constructEvent(state, {startType: indentation.collection.pop()}, tagStructure);
                 }
-                // Block mapping
-                // The tag structure corresponds to the key 
-                //     state.eventBuffer.push(check constructEvent(state, tagStructure, contentValue));
-                //     return constructEvent(state, {startType: indentation.collection.pop()});
 
-                // The tag structure corresponds to the entire mapping
-                state.eventBuffer.push(check constructEvent(state, contentValue));
-                return constructEvent(state, tagStructure, {startType: indentation.collection.pop()});
+                // Block mapping
+                return differentiateTagProperty(state, indentation.tokens,
+                    {startType: indentation.collection.pop()}, contentValue, tagStructure);
             }
             -1 => { // Decreased 
                 buffer = {endType: indentation.collection.shift()};
@@ -80,13 +82,41 @@ function appendData(ParserState state, ParserOption option, map<json> tagStructu
         }
     }
 
-    common:Event event = check constructEvent(state, tagStructure, contentValue);
+    common:Event event = check constructEvent(state, contentValue, tagStructure);
 
     if buffer == () {
         return event;
     }
     state.eventBuffer.push(event);
     return buffer;
+}
+
+function differentiateTagProperty(ParserState state, lexer:YAMLToken[] tokens,
+    map<json> currentValue, map<json> contentValue, TagStructure tagStructure) returns common:Event|ParsingError {
+    match tokens.length() {
+        0 => { // The tag structure belongs to the empty node
+            state.eventBuffer.push(check constructEvent(state, contentValue));
+            return constructEvent(state, currentValue, tagStructure);
+        }
+        1 => { // The tag structure is divided between the key and the empty node
+            match tokens.pop() {
+                lexer:ANCHOR => {
+                    state.eventBuffer.push(check constructEvent(state, {anchor: tagStructure.anchor}, contentValue));
+                    return constructEvent(state, {tag: tagStructure.tag}, currentValue);
+                }
+                lexer:TAG => {
+                    state.eventBuffer.push(check constructEvent(state, {tag: tagStructure.tag}, contentValue));
+                    return constructEvent(state, {anchor: tagStructure.anchor}, currentValue);
+                }
+            }
+        }
+        2 => { // The whole tag structure belongs mapping key
+            state.eventBuffer.push(check constructEvent(state, contentValue, tagStructure));
+            return constructEvent(state, currentValue);
+        }
+    }
+    return generateGrammarError(state,
+        string `There cannot be more than 2 tag properties to a node, but found ${tokens.length()}`);
 }
 
 # Extracts the data for the given node.

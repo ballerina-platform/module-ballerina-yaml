@@ -172,13 +172,20 @@ function planarScalar(ParserState state) returns ParsingError|string {
             }
             lexer:EOL => {
                 check checkToken(state);
-                isFirstLine = false;
 
-                // Terminate at the end of the line
+                 // Terminate at the end of the line
                 if state.lineIndex == state.numLines - 1 {
                     break;
                 }
-                check state.initLexer("");
+                check state.initLexer();
+
+                // Keys are allowed if the mapping value is next line
+                check checkToken(state, peek = true);
+                if state.tokenBuffer.token == lexer:MAPPING_VALUE {
+                    break;
+                }
+
+                isFirstLine = false;
             }
             lexer:EMPTY_LINE => {
                 newLineBuffer += "\n";

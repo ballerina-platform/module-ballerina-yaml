@@ -39,6 +39,8 @@ public class LexerState {
     # Start index for the mapping value
     public int indentStartIndex = -1;
 
+    public YAMLToken[] tokensForMappingValue = [];
+
     # When flag is set, updates the current indent to the indent of the first line
     boolean captureIndent = false;
 
@@ -67,7 +69,10 @@ public class LexerState {
         }
     }
 
-    function updateStartIndex() {
+    function updateStartIndex(YAMLToken? token = ()) {
+        if token != () {
+            self.tokensForMappingValue.push(token);
+        }
         if self.index < self.indentStartIndex || self.indentStartIndex < 0 {
             self.indentStartIndex = self.index;
         }

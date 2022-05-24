@@ -8,7 +8,7 @@ public function generateConversionError(string message) returns ConversionError 
 public function processTypeCastingError(json|error value) returns json|ConversionError {
     // Check if the type casting has any errors
     if value is error {
-        return generateConversionError('error:message(value));
+        return generateConversionError(value.message());
     }
 
     // Returns the value on success

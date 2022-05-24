@@ -13,11 +13,13 @@ public type Token record {|
 
 # Represents indentation change caused by block scalars.
 #
-# + collection - List of opened or closed collections.
-# + change - +1 indent increased, -1 indent decreased, 0 indent has not changed.
+# + change - +1 indent increased, -1 indent decreased, 0 indent has not changed.  
+# + collection - List of opened or closed collections.  
+# + tokens - Tokens related to the mapping value.
 public type Indentation record {|
     IndentChange change;
     common:Collection[] collection;
+    YAMLToken[] tokens = [];
 |};
 
 # Direction of the indent change

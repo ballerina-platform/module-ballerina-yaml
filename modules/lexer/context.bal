@@ -178,7 +178,7 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
         }
         "!" => { // Node tags
             // check assertIndent(state, 1);
-            state.updateStartIndex();
+            state.updateStartIndex(TAG);
             match state.peek(1) {
                 "<" => { // Verbatim tag
                     state.forward(2);
@@ -212,7 +212,7 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
         }
         "&" => {
             // check assertIndent(state, 1);
-            state.updateStartIndex();
+            state.updateStartIndex(ANCHOR);
             state.forward();
             return iterate(state, scanAnchorName, ANCHOR);
         }

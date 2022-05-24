@@ -50,6 +50,8 @@ public class LexerState {
 
     boolean tabInWhitespace = false;
 
+    boolean indentationBreak = false;
+
     # Output TOML token
     YAMLToken token = DUMMY;
 

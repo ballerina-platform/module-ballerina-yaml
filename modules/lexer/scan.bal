@@ -376,6 +376,8 @@ function scanDigit(LexerState state) returns boolean|LexicalError {
 # + process - Function to scan the lexeme
 # + return - Returns the tokenized state with correct YAML token
 function scanMappingValueKey(LexerState state, YAMLToken outputToken, function (LexerState state) returns boolean|LexicalError process) returns LexerState|LexicalError {
+    state.indentationBreak = false;
+
     LexicalError? err = assertIndent(state, 1);
     boolean enforceMapping = state.enforceMapping;
     state.enforceMapping = false;
@@ -415,6 +417,7 @@ function scanMappingValueKey(LexerState state, YAMLToken outputToken, function (
 # + outputToken - Single or double quoted keys
 # + return - Returns the tokenized state with correct YAML token
 function scanMappingValueKeyWithDelimiter(LexerState state, YAMLToken outputToken) returns LexerState|LexicalError {
+    state.indentationBreak = false;
     LexerState token = state.tokenize(outputToken);
     boolean enforceMapping = state.enforceMapping;
     state.enforceMapping = false;

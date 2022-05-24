@@ -88,11 +88,16 @@ function checkIndent(LexerState state, int? mapIndex = ()) returns Indentation|L
 
 # Check if the current index has sufficient indent.
 #
-# + state - Current lexer state
-# + offset - Additional whitespace after the parent indent
+# + state - Current lexer state  
+# + offset - Additional whitespace after the parent indent  
+# + captureIndentationBreak - Flag is set if the token is allowed as prefix to a mapping key name
 # + return - An error if the indent is not sufficient
-function assertIndent(LexerState state, int offset = 0) returns LexicalError? {
+function assertIndent(LexerState state, int offset = 0, boolean captureIndentationBreak = false) returns LexicalError? {
     if state.index < state.indent + offset {
+        if captureIndentationBreak {
+            state.indentationBreak = true;
+            return;
+        }
         return generateIndentationError(state, "Invalid indentation");
     }
 }

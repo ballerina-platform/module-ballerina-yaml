@@ -67,6 +67,9 @@ public function scan(LexerState state) returns LexerState|LexicalError {
 
     // Generate EOL token at the last index
     if state.index >= state.line.length() {
+        if state.indentationBreak {
+            return generateIndentationError(state, "Invalid indentation");
+        }
         return state.index == 0 ? state.tokenize(EMPTY_LINE) : state.tokenize(EOL);
     }
 

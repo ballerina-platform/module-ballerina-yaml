@@ -67,6 +67,11 @@ function testComposeMultipleDocuments(string[] lines, json[] expectedDocs) retur
 function streamDataGen() returns map<[string[], json[]]> {
     return {
         "multiple bare documents": [["first doc", "...", "second doc"], ["first doc", "second doc"]],
+        "explicit after bare": [["first doc", "---", "second doc"], ["first doc", "second doc"]],
+        "explicit after directive": [["%YAML 1.1", "---", "first doc", "---", "second doc"], ["first doc", "second doc"]],
+        "any explicit after directive": [["%YAML 1.1", "---", "first doc", "...", "---", "second doc"], ["first doc", "second doc"]],
+        "explicit after empty directive": [["%YAML 1.1", "---", "# empty doc", "---", "second doc"], [(), "second doc"]],
+        "bare after directive": [["%YAML 1.1", "---", "first doc", "...", "second doc"], ["first doc", "second doc"]],
         "hoping out from block collection": [["-", " - value", "...", "second doc"], [[["value"]], "second doc"]]
     };
 }

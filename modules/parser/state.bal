@@ -27,7 +27,7 @@ public class ParserState {
     # YAML version of the document.
     float? yamlVersion = ();
 
-    boolean directiveDocument = false;
+    public boolean directiveDocument = false;
 
     common:Event[] eventBuffer = [];
 

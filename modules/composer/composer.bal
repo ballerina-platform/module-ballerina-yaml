@@ -10,8 +10,14 @@ public function composeDocument(ComposerState state, common:Event? eventParam = 
     // Obtain the root event
     common:Event event = eventParam is () ? check checkEvent(state, docType = parser:ANY_DOCUMENT) : eventParam;
 
+    boolean directiveDocument = false;
     // Ignore the markers at the start of the document
     while event is common:EndEvent && event.endType == common:DOCUMENT {
+        // Expects a explicit document after the directive
+        if directiveDocument {
+            return ();
+        }
+        directiveDocument = state.parserState.directiveDocument;
         event = check checkEvent(state, docType = parser:ANY_DOCUMENT);
     }
 

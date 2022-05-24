@@ -15,10 +15,12 @@ function yamlDataGen() returns map<[string, json, boolean, boolean]>|error {
 
         if testFiles[0].dir {
             foreach file:MetaData subItem in testFiles {
+                int pathLength = subItem["absPath"].length();
+                string:Char dirChar = subItem["absPath"][pathLength - 4];
                 check addTestCase(testMetaData, subItem, dirName,
-                    "#" + (subItem["absPath"][subItem["absPath"].length() - 4] == "/" 
-                        ? subItem["absPath"].substring(subItem["absPath"].length() - 3)
-                        : subItem["absPath"].substring(subItem["absPath"].length() - 2)));
+                    "#" + ((dirChar == "/" || dirChar == "\\")
+                        ? subItem["absPath"].substring(pathLength - 3)
+                        : subItem["absPath"].substring(pathLength - 2)));
             }
         }
         else {

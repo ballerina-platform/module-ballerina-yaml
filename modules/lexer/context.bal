@@ -97,6 +97,11 @@ function contextYamlDirective(LexerState state) returns LexerState|LexicalError 
         return state.tokenize(DOT);
     }
 
+    // Check for tail separation-in-line
+    if state.peek() == " " {
+        return check iterate(state, scanWhitespace, SEPARATION_IN_LINE);
+    }
+
     return generateInvalidCharacterError(state, "version number");
 }
 
@@ -542,6 +547,10 @@ function contextBlockScalar(LexerState state) returns LexerState|LexicalError {
 
         state.addIndent += additionalIndent;
         state.captureIndent = false;
+    }
+
+    if state.index >= state.line.length() {
+        return state.tokenize(EOL);
     }
 
     // Scan printable character

@@ -20,7 +20,7 @@ public enum Context {
 # + return - Tokenized double quoted scalar
 function contextDoubleQuote(LexerState state) returns LexerState|LexicalError {
     // Check for empty lines
-    if state.peek() == " " {
+    if state.peek() == " " || state.peek() == "\t" {
         _ = check iterate(state, scanWhitespace, SEPARATION_IN_LINE);
         if state.peek() == () {
             return state.tokenize(EMPTY_LINE);
@@ -46,7 +46,7 @@ function contextDoubleQuote(LexerState state) returns LexerState|LexicalError {
 # + return - Tokenized single quoted scalar
 function contextSingleQuote(LexerState state) returns LexerState|LexicalError {
     // Check for empty lines
-    if state.peek() == " " {
+    if state.peek() == " " || state.peek() == "\t" {
         _ = check iterate(state, scanWhitespace, SEPARATION_IN_LINE);
         if state.peek() == () {
             return state.tokenize(EMPTY_LINE);

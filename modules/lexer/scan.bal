@@ -137,7 +137,7 @@ function scanPlanarChar(LexerState state) returns boolean|LexicalError {
     // Store the whitespace before a ns-planar char
     string whitespace = "";
     int numWhitespace = 0;
-    while state.peek() == "\t" || state.peek() == " " {
+    while isWhitespace(state) {
         whitespace += <string>state.peek();
         numWhitespace += 1;
         state.forward();
@@ -354,6 +354,24 @@ function scanWhitespace(LexerState state) returns boolean {
     return true;
 }
 
+function scanWS(LexerState state) returns string {
+    string whitespace = "";
+
+    while state.index < state.line.length() {
+        if state.peek() == " " {
+            whitespace += " ";
+        } else if state.peek() == "\t" {
+            state.tabInWhitespace = true;
+            whitespace += "\t";
+        } else {
+            break;
+        }
+        state.forward();
+    }
+
+    return whitespace;
+}
+
 # Check for the lexemes to crete an DECIMAL token.
 #
 # + state - Current lexer state
@@ -363,7 +381,7 @@ function scanDigit(LexerState state) returns boolean|LexicalError {
         state.lexeme += <string>state.peek();
         return false;
     }
-    if state.peek() == " " || state.peek() == "\t" || state.peek() == "." {
+    if isWhitespace(state) || state.peek() == "." {
         return true;
     }
     return generateInvalidCharacterError(state, "Digit");
@@ -391,7 +409,7 @@ function scanMappingValueKey(LexerState state, YAMLToken outputToken, function (
 
     // Ignore whitespace until a character is found
     int numWhitespace = 0;
-    while state.peek() == " " {
+    while isWhitespace(state) {
         numWhitespace += 1;
         state.forward();
     }
@@ -424,7 +442,7 @@ function scanMappingValueKeyWithDelimiter(LexerState state, YAMLToken outputToke
 
     // Ignore whitespace until a character is found
     int numWhitespace = 0;
-    while state.peek() == " " {
+    while isWhitespace(state) {
         numWhitespace += 1;
         state.forward();
     }

@@ -20,10 +20,13 @@ public enum Context {
 # + return - Tokenized double quoted scalar
 function contextDoubleQuote(LexerState state) returns LexerState|LexicalError {
     // Check for empty lines
-    if state.peek() == " " || state.peek() == "\t" {
-        _ = check iterate(state, scanWhitespace, SEPARATION_IN_LINE);
+    if isWhitespace(state) {
+        string whitespace = scanWS(state);
         if state.peek() == () {
             return state.tokenize(EMPTY_LINE);
+        }
+        if state.firstLine {
+            state.lexeme += whitespace;
         }
     }
 
@@ -46,10 +49,13 @@ function contextDoubleQuote(LexerState state) returns LexerState|LexicalError {
 # + return - Tokenized single quoted scalar
 function contextSingleQuote(LexerState state) returns LexerState|LexicalError {
     // Check for empty lines
-    if state.peek() == " " || state.peek() == "\t" {
-        _ = check iterate(state, scanWhitespace, SEPARATION_IN_LINE);
+    if isWhitespace(state) {
+        string whitespace = scanWS(state);
         if state.peek() == () {
             return state.tokenize(EMPTY_LINE);
+        }
+        if state.firstLine {
+            state.lexeme += whitespace;
         }
     }
 
@@ -98,7 +104,7 @@ function contextYamlDirective(LexerState state) returns LexerState|LexicalError 
     }
 
     // Check for tail separation-in-line
-    if state.peek() == " " {
+    if isWhitespace(state) {
         return check iterate(state, scanWhitespace, SEPARATION_IN_LINE);
     }
 
@@ -367,7 +373,7 @@ function contextTagHandle(LexerState state) returns LexerState|LexicalError {
     }
 
     // Check for separation-in-space before the tag prefix
-    if state.peek() == " " || state.peek() == "\t" {
+    if isWhitespace(state) {
         return check iterate(state, scanWhitespace, SEPARATION_IN_LINE);
     }
 
@@ -399,7 +405,7 @@ function contextTagPrefix(LexerState state) returns LexerState|LexicalError {
     }
 
     // Check for tail separation-in-line
-    if state.peek() == " " {
+    if isWhitespace(state) {
         return check iterate(state, scanWhitespace, SEPARATION_IN_LINE);
     }
 
@@ -430,7 +436,7 @@ function contextTagNode(LexerState state) returns LexerState|LexicalError {
     }
 
     // Check for tail separation-in-line
-    if state.peek() == " " {
+    if isWhitespace(state) {
         return check iterate(state, scanWhitespace, SEPARATION_IN_LINE);
     }
 

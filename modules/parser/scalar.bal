@@ -7,7 +7,7 @@ import yaml.lexer;
 function doubleQuoteScalar(ParserState state) returns ParsingError|string {
     state.updateLexerContext(lexer:LEXER_DOUBLE_QUOTE);
     string lexemeBuffer = "";
-    boolean isFirstLine = true;
+    state.lexerState.firstLine = true;
     boolean emptyLine = false;
     boolean escaped = false;
 
@@ -23,7 +23,7 @@ function doubleQuoteScalar(ParserState state) returns ParsingError|string {
                 if lexeme.length() > 0 && lexeme[lexeme.length() - 1] == "\\" {
                     escaped = true;
                     lexemeBuffer += lexeme.substring(0, lexeme.length() - 1);
-                } else if !isFirstLine {
+                } else if !state.lexerState.firstLine {
                     if escaped {
                         escaped = false;
                     } else { // Trim the white space if not escaped
@@ -45,7 +45,7 @@ function doubleQuoteScalar(ParserState state) returns ParsingError|string {
                     lexemeBuffer = trimTailWhitespace(lexemeBuffer, state.lexerState.lastEscapedChar);
                 }
 
-                isFirstLine = false;
+                state.lexerState.firstLine = false;
                 check state.initLexer("Expected to end the multi-line double string");
 
                 // Add a whitespace if the delimiter is on a new line
@@ -55,9 +55,9 @@ function doubleQuoteScalar(ParserState state) returns ParsingError|string {
                 }
             }
             lexer:EMPTY_LINE => {
-                if isFirstLine { // Whitespace is preserved on the first line
+                if state.lexerState.firstLine { // Whitespace is preserved on the first line
                     lexemeBuffer += state.currentToken.value;
-                    isFirstLine = false;
+                    state.lexerState.firstLine = false;
                 } else if escaped { // Whitespace is preserved when escaped
                     lexemeBuffer += state.currentToken.value + "\n";
                 } else { // Whitespace is ignored when line folding
@@ -74,7 +74,8 @@ function doubleQuoteScalar(ParserState state) returns ParsingError|string {
         check checkToken(state);
     }
 
-    check verifyKey(state, isFirstLine);
+    check verifyKey(state, state.lexerState.firstLine);
+    state.lexerState.firstLine = true;
     return lexemeBuffer;
 }
 
@@ -85,7 +86,7 @@ function doubleQuoteScalar(ParserState state) returns ParsingError|string {
 function singleQuoteScalar(ParserState state) returns ParsingError|string {
     state.updateLexerContext(lexer:LEXER_SINGLE_QUOTE);
     string lexemeBuffer = "";
-    boolean isFirstLine = true;
+    state.lexerState.firstLine = true;
     boolean emptyLine = false;
 
     check checkToken(state);
@@ -96,22 +97,20 @@ function singleQuoteScalar(ParserState state) returns ParsingError|string {
             lexer:SINGLE_QUOTE_CHAR => {
                 string lexeme = state.currentToken.value;
 
-                if isFirstLine {
-                    lexemeBuffer += lexeme;
-                } else {
+                if !state.lexerState.firstLine {
                     if emptyLine {
                         emptyLine = false;
                     } else { // Add a white space if there are not preceding empty lines
                         lexemeBuffer += " ";
                     }
-                    lexemeBuffer += trimHeadWhitespace(lexeme);
                 }
+                lexemeBuffer += lexeme;
             }
             lexer:EOL => {
                 // Trim trailing white spaces
                 lexemeBuffer = trimTailWhitespace(lexemeBuffer);
-                isFirstLine = false;
-                check state.initLexer("Expected to end the multi-line double string");
+                state.lexerState.firstLine = false;
+                check state.initLexer("Expected to end the multi-line single-quoted string");
 
                 // Add a whitespace if the delimiter is on a new line
                 check checkToken(state, peek = true);
@@ -120,9 +119,9 @@ function singleQuoteScalar(ParserState state) returns ParsingError|string {
                 }
             }
             lexer:EMPTY_LINE => {
-                if isFirstLine { // Whitespace is preserved on the first line
+                if state.lexerState.firstLine { // Whitespace is preserved on the first line
                     lexemeBuffer += state.currentToken.value;
-                    isFirstLine = false;
+                    state.lexerState.firstLine = false;
                 } else { // Whitespace is ignored when line folding
                     lexemeBuffer = trimTailWhitespace(lexemeBuffer);
                     lexemeBuffer += "\n";
@@ -137,7 +136,8 @@ function singleQuoteScalar(ParserState state) returns ParsingError|string {
         check checkToken(state);
     }
 
-    check verifyKey(state, isFirstLine);
+    check verifyKey(state, state.lexerState.firstLine);
+    state.lexerState.firstLine = true;
     return lexemeBuffer;
 }
 

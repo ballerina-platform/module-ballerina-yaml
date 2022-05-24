@@ -105,3 +105,6 @@ function checkCharacter(LexerState state, string|string[] expectedCharacters, in
 # + return - Return true if a planar safe character is found.
 function isPlainSafe(LexerState state) returns boolean
     => matchRegexPattern(state, [PRINTABLE_PATTERN], [LINE_BREAK_PATTERN, BOM_PATTERN, WHITESPACE_PATTERN, INDICATOR_PATTERN]);
+
+function isWhitespace(LexerState state) returns boolean
+    => state.peek() == " " || state.peek() == "\t";

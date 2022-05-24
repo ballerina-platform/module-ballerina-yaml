@@ -10,17 +10,17 @@ public type ComposingError ComposeError|parser:ParsingError|lexer:LexicalError|
 # Represents an error caused for an invalid compose.
 public type ComposeError distinct error<common:ReadErrorDetails>;
 
-# # Generate an error message based on the template,
-# "Expected ${expectedTokens} after ${beforeToken}, but found ${actualToken}"
+# Generate an error message based on the template,
+# "Expected '${expectedEvent}' before '-${actualEvent}'"
 #
 # + state - Current composer state  
-# + actualEndEvent - Obtained invalid event
-# + expectedEndEvent - Next expected event of the stream
+# + actualEvent - Obtained invalid event
+# + expectedEvent - Next expected event of the stream
 # + return - Formatted error message
 function generateExpectedEndEventError(ComposerState state,
-    common:EndEvent actualEndEvent, common:EndEvent expectedEndEvent) returns ComposeError =>
-        generateComposeError(state, common:generateExpectedEndEventErrorMessage(actualEndEvent, expectedEndEvent),
-            actualEndEvent, expectedEndEvent);
+    string actualEvent, string expectedEvent) returns ComposeError =>
+        generateComposeError(state, common:generateExpectedEndEventErrorMessage(actualEvent, expectedEvent),
+            actualEvent, expectedEvent);
 
 # Generate an error message based on the template,
 # Expected '${expectedKind}' kind for the '${tag}' tag but found '${actualKind}'

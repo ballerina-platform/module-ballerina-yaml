@@ -81,7 +81,10 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
         lexer:DOCUMENT_MARKER|lexer:DIRECTIVE_MARKER => {
             state.lexerState.resetState();
             state.yamlVersion = ();
-            return {endType: common:DOCUMENT};
+            return {
+                explicit: state.currentToken.token == lexer:DIRECTIVE_MARKER,
+                directive: state.directiveDocument
+            };
         }
         lexer:DOUBLE_QUOTE_DELIMITER|lexer:SINGLE_QUOTE_DELIMITER|lexer:PLANAR_CHAR|lexer:ALIAS => {
             return appendData(state, option, peeked = true);

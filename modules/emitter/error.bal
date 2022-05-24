@@ -3,18 +3,17 @@ import yaml.common;
 # Represents an error caused during the emitting.
 public type EmittingError distinct error<common:WriteErrorDetails>;
 
-# # Generate an error message based on the template,
-# "Expected ${expectedTokens} after ${beforeToken}, but found ${actualToken}"
+# Generate an error message based on the template,
+# "Expected '${expectedEvent}' before '-${actualEvent}'"
 #
-# + actualEndEvent - Obtained invalid event  
-# + expectedEndEvent - Next expected event of the stream
+# + actualEvent - Obtained invalid event
+# + expectedEvent - Next expected event of the stream
 # + return - Formatted error message
-function generateExpectedEndEventError(
-    common:EndEvent actualEndEvent, common:EndEvent expectedEndEvent) returns EmittingError =>
-        generateEmittingError(common:generateExpectedEndEventErrorMessage(actualEndEvent, expectedEndEvent),
-            actualEndEvent, expectedEndEvent);
+function generateExpectedEndEventError(string actualEvent, string expectedEvent) returns EmittingError =>
+    generateEmittingError(common:generateExpectedEndEventErrorMessage(actualEvent, expectedEvent),
+        actualEvent, expectedEvent);
 
-function generateEmittingError(string message, common:Event actualValue, common:Event? expectedValue = ())
+function generateEmittingError(string message, json actualValue, json? expectedValue = ())
     returns EmittingError =>
         error(
             message,

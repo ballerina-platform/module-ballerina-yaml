@@ -10,15 +10,13 @@ public function composeDocument(ComposerState state, common:Event? eventParam = 
     // Obtain the root event
     common:Event event = eventParam is () ? check checkEvent(state, docType = parser:ANY_DOCUMENT) : eventParam;
 
-    boolean directiveDocument = false;
-    // Ignore the markers at the start of the document
-    while event is common:EndEvent && event.endType == common:DOCUMENT {
-        // Expects a explicit document after the directive
-        if directiveDocument {
+    if event is common:DocumentMarkerEvent {
+        boolean explicit = event.explicit;
+
+        event = check checkEvent(state, docType = parser:ANY_DOCUMENT);
+        if event is common:DocumentMarkerEvent && !(!explicit && event.explicit && !event.directive) {
             return ();
         }
-        directiveDocument = state.parserState.directiveDocument;
-        event = check checkEvent(state, docType = parser:ANY_DOCUMENT);
     }
 
     // Construct the single document
@@ -41,7 +39,7 @@ public function composeStream(ComposerState state) returns json[]|ComposingError
     // Iterate all the documents
     while !(event is common:EndEvent && event.endType == common:STREAM) {
         output.push(check composeDocument(state, event));
-        state.docTerminated = false;
+        state.terminatedDocEvent = ();
         event = check checkEvent(state, docType = parser:ANY_DOCUMENT);
     }
 

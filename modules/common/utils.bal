@@ -16,14 +16,10 @@ public function processTypeCastingError(json|error value) returns json|Conversio
 }
 
 # Generate the string error message of the template,
-# "Expected ${expectedTokens} after ${beforeToken}, but found ${actualToken}"
+# "Expected '${expectedEvent}' before '-${actualEvent}'"
 # 
-# + actualEndEvent - Obtained invalid event
-# + expectedEndEvent - Next expected event of the stream
-# + return - Formatted error message
-public function generateExpectedEndEventErrorMessage(EndEvent actualEndEvent, EndEvent expectedEndEvent)
-    returns string {
-    string actualEvent = "-" + actualEndEvent.endType;
-    string expectedEvent = "-" + expectedEndEvent.endType;
-    return string `Expected '${expectedEvent}' before '-${actualEvent}'`;
-}
+# + actualEvent - Obtained invalid event
+# + expectedEvent - Next expected event of the stream
+# + return - Formatted error message as a string
+public function generateExpectedEndEventErrorMessage(string actualEvent, string expectedEvent) returns string
+    => string `Expected '${expectedEvent}' before '-${actualEvent}'`;

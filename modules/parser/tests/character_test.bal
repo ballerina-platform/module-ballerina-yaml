@@ -101,7 +101,6 @@ function endEventDataGen() returns map<[string, common:Collection]> {
     return {
         "end-sequence": ["]", common:SEQUENCE],
         "end-mapping": ["}", common:MAPPING],
-        "end-document": ["...", common:DOCUMENT],
         "end-stream": ["", common:STREAM]
     };
 }

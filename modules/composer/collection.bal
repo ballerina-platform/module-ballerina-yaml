@@ -14,20 +14,27 @@ function composeSequence(ComposerState state, boolean flowStyle) returns json[]|
 
     // Iterate until the end event is detected
     while true {
+        if event is common:DocumentMarkerEvent {
+            state.terminatedDocEvent = event;
+            if !flowStyle {
+                break;
+            }
+            return generateExpectedEndEventError(state, "DOCUMENT", common:MAPPING);
+        }
+
         if event is common:EndEvent {
             match event.endType {
                 common:MAPPING => {
-                    return generateExpectedEndEventError(state, event, {endType: common:SEQUENCE});
+                    return generateExpectedEndEventError(state, common:MAPPING, common:SEQUENCE);
                 }
                 common:SEQUENCE => {
                     break;
                 }
-                common:DOCUMENT|common:STREAM => {
-                    state.docTerminated = event.endType == common:DOCUMENT;
+                common:STREAM => {
                     if !flowStyle {
                         break;
                     }
-                    return generateExpectedEndEventError(state, event, {endType: common:SEQUENCE});
+                    return generateExpectedEndEventError(state, common:STREAM, common:SEQUENCE);
                 }
             }
         }
@@ -50,20 +57,27 @@ function composeMapping(ComposerState state, boolean flowStyle) returns map<json
 
     // Iterate until an end event is detected
     while true {
+        if event is common:DocumentMarkerEvent {
+            state.terminatedDocEvent = event;
+            if !flowStyle {
+                break;
+            }
+            return generateExpectedEndEventError(state, "DOCUMENT", common:MAPPING);
+        }
+
         if event is common:EndEvent {
             match event.endType {
                 common:MAPPING => {
                     break;
                 }
                 common:SEQUENCE => {
-                    return generateExpectedEndEventError(state, event, {endType: common:MAPPING});
+                    return generateExpectedEndEventError(state, common:SEQUENCE, common:MAPPING);
                 }
-                common:DOCUMENT|common:STREAM => {
-                    state.docTerminated = event.endType == common:DOCUMENT;
+                common:STREAM => {
                     if !flowStyle {
                         break;
                     }
-                    return generateExpectedEndEventError(state, event, {endType: common:MAPPING});
+                    return generateExpectedEndEventError(state, common:STREAM, common:MAPPING);
                 }
             }
         }

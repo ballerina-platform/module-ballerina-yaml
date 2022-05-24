@@ -19,7 +19,7 @@ function composeNode(ComposerState state, common:Event event) returns json|lexer
     }
 
     // Ignore end events
-    if event is common:EndEvent {
+    if event is common:EndEvent || event is common:DocumentMarkerEvent {
         return;
     }
 

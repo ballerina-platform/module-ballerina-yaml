@@ -176,17 +176,7 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
         }
         "%" => { // Directive line
             state.forward();
-            match state.peek() {
-                "T" => {
-                    return check tokensInSequence(state, "TAG", DIRECTIVE);
-                }
-                "Y" => {
-                    return check tokensInSequence(state, "YAML", DIRECTIVE);
-                }
-                _ => {
-                    return iterate(state, scanNoSpacePrintableChar, DIRECTIVE);
-                }
-            }
+            return iterate(state, scanNoSpacePrintableChar, DIRECTIVE);
         }
         "!" => { // Node tags
             check assertIndent(state, 1, true);
@@ -453,11 +443,23 @@ function contextTagNode(LexerState state) returns LexerState|LexicalError {
 # + state - Current lexer state.
 # + return - Tokenized block header
 function contextBlockHeader(LexerState state) returns LexerState|LexicalError {
+    // Ignore whitespace
+    if state.peek() == " " {
+        _ = scanWS(state);
+    }
+
+    // Ignore any comments
+    if state.peek() == "#" && isWhitespace(state, -1) {
+        state.forward(-1);
+        return state.tokenize(EOL);
+    }
+
     // Check for indentation indicators and adjust the current indent
     if matchRegexPattern(state, "1-9") {
         state.captureIndent = false;
         state.addIndent += <int>(check common:processTypeCastingError('int:fromString(<string>state.peek()))) - 1;
         state.forward();
+        return contextBlockHeader(state);
     }
 
     // If the indentation indicator is at the tail

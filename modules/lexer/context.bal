@@ -138,7 +138,7 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
     match state.peek() {
         "-" => {
             // Scan for directive marker
-            if state.peek(1) == "-" && state.peek(2) == "-" {
+            if state.peek(1) == "-" && state.peek(2) == "-" && (isWhitespace(state, 3) || state.peek(3) == ()) {
                 state.forward(2);
                 return state.tokenize(DIRECTIVE_MARKER);
             }
@@ -158,7 +158,7 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
         }
         "." => {
             // Scan for directive marker
-            if state.peek(1) == "." && state.peek(2) == "." {
+            if state.peek(1) == "." && state.peek(2) == "." && (isWhitespace(state, 3) || state.peek(3) == ()) {
                 state.forward(2);
                 return state.tokenize(DOCUMENT_MARKER);
             }

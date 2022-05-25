@@ -52,6 +52,7 @@ function appendData(ParserState state, ParserOption option,
             buffer = {value: ()};
         }
     }
+    state.lexerState.isJsonKey = false;
 
     // If there are no whitespace, and the current token is ","
     if state.currentToken.token == lexer:SEPARATOR {

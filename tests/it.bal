@@ -1,25 +1,39 @@
 import ballerina/test;
 
+YAMLType[] customYamlTypes = [];
+map<FailSafeSchema> customTags = {
+    "!foo": STRING,
+    "tag:example.com,2000:app/foo": STRING,
+    "tag:yaml.org,2002:binary": STRING,
+    "!my-light": STRING,
+    "!local": STRING,
+    "!bar": STRING,
+    "tag:clarkevans.com,2002:circle": MAPPING,
+    "tag:clarkevans.com,2002:line": MAPPING,
+    "tag:clarkevans.com,2002:label": MAPPING,
+    "tag:yaml.org,2002:omap": SEQUENCE,
+    "tag:example.com,2000:app/int": STRING,
+    "tag:example.com,2000:app/tag!": STRING
+};
+
+@test:BeforeSuite
+function initYamlCustomeTypes() {
+    customTags.entries().forEach(function([string, FailSafeSchema] entry) {
+        customYamlTypes.push({
+            tag: entry[0],
+            ballerinaType: string,
+            kind: entry[1],
+            construct: function(json data) returns json => data,
+            represent: function(json data) returns string => data.toString()
+        });
+    });
+}
+
 @test:Config {
     dataProvider: yamlDataGen
 }
 function testYAMLIntegrationTest(string filePath, json expectedOutput, boolean isStream, boolean isError) returns error? {
-    YAMLType primaryFooType = {
-        tag: "!foo",
-        ballerinaType: string,
-        kind: STRING,
-        construct: function(json data) returns json => data,
-        represent: function(json data) returns string => data.toString()
-    };
-    YAMLType globalFooType = {
-        tag: "tag:example.com,2000:app/foo",
-        ballerinaType: string,
-        kind: STRING,
-        construct: function(json data) returns json => data,
-        represent: function(json data) returns string => data.toString()
-    };
-
-    json|Error output = read(filePath, {yamlTypes: [primaryFooType, globalFooType]}, isStream = isStream);
+    json|Error output = read(filePath, {yamlTypes: customYamlTypes}, isStream = isStream);
     if isError {
         test:assertTrue(output is Error);
     } else {

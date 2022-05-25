@@ -206,6 +206,19 @@ function scanPrintableChar(LexerState state) returns boolean|LexicalError {
     return true;
 }
 
+# Process ns-char values
+#
+# + state - Current lexer state
+# + return - False to continue. True to terminate the token. An error on failure.
+function scanNoSpacePrintableChar(LexerState state) returns boolean|LexicalError {
+    if matchRegexPattern(state, PRINTABLE_PATTERN, [BOM_PATTERN, LINE_BREAK_PATTERN, WHITESPACE_PATTERN]) {
+        state.lexeme += <string>state.peek();
+        return false;
+    }
+
+    return true;
+}
+
 # Scan the lexeme for tag characters.
 #
 # + state - Current lexer state

@@ -12,7 +12,8 @@ function testDirectivesToken(string lexeme, string value) returns error? {
 function directiveDataGen() returns map<[string, string]> {
     return {
         "yaml-directive": ["%YAML", "YAML"],
-        "tag-directive": ["%TAG", "TAG"]
+        "tag-directive": ["%TAG", "TAG"],
+        "reserved-directive": ["%RESERVED", "RESERVED"]
     };
 }
 

@@ -104,3 +104,20 @@ function testInvalidDirectiveInBareDocument() returns error? {
 function testStartingEmptyLines() returns error? {
     check assertParsingEvent(["", " ", "", " value"], "value");
 }
+
+@test:Config {
+    dataProvider: reservedDirectiveDataGen
+}
+function testValidReservedDirective(string line, string reservedDirective) returns error? {
+    ParserState state = check new ([line, "---"]);
+    _ = check parse(state, docType = DIRECTIVE_DOCUMENT);
+    test:assertEquals(state.reservedDirectives.pop(), reservedDirective);
+}
+
+function reservedDirectiveDataGen() returns map<[string, string]> {
+    return {
+        "Only directive name": ["%RESERVED ", "RESERVED"],
+        "One directive parameter": ["%RESERVED parameter ", "RESERVED parameter"],
+        "two directive parameters": ["%RESERVED first second", "RESERVED first second"]
+    };
+}

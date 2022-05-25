@@ -24,6 +24,8 @@ public class ParserState {
 
     map<string> customTagHandles = {};
 
+    string[] reservedDirectives = [];
+
     # YAML version of the document.
     float? yamlVersion = ();
 

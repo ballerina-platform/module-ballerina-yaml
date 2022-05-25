@@ -11,7 +11,8 @@ public enum Context {
     LEXER_DOUBLE_QUOTE,
     LEXER_SINGLE_QUOTE,
     LEXER_BLOCK_HEADER,
-    LEXER_LITERAL
+    LEXER_LITERAL,
+    LEXER_RESERVED_DIRECTIVE
 }
 
 # Scan the lexemes for double quoted scalars.
@@ -183,7 +184,7 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
                     return check tokensInSequence(state, "YAML", DIRECTIVE);
                 }
                 _ => {
-                    return generateInvalidCharacterError(state, DIRECTIVE);
+                    return iterate(state, scanNoSpacePrintableChar, DIRECTIVE);
                 }
             }
         }
@@ -565,4 +566,22 @@ function contextBlockScalar(LexerState state) returns LexerState|LexicalError {
     }
 
     return generateInvalidCharacterError(state, LITERAL);
+}
+
+# Scan the lexemes for reserved directive.
+#
+# + state - Current lexer state
+# + return - Tokenized YAML reserved directive
+function contextReservedDirective(LexerState state) returns LexicalError|LexerState {
+    // Scan printable character
+    if matchRegexPattern(state, PRINTABLE_PATTERN, [BOM_PATTERN, LINE_BREAK_PATTERN, WHITESPACE_PATTERN]) {
+        return iterate(state, scanNoSpacePrintableChar, PRINTABLE_CHAR);
+    }
+
+    // Check for separation-in-line
+    if isWhitespace(state) {
+        return check iterate(state, scanWhitespace, SEPARATION_IN_LINE);
+    }
+
+    return generateInvalidCharacterError(state, "<reserved-directive>");
 }

@@ -108,6 +108,9 @@ public function scan(LexerState state) returns LexerState|LexicalError {
         LEXER_LITERAL => {
             return contextBlockScalar(state);
         }
+        LEXER_RESERVED_DIRECTIVE => {
+            return contextReservedDirective(state);
+        }
         _ => {
             return generateScanningError(state, "Invalid context for the lexer");
         }

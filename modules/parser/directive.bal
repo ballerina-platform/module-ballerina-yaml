@@ -7,7 +7,7 @@ import yaml.lexer;
 #
 # + state - Current parser state
 # + return - An error on mismatch.
-function tagDirective(ParserState state) returns (ParsingError)? {
+function tagDirective(ParserState state) returns ParsingError? {
     // Expect a separate in line
     check checkToken(state, lexer:SEPARATION_IN_LINE);
 
@@ -35,7 +35,7 @@ function tagDirective(ParserState state) returns (ParsingError)? {
 #
 # + state - Current parser state
 # + return - An error on mismatch.
-function yamlDirective(ParserState state) returns ParsingError|() {
+function yamlDirective(ParserState state) returns ParsingError? {
     // Returns an error if the document version is already defined.
     if state.yamlVersion != () {
         return generateDuplicateError(state, "%YAML");
@@ -62,4 +62,30 @@ function yamlDirective(ParserState state) returns ParsingError|() {
         log:printWarn(string `The parser is designed for YAML 1.2. Some features may not work with ${yamlVersion}`);
     }
     state.yamlVersion = yamlVersion;
+}
+
+# Check the grammar productions for YAML reserved directives.
+# Update the reserved directives of the document.
+#
+# + state - Current parser state
+# + return - An error on mismatch.
+function reservedDirective(ParserState state) returns ParsingError? {
+    string reservedDirective = state.currentToken.value;
+    state.updateLexerContext(lexer:LEXER_RESERVED_DIRECTIVE);
+
+    // Check for reserved directive parameters
+    check checkToken(state, peek = true);
+    while state.tokenBuffer.token == lexer:SEPARATION_IN_LINE {
+        check checkToken(state);
+        check checkToken(state, peek = true);
+        if state.tokenBuffer.token != lexer:PRINTABLE_CHAR {
+            break;
+        }
+        check checkToken(state);
+        reservedDirective += " " + state.currentToken.value;
+        check checkToken(state, peek = true);
+    }
+
+    log:printWarn(string `The directive '${reservedDirective}' is not supported by the YAML parser.`);
+    state.reservedDirectives.push(reservedDirective);
 }

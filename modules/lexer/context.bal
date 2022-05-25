@@ -125,10 +125,11 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
             _ = check iterate(state, scanWhitespace, SEPARATION_IN_LINE);
             return (state.peek() == () && isFirstChar) ? state.tokenize(EMPTY_LINE) : state;
         }
-        "#" => { // Ignore comments
-            state.forward(-1);
-            return state.tokenize(EOL);
-        }
+    }
+
+    if state.peek() == "#" && (isWhitespace(state, -1) || state.peek(-1) == ()) {
+        state.forward(-1);
+        return state.tokenize(EOL);
     }
 
     if matchRegexPattern(state, BOM_PATTERN) {
@@ -310,9 +311,6 @@ function contextExplicitKey(LexerState state) returns LexerState|LexicalError {
             _ = check iterate(state, scanWhitespace, SEPARATION_IN_LINE);
             return (state.peek() == () && isFirstChar) ? state.tokenize(EMPTY_LINE) : state;
         }
-        "#" => { // Ignore comments
-            return state.tokenize(EOL);
-        }
         ":" => {
             if state.numOpenedFlowCollections > 0 {
                 return state.tokenize(MAPPING_VALUE);
@@ -324,6 +322,11 @@ function contextExplicitKey(LexerState state) returns LexerState|LexicalError {
             }
             return generateIndentationError(state, "Invalid indentation for an explicit key");
         }
+    }
+
+    if state.peek() == "#" && (isWhitespace(state, -1) || state.peek(-1) == ()) {
+        state.forward(-1);
+        return state.tokenize(EOL);
     }
 
     if isPlainSafe(state) {
@@ -339,7 +342,7 @@ function contextExplicitKey(LexerState state) returns LexerState|LexicalError {
 # + return - Tokenized YAML tag handle directive
 function contextTagHandle(LexerState state) returns LexerState|LexicalError {
     // Ignore any comments
-    if state.peek() == "#" {
+    if state.peek() == "#" && (isWhitespace(state, -1) || state.peek(-1) == ()) {
         state.forward(-1);
         return state.tokenize(EOL);
     }
@@ -381,7 +384,7 @@ function contextTagHandle(LexerState state) returns LexerState|LexicalError {
 # + return - Tokenized YAML tag prefix directive
 function contextTagPrefix(LexerState state) returns LexerState|LexicalError {
     // Ignore any comments
-    if state.peek() == "#" {
+    if state.peek() == "#" && (isWhitespace(state, -1) || state.peek(-1) == ()) {
         state.forward(-1);
         return state.tokenize(EOL);
     }

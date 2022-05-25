@@ -67,7 +67,10 @@ public class LexerState {
     # + k - Number of characters to peek. Default = 0
     # + return - Character at the peek if not null  
     function peek(int k = 0) returns string? {
-        return self.index + k < self.line.length() ? self.line[self.index + k] : ();
+        if self.index + k >= self.line.length() || self.index + k < 0 {
+            return ();
+        }
+        return self.line[self.index + k];
     }
 
     # Increment the index of the column by k indexes

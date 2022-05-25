@@ -150,6 +150,7 @@ function planarScalar(ParserState state) returns ParsingError|string {
     string lexemeBuffer = state.currentToken.value;
     boolean isFirstLine = true;
     string newLineBuffer = "";
+    state.lexerState.allowTagAsPlanar = true;
 
     check checkToken(state, peek = true);
 
@@ -191,7 +192,7 @@ function planarScalar(ParserState state) returns ParsingError|string {
             }
             lexer:SEPARATION_IN_LINE => {
                 check checkToken(state);
-                // Continue to scan planar char if the white space at the lexer:EOL
+                // Continue to scan planar char if the white space at the end-of-line
                 check checkToken(state, peek = true);
                 if state.tokenBuffer.token == lexer:MAPPING_VALUE {
                     break;
@@ -205,6 +206,7 @@ function planarScalar(ParserState state) returns ParsingError|string {
     }
 
     check verifyKey(state, isFirstLine);
+    state.lexerState.allowTagAsPlanar = false;
     return trimTailWhitespace(lexemeBuffer);
 }
 

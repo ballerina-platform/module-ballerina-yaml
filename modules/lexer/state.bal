@@ -43,6 +43,8 @@ public class LexerState {
 
     public int lastEscapedChar = -1;
 
+    public boolean allowTagAsPlanar = false;
+
     # When flag is set, updates the current indent to the indent of the first line
     boolean captureIndent = false;
 

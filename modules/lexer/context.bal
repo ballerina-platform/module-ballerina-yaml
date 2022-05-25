@@ -196,7 +196,7 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
                     state.forward(2);
 
                     if state.peek() == "!" && state.peek(1) == ">" {
-                        return generateScanningError(state, "'verbatim tag' are not resolved. Hence, '!' is invalid");
+                        return generateScanningError(state, "'verbatim tag' is not resolved. Hence, '!' is invalid");
                     }
 
                     return matchRegexPattern(state, [URI_CHAR_PATTERN, WORD_PATTERN]) ?
@@ -211,14 +211,18 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
                 "!" => { // Secondary tag handle 
                     state.lexeme = "!!";
                     state.forward();
-                    return state.tokenize(TAG_HANDLE);
+                    return discernTagPropertyFromPlanar(state, 1)
+                        ? state.tokenize(TAG_HANDLE)
+                        : iterate(state, scanPlanarChar, PLANAR_CHAR);
                 }
                 _ => { // Check for primary and name tag handles
                     state.lexeme = "!";
                     state.forward();
 
-                    // Differentiate between primary and named tag
-                    return iterate(state, scanTagHandle(true), TAG_HANDLE, true);
+                    // Differentiate primary and named tag form planar
+                    return discernTagPropertyFromPlanar(state)
+                        ? iterate(state, scanTagHandle(true), TAG_HANDLE, true)
+                        : iterate(state, scanPlanarChar, PLANAR_CHAR);
                 }
             }
         }
@@ -573,6 +577,11 @@ function contextBlockScalar(LexerState state) returns LexerState|LexicalError {
 # + state - Current lexer state
 # + return - Tokenized YAML reserved directive
 function contextReservedDirective(LexerState state) returns LexicalError|LexerState {
+    if state.peek() == "#" { // Ignore comments
+        state.forward(-1);
+        return state.tokenize(EOL);
+    }
+
     // Scan printable character
     if matchRegexPattern(state, PRINTABLE_PATTERN, [BOM_PATTERN, LINE_BREAK_PATTERN, WHITESPACE_PATTERN]) {
         return iterate(state, scanNoSpacePrintableChar, PRINTABLE_CHAR);

@@ -132,7 +132,7 @@ function verifyKey(ParserState state, boolean isSingleLine) returns ParsingError
     state.updateLexerContext(lexer:LEXER_START);
     check checkToken(state, peek = true);
     if state.tokenBuffer.token == lexer:MAPPING_VALUE && !isSingleLine {
-        return generateGrammarError(state, "Single-quoted keys cannot span multiple lines");
+        return generateGrammarError(state, "Mapping keys cannot span multiple lines");
     }
 }
 

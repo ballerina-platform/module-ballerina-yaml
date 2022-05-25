@@ -550,13 +550,13 @@ function contextBlockScalar(LexerState state) returns LexerState|LexicalError {
     }
 
     if state.index >= state.line.length() {
-        return state.tokenize(EOL);
+        return state.tokenize(EMPTY_LINE);
     }
 
     // Check for document end markers
     if (state.peek() == "." && state.peek(1) == "." && state.peek(2) == ".")
         || (state.peek() == "-" && state.peek(1) == "-" && state.peek(2) == "-") {
-            return contextStart(state);
+        return contextStart(state);
     }
 
     // Scan printable character

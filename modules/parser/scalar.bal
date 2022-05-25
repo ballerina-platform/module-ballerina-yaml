@@ -242,6 +242,7 @@ function blockScalar(ParserState state, boolean isFolded) returns ParsingError|s
     string newLineBuffer = "";
     boolean isFirstLine = true;
     boolean prevTokenIndented = false;
+    boolean tokenProcessed = false;
 
     check checkToken(state, peek = true);
 
@@ -273,6 +274,7 @@ function blockScalar(ParserState state, boolean isFolded) returns ParsingError|s
                     newLineBuffer += "\n";
                 }
                 if state.lineIndex == state.numLines - 1 {
+                    tokenProcessed = true;
                     break;
                 }
                 check state.initLexer();
@@ -282,6 +284,7 @@ function blockScalar(ParserState state, boolean isFolded) returns ParsingError|s
                 state.lexerState.trailingComment = true;
                 // Terminate at the end of the line
                 if state.lineIndex == state.numLines - 1 {
+                    tokenProcessed = true;
                     break;
                 }
                 check state.initLexer();
@@ -292,6 +295,7 @@ function blockScalar(ParserState state, boolean isFolded) returns ParsingError|s
                 while state.tokenBuffer.token == lexer:EOL || state.tokenBuffer.token == lexer:EMPTY_LINE {
                     // Terminate at the end of the line
                     if state.lineIndex == state.numLines - 1 {
+                        tokenProcessed = true;
                         break;
                     }
                     check state.initLexer();
@@ -300,6 +304,7 @@ function blockScalar(ParserState state, boolean isFolded) returns ParsingError|s
                 }
 
                 state.lexerState.trailingComment = false;
+                tokenProcessed = true;
                 break;
             }
             _ => { // Break the character when the token does not belong to planar scalar
@@ -308,20 +313,19 @@ function blockScalar(ParserState state, boolean isFolded) returns ParsingError|s
         }
         check checkToken(state);
         check checkToken(state, peek = true);
+        tokenProcessed = true;
     }
 
     // Adjust the tail based on the chomping values
-    match chompingIndicator {
-        "-" => {
-            //TODO: trim trailing newlines
-        }
-        "+" => {
-            lexemeBuffer += "\n";
-            lexemeBuffer += newLineBuffer;
-        }
-        "=" => {
-            //TODO: trim trailing newlines
-            lexemeBuffer += "\n";
+    if tokenProcessed {
+        match chompingIndicator {
+            "+" => {
+                lexemeBuffer += "\n";
+                lexemeBuffer += newLineBuffer;
+            }
+            "=" => {
+                lexemeBuffer += "\n";
+            }
         }
     }
 

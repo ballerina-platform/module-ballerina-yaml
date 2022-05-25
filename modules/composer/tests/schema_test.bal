@@ -20,7 +20,8 @@ function constructRGB(json data) returns json|schema:SchemaError {
 }
 
 @test:Config {
-    dataProvider: jsonLineDataGen
+    dataProvider: jsonLineDataGen,
+    groups: ["composer"]
 }
 function testJSONSchema(string line, json expectedOutput) returns error? {
     ComposerState state = check new ([line], schema:getJsonSchemaTags());
@@ -46,7 +47,8 @@ function jsonLineDataGen() returns map<[string, json]> {
 }
 
 @test:Config {
-    dataProvider: coreLineDataGen
+    dataProvider: coreLineDataGen,
+    groups: ["composer"]
 }
 function testCORESchema(string line, json expectedOutput) returns error? {
     ComposerState state = check new ([line], schema:getCoreSchemaTags());
@@ -68,7 +70,9 @@ function coreLineDataGen() returns map<[string, json]> {
     };
 }
 
-@test:Config {}
+@test:Config {
+    groups: ["composer"]
+}
 function testCustomTag() returns error? {
     map<schema:YAMLTypeConstructor> tagHandles = schema:getJsonSchemaTags();
     tagHandles["!rgb"] = {
@@ -78,7 +82,7 @@ function testCustomTag() returns error? {
             RGB|error output = data.cloneWithType();
             return output is RGB;
         },
-        represent: function (json data) returns string => data.toString()
+        represent: function(json data) returns string => data.toString()
     };
 
     ComposerState state = check new (["!rgb [123, 12, 32]"], tagHandles);
@@ -88,14 +92,16 @@ function testCustomTag() returns error? {
     test:assertEquals(output, expectedOutput);
 }
 
-@test:Config {}
+@test:Config {
+    groups: ["composer"]
+}
 function testInvalidCustomTag() returns error? {
     map<schema:YAMLTypeConstructor> tagHandles = schema:getJsonSchemaTags();
     tagHandles["!rgb"] = {
         kind: schema:SEQUENCE,
         construct: constructRGB,
         identity: schema:generateIdentityFunction(RGB),
-        represent: function (json data) returns string => data.toString()
+        represent: function(json data) returns string => data.toString()
     };
 
     ComposerState state = check new (["!rgb [256, 12, 32]"], tagHandles);

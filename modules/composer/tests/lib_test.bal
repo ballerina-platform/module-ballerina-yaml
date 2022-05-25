@@ -1,7 +1,8 @@
 import ballerina/test;
 
 @test:Config {
-    dataProvider: nativeDataStructureDataGen
+    dataProvider: nativeDataStructureDataGen,
+    groups: ["composer"]
 }
 function testGenerateNativeDataStructure(string|string[] line, json structure) returns error? {
     ComposerState state = check new ((line is string) ? [line] : line, {});
@@ -34,7 +35,8 @@ function nativeDataStructureDataGen() returns map<[string|string[], json]> {
 }
 
 @test:Config {
-    dataProvider: invalidEventStreamDataGen
+    dataProvider: invalidEventStreamDataGen,
+    groups: ["composer"]
 }
 function testComposeInvalidEventStream(string[] lines) returns error? {
     ComposerState state = check new (lines, {});
@@ -54,7 +56,8 @@ function invalidEventStreamDataGen() returns map<[string[]]> {
 }
 
 @test:Config {
-    dataProvider: streamDataGen
+    dataProvider: streamDataGen,
+    groups: ["composer"]
 }
 function testComposeMultipleDocuments(string[] lines, json[] expectedDocs) returns error? {
     ComposerState state = check new (lines, {});
@@ -72,8 +75,9 @@ function streamDataGen() returns map<[string[], json[]]> {
         "any explicit after directive": [["%YAML 1.1", "---", "first doc", "...", "---", "second doc"], ["first doc", "second doc"]],
         "explicit after empty directive": [["%YAML 1.1", "---", "# empty doc", "---", "second doc"], [(), "second doc"]],
         "directive after empty bare": [["# empty doc", "...", "%YAML 1.1", "---", "second doc", "..."], [(), "second doc"]],
+        "two empty directive": [["---", "# empty doc", "---"], [(), ()]],
         "bare after directive": [["%YAML 1.1", "---", "first doc", "...", "second doc"], ["first doc", "second doc"]],
+        "multiple end document markers": [["first doc", "...", "..."], ["first doc"]],
         "hoping out from block collection": [["-", " - value", "...", "second doc"], [[["value"]], "second doc"]]
     };
 }
-    

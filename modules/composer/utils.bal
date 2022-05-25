@@ -16,10 +16,3 @@ function checkEvent(ComposerState state, parser:ParserOption option = parser:DEF
     }
     return parser:parse(state.parserState, option, docType);
 }
-
-# Check if the end of the document is reached
-#
-# + event - Current event
-# + return - True if the end of the document is reached
-function isEndOfDocument(common:Event event) returns boolean =>
-    (event is common:EndEvent && event.endType == common:STREAM) || event is common:DocumentMarkerEvent;

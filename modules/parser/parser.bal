@@ -150,6 +150,9 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
             if state.currentToken.indentation == () {
                 return generateIndentationError(state, "Block sequence must have an indentation");
             }
+            if state.blockSequenceState == VALUE {
+                return generateGrammarError(state, "Cannot have nested sequence for a defined value");
+            }
             if state.lastKeyLine == state.lineIndex && state.lastExplicitKeyLine != state.lineIndex
                 && !state.lexerState.isFlowCollection() && option == EXPECT_VALUE
                 && state.currentToken.token == lexer:SEQUENCE_ENTRY {

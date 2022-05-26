@@ -13,7 +13,8 @@ map<FailSafeSchema> customTags = {
     "tag:clarkevans.com,2002:label": MAPPING,
     "tag:yaml.org,2002:omap": SEQUENCE,
     "tag:example.com,2000:app/int": STRING,
-    "tag:example.com,2000:app/tag!": STRING
+    "tag:example.com,2000:app/tag!": STRING,
+    "tag:example.com,2011:A": STRING
 };
 
 @test:BeforeSuite

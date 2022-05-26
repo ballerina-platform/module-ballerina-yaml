@@ -24,6 +24,7 @@ function appendData(ParserState state, ParserOption option,
     }
 
     map<json> contentValue = check content(state, peeked);
+    boolean isAlias = contentValue.hasKey("alias");
     common:Event? buffer = ();
 
     if !state.explicitKey {
@@ -45,14 +46,13 @@ function appendData(ParserState state, ParserOption option,
     }
 
     // If there are no whitespace, and the current token is ':'
+    state.lexerState.isJsonKey = false;
     if state.currentToken.token == lexer:MAPPING_VALUE {
-        state.lexerState.isJsonKey = false;
         check separate(state, isJsonKey, true);
         if option == EXPECT_VALUE {
             buffer = {value: ()};
         }
     }
-    state.lexerState.isJsonKey = false;
 
     // If there are no whitespace, and the current token is ","
     if state.currentToken.token == lexer:SEPARATOR {
@@ -72,7 +72,7 @@ function appendData(ParserState state, ParserOption option,
 
                 // Block mapping
                 return differentiateTagProperty(state, indentation.tokens,
-                    {startType: indentation.collection.pop()}, contentValue, tagStructure);
+                    {startType: indentation.collection.pop()}, contentValue, tagStructure, isAlias);
             }
             -1 => { // Decreased 
                 buffer = {endType: indentation.collection.shift()};
@@ -82,8 +82,10 @@ function appendData(ParserState state, ParserOption option,
             }
         }
     }
-
-    common:Event event = check constructEvent(state, contentValue, tagStructure);
+    if isAlias && (tagStructure.anchor != () || tagStructure.tag != ()) {
+        return generateGrammarError(state, "An alias node cannot have tag properties");
+    }
+    common:Event event = check constructEvent(state, contentValue, isAlias ? () : tagStructure);
 
     if buffer == () {
         return event;
@@ -92,8 +94,8 @@ function appendData(ParserState state, ParserOption option,
     return buffer;
 }
 
-function differentiateTagProperty(ParserState state, lexer:YAMLToken[] tokens,
-    map<json> currentValue, map<json> contentValue, TagStructure tagStructure) returns common:Event|ParsingError {
+function differentiateTagProperty(ParserState state, lexer:YAMLToken[] tokens, map<json> currentValue,
+    map<json> contentValue, TagStructure tagStructure, boolean isAlias) returns common:Event|ParsingError {
     match tokens.length() {
         0 => { // The tag structure belongs to the empty node
             state.eventBuffer.push(check constructEvent(state, contentValue));
@@ -102,17 +104,26 @@ function differentiateTagProperty(ParserState state, lexer:YAMLToken[] tokens,
         1 => { // The tag structure is divided between the key and the empty node
             match tokens.pop() {
                 lexer:ANCHOR => {
-                    state.eventBuffer.push(check constructEvent(state, {anchor: tagStructure.anchor}, contentValue));
+                    if isAlias && tagStructure.tag != () {
+                        return generateGrammarError(state, "An alias node cannot have tag properties");
+                    }
+                    state.eventBuffer.push(check constructEvent(state, contentValue, isAlias ? () : {anchor: tagStructure.anchor}));
                     return constructEvent(state, {tag: tagStructure.tag}, currentValue);
                 }
                 lexer:TAG => {
-                    state.eventBuffer.push(check constructEvent(state, {tag: tagStructure.tag}, contentValue));
+                    if isAlias && tagStructure.anchor != () {
+                        return generateGrammarError(state, "An alias node cannot have tag properties");
+                    }
+                    state.eventBuffer.push(check constructEvent(state, contentValue, isAlias ? () : {tag: tagStructure.tag}));
                     return constructEvent(state, {anchor: tagStructure.anchor}, currentValue);
                 }
             }
         }
         2 => { // The whole tag structure belongs mapping key
-            state.eventBuffer.push(check constructEvent(state, contentValue, tagStructure));
+            if isAlias && (tagStructure.anchor != () || tagStructure.tag != ()) {
+                return generateGrammarError(state, "An alias node cannot have tag properties");
+            }
+            state.eventBuffer.push(check constructEvent(state, contentValue, isAlias ? () : tagStructure));
             return constructEvent(state, currentValue);
         }
     }

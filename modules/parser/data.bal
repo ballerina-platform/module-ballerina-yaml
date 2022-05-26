@@ -184,6 +184,9 @@ function content(ParserState state, boolean peeked) returns map<json>|ParsingErr
                 return {value: ""};
             }
         }
+        lexer:EOL => {
+            return {value: ""};
+        }
     }
 
     // Check for empty nodes with explicit keys

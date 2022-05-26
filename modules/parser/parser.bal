@@ -91,6 +91,10 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
             state.lexerState.resetState();
             state.yamlVersion = ();
 
+            if !explicit {
+                state.customTagHandles = {};
+            }
+
             if state.currentToken.token == lexer:SEPARATION_IN_LINE {
                 check checkToken(state, peek = true);
                 // There cannot be nodes next to the document marker.

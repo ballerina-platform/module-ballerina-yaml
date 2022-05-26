@@ -106,6 +106,7 @@ function invalidKeyDataGen() returns map<[string|string[], boolean]> {
     return {
         "explicit key and mapping value without indent": [["? first", " second", " : value"], true],
         "explicit key without indent": [["? first", "second", ": value"], true],
+        "two block keys in same line": [["first: value1 second: value2"], false],
         "multiline implicit key": [["first", "second", " : value"], false]
     };
 }

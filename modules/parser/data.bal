@@ -41,7 +41,7 @@ function appendData(ParserState state, ParserOption option,
 
     state.updateLexerContext(state.explicitKey ? lexer:LEXER_EXPLICIT_KEY : lexer:LEXER_START);
 
-    map<json> contentValue = check content(state, peeked);
+    map<json> contentValue = check content(state, peeked, option);
     boolean isAlias = contentValue.hasKey("alias");
 
     if !state.explicitKey {
@@ -65,6 +65,11 @@ function appendData(ParserState state, ParserOption option,
     // If there are no whitespace, and the current token is ':'
     state.lexerState.isJsonKey = false;
     if state.currentToken.token == lexer:MAPPING_VALUE {
+        if state.lastKeyLine == state.lineIndex && !state.lexerState.isFlowCollection() {
+            return generateGrammarError(state, "Two block mapping keys cannot be defined in the same line");
+        }
+        state.lastKeyLine = state.lineIndex;
+
         check separate(state, isJsonKey || state.lexerState.isFlowCollection(), true);
         if option == EXPECT_VALUE {
             buffer = {value: ()};
@@ -151,11 +156,25 @@ function differentiateTagProperty(ParserState state, lexer:YAMLToken[] tokens, m
 # Extracts the data for the given node.
 #
 # + state - Current parser state  
-# + peeked - If the expected token is already in the state
+# + peeked - If the expected token is already in the state  
+# + option - Selected parser option  
 # + return - String if a scalar event. The respective collection if a start event. Else, returns an error.
-function content(ParserState state, boolean peeked) returns map<json>|ParsingError {
+function content(ParserState state, boolean peeked, ParserOption option) returns map<json>|ParsingError {
     if !peeked {
         check checkToken(state);
+    }
+
+    match state.currentToken.token {
+        lexer:SEPARATOR|lexer:MAPPING_VALUE => {
+            return {value: ""};
+        }
+        lexer:EOL => {
+            return {value: ""};
+        }
+    }
+
+    if state.lastKeyLine == state.lineIndex && !state.lexerState.isFlowCollection() && option == EXPECT_KEY {
+        return generateGrammarError(state, "Two block mapping keys cannot be defined in the same line");
     }
 
     // Check for flow and block nodes
@@ -186,9 +205,6 @@ function content(ParserState state, boolean peeked) returns map<json>|ParsingErr
         lexer:ALIAS => {
             return {alias: state.currentToken.value};
         }
-        lexer:SEPARATOR|lexer:MAPPING_VALUE => {
-            return {value: ""};
-        }
         lexer:ANCHOR|lexer:TAG|lexer:TAG_HANDLE => {
             common:Event event = check nodeComplete(state, EXPECT_KEY);
             if event is common:StartEvent && event.startType == common:MAPPING {
@@ -198,9 +214,6 @@ function content(ParserState state, boolean peeked) returns map<json>|ParsingErr
                 state.eventBuffer.push(event);
                 return {value: ""};
             }
-        }
-        lexer:EOL => {
-            return {value: ""};
         }
     }
 

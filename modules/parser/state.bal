@@ -26,6 +26,8 @@ public class ParserState {
 
     string[] reservedDirectives = [];
 
+    int lastKeyLine = -1;
+
     # YAML version of the document.
     float? yamlVersion = ();
 

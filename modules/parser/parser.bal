@@ -84,10 +84,30 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
             return check parse(state, docType = DIRECTIVE_DOCUMENT);
         }
         lexer:DOCUMENT_MARKER|lexer:DIRECTIVE_MARKER => {
+            boolean explicit = state.currentToken.token == lexer:DIRECTIVE_MARKER;
+            state.explicitDoc = explicit;
+
+            check checkToken(state, [lexer:SEPARATION_IN_LINE, lexer:EOL]);
             state.lexerState.resetState();
             state.yamlVersion = ();
+
+            if state.currentToken.token == lexer:SEPARATION_IN_LINE {
+                check checkToken(state, peek = true);
+                // There cannot be nodes next to the document marker.
+                if state.tokenBuffer.token != lexer:EOL && !explicit {
+                    return generateGrammarError(state,
+                        string `'${state.tokenBuffer.token}' token cannot start in the same line as the document marker`);
+                }
+
+                // Block collection nodes cannot be next to the directive marker.
+                if explicit && (state.tokenBuffer.token == lexer:PLANAR_CHAR && state.tokenBuffer.indentation != ()
+                    || state.tokenBuffer.token == lexer:SEQUENCE_ENTRY) {
+                    return generateGrammarError(state,
+                        string `'${state.tokenBuffer.token}' token cannot start in the same line as the document marker`);
+                }
+            }
             return {
-                explicit: state.currentToken.token == lexer:DIRECTIVE_MARKER,
+                explicit,
                 directive: state.directiveDocument
             };
         }

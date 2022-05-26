@@ -22,6 +22,8 @@ public class ParserState {
 
     boolean explicitKey = false;
 
+    boolean explicitDoc = false;
+
     map<string> customTagHandles = {};
 
     string[] reservedDirectives = [];
@@ -61,6 +63,7 @@ public class ParserState {
         if self.lineIndex >= self.numLines {
             return generateGrammarError(self, message);
         }
+        self.explicitDoc = false;
         self.lexerState.setLine(self.lines[self.lineIndex], self.lineIndex);
     }
 }

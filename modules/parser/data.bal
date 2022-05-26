@@ -74,6 +74,11 @@ function appendData(ParserState state, ParserOption option,
         }
         state.lastKeyLine = state.lineIndex;
 
+        if state.explicitDoc {
+            return generateGrammarError(state,
+                string `'${lexer:PLANAR_CHAR}' token cannot start in the same line as the document marker`);
+        }
+
         check separate(state, isJsonKey || state.lexerState.isFlowCollection(), true);
         if option == EXPECT_VALUE {
             buffer = {value: ()};

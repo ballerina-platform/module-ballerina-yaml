@@ -13,8 +13,6 @@ public class LexerState {
     public Context context = LEXER_START;
 
     # Minimum indentation imposed by the parent nodes
-    // int[] seqIndents = [];
-    // int[] mapIndents = [];
     Indent[] indents = [];
 
     # Minimum indentation required to the current line

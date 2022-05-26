@@ -73,7 +73,7 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
                 }
             }
             check checkToken(state, [lexer:SEPARATION_IN_LINE, lexer:EOL]);
-            
+
             if state.directiveDocument {
                 return generateGrammarError(state,
                     "Expected a '<explicit-document>' after directive, but found another directive",
@@ -129,6 +129,11 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
         lexer:SEQUENCE_ENTRY => {
             if state.currentToken.indentation == () {
                 return generateIndentationError(state, "Block sequence must have an indentation");
+            }
+            if state.lastKeyLine == state.lineIndex && state.lastExplicitKeyLine != state.lineIndex
+                && !state.lexerState.isFlowCollection() && option == EXPECT_VALUE
+                && state.currentToken.token == lexer:SEQUENCE_ENTRY {
+                return generateGrammarError(state, "Block sequence cannot be nested under a key in the same line");
             }
             match (<lexer:Indentation>state.currentToken.indentation).change {
                 1 => { // Indent increase

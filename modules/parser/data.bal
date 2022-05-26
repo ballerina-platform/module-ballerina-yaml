@@ -48,6 +48,7 @@ function appendData(ParserState state, ParserOption option,
         indentation = state.currentToken.indentation;
     }
 
+    boolean explicitKey = state.explicitKey;
     state.explicitKey = false;
 
     // Check if the current node is a key
@@ -67,6 +68,9 @@ function appendData(ParserState state, ParserOption option,
     if state.currentToken.token == lexer:MAPPING_VALUE {
         if state.lastKeyLine == state.lineIndex && !state.lexerState.isFlowCollection() {
             return generateGrammarError(state, "Two block mapping keys cannot be defined in the same line");
+        }
+        if explicitKey {
+            state.lastExplicitKeyLine = state.lineIndex;
         }
         state.lastKeyLine = state.lineIndex;
 
@@ -174,7 +178,7 @@ function content(ParserState state, boolean peeked, ParserOption option) returns
     }
 
     if state.lastKeyLine == state.lineIndex && !state.lexerState.isFlowCollection() && option == EXPECT_KEY {
-        return generateGrammarError(state, "Two block mapping keys cannot be defined in the same line");
+        return generateGrammarError(state, "Cannot have a scalar next to a block key-value pair");
     }
 
     // Check for flow and block nodes

@@ -110,7 +110,7 @@ function isWhitespace(LexerState state, int offset = 0) returns boolean
     => state.peek(offset) == " " || state.peek(offset) == "\t";
 
 function discernTagPropertyFromPlanar(LexerState state, int offset = 0) returns boolean
-    => (!state.allowTagAsPlanar || state.index < state.indent + 1 + offset);
+    => (!state.allowTokensAsPlanar || state.index < state.indent + 1 + offset);
 
 function discernPlanarFromIndicator(LexerState state) returns boolean
     => matchRegexPattern(state, [PRINTABLE_PATTERN], state.isFlowCollection()

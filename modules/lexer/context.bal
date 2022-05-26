@@ -176,6 +176,12 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
             return scanMappingValueKey(state, ALIAS, scanAnchorName);
         }
         "%" => { // Directive line
+            if state.allowTokensAsPlanar {
+                check assertIndent(state, 1);
+                state.forward();
+                state.lexeme += "%";
+                return iterate(state, scanPlanarChar, PLANAR_CHAR);
+            }
             state.forward();
             return iterate(state, scanNoSpacePrintableChar, DIRECTIVE);
         }

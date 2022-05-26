@@ -150,7 +150,7 @@ function planarScalar(ParserState state) returns ParsingError|string {
     string lexemeBuffer = state.currentToken.value;
     boolean isFirstLine = true;
     string newLineBuffer = "";
-    state.lexerState.allowTagAsPlanar = true;
+    state.lexerState.allowTokensAsPlanar = true;
 
     check checkToken(state, peek = true);
 
@@ -206,7 +206,7 @@ function planarScalar(ParserState state) returns ParsingError|string {
     }
 
     check verifyKey(state, isFirstLine);
-    state.lexerState.allowTagAsPlanar = false;
+    state.lexerState.allowTokensAsPlanar = false;
     return trimTailWhitespace(lexemeBuffer);
 }
 

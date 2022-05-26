@@ -103,7 +103,7 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
                 if explicit && (state.tokenBuffer.token == lexer:PLANAR_CHAR && state.tokenBuffer.indentation != ()
                     || state.tokenBuffer.token == lexer:SEQUENCE_ENTRY) {
                     return generateGrammarError(state,
-                        string `'${state.tokenBuffer.token}' token cannot start in the same line as the document marker`);
+                        string `'${state.tokenBuffer.token}' token cannot start in the same line as the directive marker`);
                 }
             }
             return {

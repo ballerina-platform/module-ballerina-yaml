@@ -34,7 +34,13 @@ function nodeAnchor(ParserState state) returns string?|ParsingError {
     return anchor;
 }
 
-function nodeComplete(ParserState state, ParserOption option) returns common:Event|ParsingError {
+# Description
+#
+# + state - Current parser state
+# + option - Expected values inside a mapping collection  
+# + definedProperties - Tag properties defined by the previous node
+# + return - Constructed node with the properties and the value.
+function nodeComplete(ParserState state, ParserOption option, TagStructure? definedProperties = ()) returns common:Event|ParsingError {
     match state.currentToken.token {
         lexer:TAG_HANDLE => {
             string tagHandle = state.currentToken.value;
@@ -51,7 +57,7 @@ function nodeComplete(ParserState state, ParserOption option) returns common:Eve
             string? anchor = check nodeAnchor(state);
 
             return appendData(state, option,
-                {tag: check generateCompleteTagName(state, tagHandle, tagPrefix), anchor});
+                {tag: check generateCompleteTagName(state, tagHandle, tagPrefix), anchor}, false, definedProperties);
         }
         lexer:TAG => {
             // Obtain the tagPrefix name
@@ -63,7 +69,7 @@ function nodeComplete(ParserState state, ParserOption option) returns common:Eve
             // Obtain the anchor if there exists
             string? anchor = check nodeAnchor(state);
 
-            return appendData(state, option, {tag: tagPrefix, anchor});
+            return appendData(state, option, {tag: tagPrefix, anchor}, false, definedProperties);
         }
         lexer:ANCHOR => {
             // Obtain the anchor name
@@ -85,7 +91,7 @@ function nodeComplete(ParserState state, ParserOption option) returns common:Eve
                 tag = tagHandle == () ? tagPrefix : check generateCompleteTagName(state, tagHandle, tagPrefix);
             }
 
-            return appendData(state, option, {tag, anchor});
+            return appendData(state, option, {tag, anchor}, false, definedProperties);
         }
     }
 

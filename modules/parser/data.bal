@@ -11,10 +11,11 @@ type TagStructure record {|
 # + state - Current parser state  
 # + option - Selected parser option  
 # + tagStructure - Constructed tag structure if exists  
-# + peeked - If the expected token is already in the state
+# + peeked - If the expected token is already in the state  
+# + definedProperties - Tag properties defined by the previous node
 # + return - The constructed scalar or start event on success.
 function appendData(ParserState state, ParserOption option,
-    TagStructure tagStructure = {}, boolean peeked = false)
+    TagStructure tagStructure = {}, boolean peeked = false, TagStructure? definedProperties = ())
     returns common:Event|ParsingError {
 
     common:Event? buffer = ();
@@ -41,7 +42,7 @@ function appendData(ParserState state, ParserOption option,
 
     state.updateLexerContext(state.explicitKey ? lexer:LEXER_EXPLICIT_KEY : lexer:LEXER_START);
 
-    map<json> contentValue = check content(state, peeked, option);
+    map<json> contentValue = check content(state, peeked, option, tagStructure);
     boolean isAlias = contentValue.hasKey("alias");
 
     if !state.explicitKey {
@@ -76,12 +77,22 @@ function appendData(ParserState state, ParserOption option,
 
         if state.explicitDoc {
             return generateGrammarError(state,
-                string `'${lexer:PLANAR_CHAR}' token cannot start in the same line as the document marker`);
+                string `'${lexer:PLANAR_CHAR}' token cannot start in the same line as the directive marker`);
         }
 
         check separate(state, isJsonKey || state.lexerState.isFlowCollection(), true);
         if option == EXPECT_VALUE {
             buffer = {value: ()};
+        }
+    } else {
+        // There is already tag properties defined adn the value is not a key
+        if definedProperties is TagStructure {
+            if definedProperties.anchor != () && tagStructure.anchor != () {
+                return generateGrammarError(state, "Only one anchor is allowed for a node");
+            }
+            if definedProperties.tag != () && tagStructure.tag != () {
+                return generateGrammarError(state, "Only one tag is allowed for a node");
+            }
         }
     }
 
@@ -166,9 +177,10 @@ function differentiateTagProperty(ParserState state, lexer:YAMLToken[] tokens, m
 #
 # + state - Current parser state  
 # + peeked - If the expected token is already in the state  
-# + option - Selected parser option  
+# + option - Expected values inside a mapping collection  
+# + tagStructure - Tag structure of the current node
 # + return - String if a scalar event. The respective collection if a start event. Else, returns an error.
-function content(ParserState state, boolean peeked, ParserOption option) returns map<json>|ParsingError {
+function content(ParserState state, boolean peeked, ParserOption option, TagStructure tagStructure = {}) returns map<json>|ParsingError {
     if !peeked {
         check checkToken(state);
     }
@@ -215,7 +227,7 @@ function content(ParserState state, boolean peeked, ParserOption option) returns
             return {alias: state.currentToken.value};
         }
         lexer:ANCHOR|lexer:TAG|lexer:TAG_HANDLE => {
-            common:Event event = check nodeComplete(state, EXPECT_KEY);
+            common:Event event = check nodeComplete(state, EXPECT_KEY, tagStructure);
             if event is common:StartEvent && event.startType == common:MAPPING {
                 return {startType: common:MAPPING};
             }

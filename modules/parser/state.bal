@@ -50,7 +50,10 @@ public class ParserState {
     public function init(string[] lines) returns ParsingError? {
         self.lines = lines;
         self.numLines = lines.length();
-        check self.initLexer();
+        ParsingError? err = self.initLexer();
+        if err is ParsingError {
+            self.eventBuffer.push({endType: common:STREAM});
+        }
     }
 
     function updateLexerContext(lexer:Context context) {

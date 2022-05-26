@@ -2,8 +2,10 @@ import ballerina/test;
 
 YAMLType[] customYamlTypes = [];
 map<FailSafeSchema> customTags = {
+    "!": STRING,
     "!foo": STRING,
     "tag:example.com,2000:app/foo": STRING,
+    "tag:example.com,2000:app/set": MAPPING,
     "tag:yaml.org,2002:binary": STRING,
     "!my-light": STRING,
     "!local": STRING,

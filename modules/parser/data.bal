@@ -17,15 +17,32 @@ function appendData(ParserState state, ParserOption option,
     TagStructure tagStructure = {}, boolean peeked = false)
     returns common:Event|ParsingError {
 
+    common:Event? buffer = ();
+
+    // Check for nested explicit keys
+    if !peeked {
+        check checkToken(state, peek = true);
+        if state.tokenBuffer.token == lexer:MAPPING_KEY {
+            state.explicitKey = true;
+            check checkToken(state);
+        }
+
+    }
+
+    if option == EXPECT_VALUE && state.currentToken.token == lexer:MAPPING_KEY {
+        buffer = {value: ()};
+    }
+
     lexer:Indentation? indentation = ();
     if state.explicitKey {
         indentation = state.currentToken.indentation;
         check separate(state, true);
     }
 
+    state.updateLexerContext(state.explicitKey ? lexer:LEXER_EXPLICIT_KEY : lexer:LEXER_START);
+
     map<json> contentValue = check content(state, peeked);
     boolean isAlias = contentValue.hasKey("alias");
-    common:Event? buffer = ();
 
     if !state.explicitKey {
         indentation = state.currentToken.indentation;
@@ -48,7 +65,7 @@ function appendData(ParserState state, ParserOption option,
     // If there are no whitespace, and the current token is ':'
     state.lexerState.isJsonKey = false;
     if state.currentToken.token == lexer:MAPPING_VALUE {
-        check separate(state, isJsonKey, true);
+        check separate(state, isJsonKey || state.lexerState.isFlowCollection(), true);
         if option == EXPECT_VALUE {
             buffer = {value: ()};
         }
@@ -137,8 +154,6 @@ function differentiateTagProperty(ParserState state, lexer:YAMLToken[] tokens, m
 # + peeked - If the expected token is already in the state
 # + return - String if a scalar event. The respective collection if a start event. Else, returns an error.
 function content(ParserState state, boolean peeked) returns map<json>|ParsingError {
-    state.updateLexerContext(state.explicitKey ? lexer:LEXER_EXPLICIT_KEY : lexer:LEXER_START);
-
     if !peeked {
         check checkToken(state);
     }

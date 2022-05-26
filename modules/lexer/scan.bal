@@ -172,7 +172,7 @@ function scanPlanarChar(LexerState state) returns boolean|LexicalError {
 
     // Check for mapping value with a space after it 
     if state.peek() == ":" {
-        if !matchRegexPattern(state, [PRINTABLE_PATTERN], [LINE_BREAK_PATTERN, BOM_PATTERN, WHITESPACE_PATTERN], 1) {
+        if !discernPlanarFromIndicator(state) {
             state.forward(-numWhitespace);
             return true;
         }

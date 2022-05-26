@@ -111,3 +111,8 @@ function isWhitespace(LexerState state, int offset = 0) returns boolean
 
 function discernTagPropertyFromPlanar(LexerState state, int offset = 0) returns boolean
     => (!state.allowTagAsPlanar || state.index < state.indent + 1 + offset);
+
+function discernPlanarFromIndicator(LexerState state) returns boolean
+    => matchRegexPattern(state, [PRINTABLE_PATTERN], state.isFlowCollection()
+            ? [LINE_BREAK_PATTERN, BOM_PATTERN, WHITESPACE_PATTERN, FLOW_INDICATOR_PATTERN]
+            : [LINE_BREAK_PATTERN, BOM_PATTERN, WHITESPACE_PATTERN], 1);

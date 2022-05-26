@@ -145,7 +145,7 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
             }
 
             // Scan for planar characters
-            if matchRegexPattern(state, [PRINTABLE_PATTERN], [LINE_BREAK_PATTERN, BOM_PATTERN, WHITESPACE_PATTERN], 1) {
+            if discernPlanarFromIndicator(state) {
                 state.updateStartIndex();
                 state.forward();
                 state.lexeme += "-";
@@ -196,7 +196,6 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
                 }
                 " "|"\t"|() => { // Non-specific tag
                     state.lexeme = "!";
-                    state.forward();
                     return state.tokenize(TAG);
                 }
                 "!" => { // Secondary tag handle 
@@ -224,7 +223,7 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
             return iterate(state, scanAnchorName, ANCHOR);
         }
         ":" => {
-            if !state.isJsonKey && matchRegexPattern(state, [PRINTABLE_PATTERN], [LINE_BREAK_PATTERN, BOM_PATTERN, WHITESPACE_PATTERN], 1) {
+            if !state.isJsonKey && discernPlanarFromIndicator(state) {
                 state.lexeme += ":";
                 state.updateStartIndex();
                 state.forward();
@@ -239,7 +238,7 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
             return state;
         }
         "?" => {
-            if matchRegexPattern(state, [PRINTABLE_PATTERN], [LINE_BREAK_PATTERN, BOM_PATTERN, WHITESPACE_PATTERN], 1) {
+            if discernPlanarFromIndicator(state) {
                 state.lexeme += "?";
                 state.updateStartIndex();
                 state.forward();

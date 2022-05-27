@@ -186,6 +186,12 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
             return iterate(state, scanNoSpacePrintableChar, DIRECTIVE);
         }
         "!" => { // Node tags
+            LexicalError? err = assertIndent(state, 1);
+            if state.allowTokensAsPlanar && err == () {
+                state.forward();
+                state.lexeme += "!";
+                return iterate(state, scanPlanarChar, PLANAR_CHAR);
+            }
             check assertIndent(state, 1, true);
             state.updateStartIndex(TAG);
             match state.peek(1) {
@@ -223,6 +229,12 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
             }
         }
         "&" => {
+            LexicalError? err = assertIndent(state, 1);
+            if state.allowTokensAsPlanar && err == () {
+                state.forward();
+                state.lexeme += "&";
+                return iterate(state, scanPlanarChar, PLANAR_CHAR);
+            }
             check assertIndent(state, 1, true);
             state.updateStartIndex(ANCHOR);
             state.forward();

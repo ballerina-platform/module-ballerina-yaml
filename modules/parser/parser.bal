@@ -3,9 +3,10 @@ import yaml.common;
 
 public enum ParserOption {
     DEFAULT,
-    EXPECT_KEY,
-    EXPECT_VALUE,
-    EXPECT_SEQUENCE
+    EXPECT_MAP_KEY,
+    EXPECT_MAP_VALUE,
+    EXPECT_SEQUENCE_ENTRY,
+    EXPECT_SEQUENCE_VALUE
 }
 
 public enum DocumentType {
@@ -161,7 +162,7 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
                 return generateGrammarError(state, "Cannot have nested sequence for a defined value");
             }
             if state.lastKeyLine == state.lineIndex && state.lastExplicitKeyLine != state.lineIndex
-                && !state.lexerState.isFlowCollection() && option == EXPECT_VALUE
+                && !state.lexerState.isFlowCollection() && option == EXPECT_MAP_VALUE
                 && state.currentToken.token == lexer:SEQUENCE_ENTRY {
                 return generateGrammarError(state, "Block sequence cannot be nested under a key in the same line");
             }
@@ -170,7 +171,12 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
                     return {startType: common:SEQUENCE};
                 }
                 0 => { // Sequence entry
-                    return parse(state);
+                    common:Event event = check parse(state, EXPECT_SEQUENCE_VALUE, docType);
+                    if option == EXPECT_SEQUENCE_VALUE {
+                        state.eventBuffer.push(event);
+                        return {value: ()};
+                    }
+                    return event;
                 }
                 -1 => { //Indent decrease 
                     foreach common:Collection collectionItem in (<lexer:Indentation>state.currentToken.indentation).collection {
@@ -196,7 +202,7 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
             return {endType: common:SEQUENCE};
         }
         lexer:MAPPING_END => {
-            if option == EXPECT_VALUE {
+            if option == EXPECT_MAP_VALUE {
                 state.eventBuffer.push({endType: common:MAPPING});
                 return {value: ()};
             }

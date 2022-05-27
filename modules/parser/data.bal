@@ -33,7 +33,7 @@ function appendData(ParserState state, ParserOption option,
     }
     boolean explicitKey = state.explicitKey;
 
-    if option == EXPECT_VALUE && state.currentToken.token == lexer:MAPPING_KEY {
+    if option == EXPECT_MAP_VALUE && state.currentToken.token == lexer:MAPPING_KEY {
         buffer = {value: ()};
     }
 
@@ -112,7 +112,7 @@ function appendData(ParserState state, ParserOption option,
     // If there are no whitespace, and the current token is ","
     if state.currentToken.token == lexer:SEPARATOR {
         check separate(state, true);
-        if option == EXPECT_KEY {
+        if option == EXPECT_MAP_KEY {
             state.eventBuffer.push({value: ()});
         }
     }
@@ -132,14 +132,14 @@ function appendData(ParserState state, ParserOption option,
         }
 
         check separate(state, isJsonKey || state.lexerState.isFlowCollection(), true);
-        if option == EXPECT_VALUE {
+        if option == EXPECT_MAP_VALUE {
             buffer = check constructEvent(state, {value: ()}, newNodeTagStructure);
         }
-        if option == EXPECT_SEQUENCE {
+        if option == EXPECT_SEQUENCE_ENTRY || option == EXPECT_SEQUENCE_VALUE {
             buffer = {startType: common:MAPPING, implicit: true};
         }
     } else {
-        if option == EXPECT_KEY && !explicitKey {
+        if option == EXPECT_MAP_KEY && !explicitKey {
             return generateGrammarError(state, "Expected a key for the block mapping");
         }
         // There is already tag properties defined adn the value is not a key
@@ -209,7 +209,7 @@ function content(ParserState state, boolean peeked, ParserOption option, boolean
         }
     }
 
-    if state.lastKeyLine == state.lineIndex && !state.lexerState.isFlowCollection() && option == EXPECT_KEY {
+    if state.lastKeyLine == state.lineIndex && !state.lexerState.isFlowCollection() && option == EXPECT_MAP_KEY {
         return generateGrammarError(state, "Cannot have a scalar next to a block key-value pair");
     }
 
@@ -242,7 +242,7 @@ function content(ParserState state, boolean peeked, ParserOption option, boolean
             return {alias: state.currentToken.value};
         }
         lexer:ANCHOR|lexer:TAG|lexer:TAG_HANDLE => {
-            common:Event event = check nodeComplete(state, EXPECT_KEY, tagStructure);
+            common:Event event = check nodeComplete(state, EXPECT_MAP_KEY, tagStructure);
             if explicitKey {
                 return event;
             }

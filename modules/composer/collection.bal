@@ -10,7 +10,7 @@ import yaml.schema;
 # + return - Constructed Ballerina array on success
 function composeSequence(ComposerState state, boolean flowStyle) returns json[]|lexer:LexicalError|parser:ParsingError|ComposingError|schema:SchemaError {
     json[] sequence = [];
-    common:Event event = check checkEvent(state, parser:EXPECT_SEQUENCE);
+    common:Event event = check checkEvent(state, parser:EXPECT_SEQUENCE_VALUE);
 
     // Iterate until the end event is detected
     while true {
@@ -39,7 +39,7 @@ function composeSequence(ComposerState state, boolean flowStyle) returns json[]|
             }
         }
         sequence.push(check composeNode(state, event));
-        event = check checkEvent(state, parser:EXPECT_SEQUENCE);
+        event = check checkEvent(state, parser:EXPECT_SEQUENCE_ENTRY);
     }
 
     return (sequence == [] && !flowStyle) ? [null] : sequence;
@@ -53,7 +53,7 @@ function composeSequence(ComposerState state, boolean flowStyle) returns json[]|
 # + return - Constructed Ballerina array on success
 function composeMapping(ComposerState state, boolean flowStyle, boolean implicitMapping) returns map<json>|lexer:LexicalError|parser:ParsingError|ComposingError|schema:SchemaError {
     map<json> structure = {};
-    common:Event event = check checkEvent(state, parser:EXPECT_KEY);
+    common:Event event = check checkEvent(state, parser:EXPECT_MAP_KEY);
 
     // Iterate until an end event is detected
     while true {
@@ -93,7 +93,7 @@ function composeMapping(ComposerState state, boolean flowStyle, boolean implicit
         json key = check composeNode(state, event);
 
         // Compose the value
-        event = check checkEvent(state, parser:EXPECT_VALUE);
+        event = check checkEvent(state, parser:EXPECT_MAP_VALUE);
         json value = check composeNode(state, event);
 
         // Map the key value pair
@@ -103,7 +103,7 @@ function composeMapping(ComposerState state, boolean flowStyle, boolean implicit
             break;
         }
 
-        event = check checkEvent(state, parser:EXPECT_KEY);
+        event = check checkEvent(state, parser:EXPECT_MAP_KEY);
     }
 
     return structure;

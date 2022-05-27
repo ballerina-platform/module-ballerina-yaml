@@ -10,6 +10,7 @@ map<FailSafeSchema> customTags = {
     "!my-light": STRING,
     "!local": STRING,
     "!bar": STRING,
+    "tag:clarkevans.com,2002:shape": SEQUENCE,
     "tag:clarkevans.com,2002:circle": MAPPING,
     "tag:clarkevans.com,2002:line": MAPPING,
     "tag:clarkevans.com,2002:label": MAPPING,

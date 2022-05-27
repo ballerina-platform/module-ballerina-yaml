@@ -187,6 +187,10 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
             return {endType: common:SEQUENCE};
         }
         lexer:MAPPING_END => {
+            if option == EXPECT_VALUE {
+                state.eventBuffer.push({endType: common:MAPPING});
+                return {value: ()};
+            }
             return {endType: common:MAPPING};
         }
         lexer:LITERAL|lexer:FOLDED => {

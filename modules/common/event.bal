@@ -27,12 +27,14 @@ public type ScalarEvent record {|
 
 # Represents the attributes of a YAML collection.
 #
-# + startType - YAML collection
-# + flowStyle - If set, the event represents the collection explicitly.
+# + startType - YAML collection  
+# + flowStyle - If set, the event represents the collection explicitly.  
+# + implicit - Flag is set, if there is only one mapping
 public type StartEvent record {|
     *NodeEvent;
     Collection startType;
     boolean flowStyle = false;
+    boolean implicit = false;
 |};
 
 # Represents the attributes to terminate the collection.

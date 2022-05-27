@@ -4,7 +4,8 @@ import yaml.common;
 public enum ParserOption {
     DEFAULT,
     EXPECT_KEY,
-    EXPECT_VALUE
+    EXPECT_VALUE,
+    EXPECT_SEQUENCE
 }
 
 public enum DocumentType {
@@ -33,7 +34,9 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
     }
 
     // Set the next line if the end of line is detected
-    if state.currentToken.token == lexer:EOL || state.currentToken.token == lexer:EMPTY_LINE {
+    if state.currentToken.token == lexer:EOL || state.currentToken.token == lexer:EMPTY_LINE
+        || state.currentToken.token == lexer:COMMENT {
+
         if state.lineIndex >= state.numLines - 1 {
             if docType == DIRECTIVE_DOCUMENT {
                 return generateExpectError(state, lexer:DIRECTIVE_MARKER, lexer:DIRECTIVE);
@@ -43,7 +46,7 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
             };
         }
         check state.initLexer();
-        return parse(state, docType = docType);
+        return parse(state, option, docType);
     }
 
     // Only directive tokens are allowed in directive document
@@ -87,7 +90,7 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
             boolean explicit = state.currentToken.token == lexer:DIRECTIVE_MARKER;
             state.explicitDoc = explicit;
 
-            check checkToken(state, [lexer:SEPARATION_IN_LINE, lexer:EOL]);
+            check checkToken(state, [lexer:SEPARATION_IN_LINE, lexer:EOL, lexer:COMMENT]);
             state.lexerState.resetState();
             state.yamlVersion = ();
 
@@ -98,7 +101,7 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
             if state.currentToken.token == lexer:SEPARATION_IN_LINE {
                 check checkToken(state, peek = true);
                 // There cannot be nodes next to the document marker.
-                if state.tokenBuffer.token != lexer:EOL && !explicit {
+                if state.tokenBuffer.token != lexer:EOL && state.tokenBuffer.token != lexer:COMMENT && !explicit {
                     return generateGrammarError(state,
                         string `'${state.tokenBuffer.token}' token cannot start in the same line as the document marker`);
                 }
@@ -106,7 +109,7 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
                 // Block collection nodes cannot be next to the directive marker.
                 if explicit && (state.tokenBuffer.token == lexer:PLANAR_CHAR && state.tokenBuffer.indentation != ()
                     || state.tokenBuffer.token == lexer:SEQUENCE_ENTRY) {
-                        return generateGrammarError(state,
+                    return generateGrammarError(state,
                             string `'${state.tokenBuffer.token}' token cannot start in the same line as the directive marker`);
                 }
             }

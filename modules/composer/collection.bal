@@ -10,7 +10,7 @@ import yaml.schema;
 # + return - Constructed Ballerina array on success
 function composeSequence(ComposerState state, boolean flowStyle) returns json[]|lexer:LexicalError|parser:ParsingError|ComposingError|schema:SchemaError {
     json[] sequence = [];
-    common:Event event = check checkEvent(state);
+    common:Event event = check checkEvent(state, parser:EXPECT_SEQUENCE);
 
     // Iterate until the end event is detected
     while true {
@@ -38,9 +38,8 @@ function composeSequence(ComposerState state, boolean flowStyle) returns json[]|
                 }
             }
         }
-
         sequence.push(check composeNode(state, event));
-        event = check checkEvent(state);
+        event = check checkEvent(state, parser:EXPECT_SEQUENCE);
     }
 
     return (sequence == [] && !flowStyle) ? [null] : sequence;
@@ -48,10 +47,11 @@ function composeSequence(ComposerState state, boolean flowStyle) returns json[]|
 
 # Compose the mapping collection into Ballerina map.
 #
-# + state - Current composer state
-# + flowStyle - If a collection is flow mapping
+# + state - Current composer state  
+# + flowStyle - If a collection is flow mapping  
+# + implicitMapping - Flag is set if there can only be one key-value pair
 # + return - Constructed Ballerina array on success
-function composeMapping(ComposerState state, boolean flowStyle) returns map<json>|lexer:LexicalError|parser:ParsingError|ComposingError|schema:SchemaError {
+function composeMapping(ComposerState state, boolean flowStyle, boolean implicitMapping) returns map<json>|lexer:LexicalError|parser:ParsingError|ComposingError|schema:SchemaError {
     map<json> structure = {};
     common:Event event = check checkEvent(state, parser:EXPECT_KEY);
 
@@ -98,6 +98,11 @@ function composeMapping(ComposerState state, boolean flowStyle) returns map<json
 
         // Map the key value pair
         structure[key.toString()] = value;
+
+        if implicitMapping {
+            break;
+        }
+
         event = check checkEvent(state, parser:EXPECT_KEY);
     }
 

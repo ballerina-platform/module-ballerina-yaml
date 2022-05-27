@@ -30,7 +30,10 @@ function nativeDataStructureDataGen() returns map<[string|string[], json]> {
         "explicit key with mapping value in block mapping": [["? key", ":"], {"key": ()}],
         "explicit key empty key": [["? ", ": value"], {"": "value"}],
         "empty value flow mapping": ["{key,}", {"key": ()}],
-        "empty values in block mapping": [["first:", "second:"], {"first": (), "second": ()}]
+        "empty values in block mapping": [["first:", "second:"], {"first": (), "second": ()}],
+        "single flow implicit map": ["[key: value]", [{"key": "value"}]],
+        "nested flow implicit map": ["[outer: {nested: value}]", [{"outer": {"nested" : "value"}}]],
+        "multiple flow implicit maps": [["[first: value1,", "second: value2]"],[{"first": "value1"}, {"second": "value2"}]] 
     };
 }
 

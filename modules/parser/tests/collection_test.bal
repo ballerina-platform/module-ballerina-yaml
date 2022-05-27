@@ -6,7 +6,7 @@ import yaml.lexer;
     dataProvider: collectionDataGen
 }
 function testBlockCollectionEvents(string|string[] line, common:Event[] eventTree) returns error? {
-    ParserState state = check new((line is string) ? [line] : line);
+    ParserState state = check new ((line is string) ? [line] : line);
 
     foreach common:Event item in eventTree {
         common:Event event = check parse(state);
@@ -14,7 +14,6 @@ function testBlockCollectionEvents(string|string[] line, common:Event[] eventTre
     }
 }
 
-//TODO: Uncomment the latter test cases
 function collectionDataGen() returns map<[string|string[], common:Event[]]> {
     return {
         "single element": ["- value", [{startType: common:SEQUENCE}, {value: "value"}]],
@@ -43,7 +42,7 @@ function collectionDataGen() returns map<[string|string[], common:Event[]]> {
 
 @test:Config {}
 function testInvalidIndentCollection() returns error? {
-    ParserState state = check new(["- ", "  - value", " - value"]);
+    ParserState state = check new (["- ", "  - value", " - value"]);
 
     common:Event event = check parse(state);
     test:assertEquals((<common:StartEvent>event).startType, common:SEQUENCE);
@@ -76,7 +75,7 @@ function testBlockMapAndSequenceAtSameIndent() returns error? {
     dataProvider: explicitKeysDataGen
 }
 function testExplicitKey(string|string[] line, common:Event[] eventTree) returns error? {
-    ParserState state = check new((line is string) ? [line] : line);
+    ParserState state = check new ((line is string) ? [line] : line);
 
     foreach common:Event item in eventTree {
         common:Event event = check parse(state);

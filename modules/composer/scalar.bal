@@ -37,7 +37,7 @@ function composeNode(ComposerState state, common:Event event) returns json|lexer
                 output = check castData(state, check composeSequence(state, event.flowStyle), schema:SEQUENCE, event.tag);
             }
             common:MAPPING => {
-                output = check castData(state, check composeMapping(state, event.flowStyle), schema:MAPPING, event.tag);
+                output = check castData(state, check composeMapping(state, event.flowStyle, event.implicit), schema:MAPPING, event.tag);
             }
             _ => {
                 return generateComposeError(state, "Only sequence and mapping are allowed as node start events", event);

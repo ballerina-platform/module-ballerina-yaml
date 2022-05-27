@@ -53,6 +53,46 @@ function appendData(ParserState state, ParserOption option,
         indentation = state.currentToken.indentation;
     }
 
+    // The tokens described in the indentaion.tokens belong to the second node.
+    TagStructure newNodeTagStructure = {};
+    TagStructure currentNodeTagStructure = {};
+    if indentation is lexer:Indentation {
+        match indentation.tokens.length() {
+            0 => {
+                newNodeTagStructure = tagStructure;
+            }
+            1 => {
+                match indentation.tokens[0] {
+                    lexer:ANCHOR => {
+                        if isAlias && tagStructure.anchor != () {
+                            return generateGrammarError(state, "An alias node cannot have an anchor");
+                        }
+                        newNodeTagStructure.tag = tagStructure.tag;
+                        currentNodeTagStructure.anchor = tagStructure.anchor;
+                    }
+                    lexer:TAG => {
+                        if isAlias && tagStructure.tag != () {
+                            return generateGrammarError(state, "An alias node cannot have a tag");
+                        }
+                        newNodeTagStructure.anchor = tagStructure.anchor;
+                        currentNodeTagStructure.tag = tagStructure.tag;
+                    }
+                }
+            }
+            2 => {
+                if isAlias && (tagStructure.anchor != () || tagStructure.tag != ()) {
+                    return generateGrammarError(state, "An alias node cannot have tag properties");
+                }
+                currentNodeTagStructure = tagStructure;
+            }
+        }
+    } else {
+        if isAlias && (tagStructure.anchor != () || tagStructure.tag != ()) {
+            return generateGrammarError(state, "An alias node cannot have tag properties");
+        }
+        currentNodeTagStructure = tagStructure;
+    }
+
     // Check if the current node is a key
     boolean isJsonKey = state.lexerState.isJsonKey;
 
@@ -93,7 +133,7 @@ function appendData(ParserState state, ParserOption option,
 
         check separate(state, isJsonKey || state.lexerState.isFlowCollection(), true);
         if option == EXPECT_VALUE {
-            buffer = {value: ()};
+            buffer = check constructEvent(state, {value: ()}, newNodeTagStructure);
         }
         if option == EXPECT_SEQUENCE {
             buffer = {startType: common:MAPPING, implicit: true};
@@ -122,8 +162,7 @@ function appendData(ParserState state, ParserOption option,
                 }
 
                 // Block mapping
-                return differentiateTagProperty(state, indentation.tokens,
-                    {startType: indentation.collection.pop()}, contentValue, tagStructure, isAlias, isJsonKey);
+                buffer = check constructEvent(state, {startType: indentation.collection.pop()}, newNodeTagStructure);
             }
             -1 => { // Decreased 
                 buffer = {endType: indentation.collection.shift()};
@@ -133,59 +172,17 @@ function appendData(ParserState state, ParserOption option,
             }
         }
     }
-    if isAlias && (tagStructure.anchor != () || tagStructure.tag != ()) {
-        return generateGrammarError(state, "An alias node cannot have tag properties");
+
+    if isJsonKey && currentNodeTagStructure.tag == () {
+        currentNodeTagStructure.tag = schema:defaultGlobalTagHandle + "str";
     }
-    if isJsonKey && tagStructure.tag == () {
-        tagStructure.tag = schema:defaultGlobalTagHandle + "str";
-    }
-    common:Event event = check constructEvent(state, contentValue, isAlias ? () : tagStructure);
+    common:Event event = check constructEvent(state, contentValue, isAlias ? () : currentNodeTagStructure);
 
     if buffer == () {
         return event;
     }
     state.eventBuffer.push(event);
     return buffer;
-}
-
-function differentiateTagProperty(ParserState state, lexer:YAMLToken[] tokens, map<json> currentValue,
-    map<json> contentValue, TagStructure tagStructure, boolean isAlias, boolean isJsonKey) returns common:Event|ParsingError {
-    match tokens.length() {
-        0 => { // The tag structure belongs to the empty node
-            state.eventBuffer.push(check constructEvent(state, contentValue));
-            return constructEvent(state, currentValue, tagStructure);
-        }
-        1 => { // The tag structure is divided between the key and the empty node
-            match tokens.pop() {
-                lexer:ANCHOR => {
-                    if isAlias && tagStructure.tag != () {
-                        return generateGrammarError(state, "An alias node cannot have tag properties");
-                    }
-                    state.eventBuffer.push(check constructEvent(state, contentValue, isAlias ? () : {anchor: tagStructure.anchor, tag: isJsonKey ? schema:defaultGlobalTagHandle + "str" : ()}));
-                    return constructEvent(state, {tag: tagStructure.tag}, currentValue);
-                }
-                lexer:TAG => {
-                    if isAlias && tagStructure.anchor != () {
-                        return generateGrammarError(state, "An alias node cannot have tag properties");
-                    }
-                    state.eventBuffer.push(check constructEvent(state, contentValue, isAlias ? () : {tag: tagStructure.tag}));
-                    return constructEvent(state, {anchor: tagStructure.anchor}, currentValue);
-                }
-            }
-        }
-        2 => { // The whole tag structure belongs mapping key
-            if isAlias && (tagStructure.anchor != () || tagStructure.tag != ()) {
-                return generateGrammarError(state, "An alias node cannot have tag properties");
-            }
-            if isJsonKey && tagStructure.tag == () {
-                tagStructure.tag = schema:defaultGlobalTagHandle + "str";
-            }
-            state.eventBuffer.push(check constructEvent(state, contentValue, isAlias ? () : tagStructure));
-            return constructEvent(state, currentValue);
-        }
-    }
-    return generateGrammarError(state,
-        string `There cannot be more than 2 tag properties to a node, but found ${tokens.length()}`);
 }
 
 # Extracts the data for the given node.

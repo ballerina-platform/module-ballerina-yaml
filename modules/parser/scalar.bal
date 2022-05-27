@@ -181,6 +181,10 @@ function planarScalar(ParserState state) returns ParsingError|string {
 
                 isFirstLine = false;
             }
+            lexer:COMMENT => {
+                check checkToken(state);
+                break;
+            }
             lexer:EMPTY_LINE => {
                 newLineBuffer += "\n";
                 check checkToken(state);

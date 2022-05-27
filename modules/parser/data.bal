@@ -57,7 +57,9 @@ function appendData(ParserState state, ParserOption option,
     boolean isJsonKey = state.lexerState.isJsonKey;
 
     // Ignore the whitespace and lines if there is any
-    check separate(state, true);
+    if state.currentToken.token != lexer:MAPPING_VALUE {
+        check separate(state, true);
+    }
     check checkToken(state, peek = true);
 
     // Check if the next token is a mapping value or    
@@ -65,9 +67,17 @@ function appendData(ParserState state, ParserOption option,
         check checkToken(state);
     }
 
-    // If there are no whitespace, and the current token is ':'
     state.lexerState.isJsonKey = false;
-    if state.currentToken.token == lexer:MAPPING_VALUE {
+
+    // If there are no whitespace, and the current token is ","
+    if state.currentToken.token == lexer:SEPARATOR {
+        check separate(state, true);
+        if option == EXPECT_KEY {
+            state.eventBuffer.push({value: ()});
+        }
+    }
+    // If there are no whitespace, and the current token is ':'
+    else if state.currentToken.token == lexer:MAPPING_VALUE {
         if state.lastKeyLine == state.lineIndex && !state.lexerState.isFlowCollection() {
             return generateGrammarError(state, "Two block mapping keys cannot be defined in the same line");
         }
@@ -85,7 +95,13 @@ function appendData(ParserState state, ParserOption option,
         if option == EXPECT_VALUE {
             buffer = {value: ()};
         }
+        if option == EXPECT_SEQUENCE {
+            buffer = {startType: common:MAPPING, implicit: true};
+        }
     } else {
+        if option == EXPECT_KEY && !explicitKey {
+            return generateGrammarError(state, "Expected a key for the block mapping");
+        }
         // There is already tag properties defined adn the value is not a key
         if definedProperties is TagStructure {
             if definedProperties.anchor != () && tagStructure.anchor != () {
@@ -94,14 +110,6 @@ function appendData(ParserState state, ParserOption option,
             if definedProperties.tag != () && tagStructure.tag != () {
                 return generateGrammarError(state, "Only one tag is allowed for a node");
             }
-        }
-    }
-
-    // If there are no whitespace, and the current token is ","
-    if state.currentToken.token == lexer:SEPARATOR {
-        check separate(state, true);
-        if option == EXPECT_KEY {
-            state.eventBuffer.push({value: ()});
         }
     }
 
@@ -199,7 +207,7 @@ function content(ParserState state, boolean peeked, ParserOption option, boolean
         lexer:SEPARATOR|lexer:MAPPING_VALUE => {
             return {value: ""};
         }
-        lexer:EOL => {
+        lexer:EOL|lexer:COMMENT => {
             return {value: ""};
         }
     }
@@ -286,8 +294,8 @@ function separate(ParserState state, boolean optional = false, boolean allowEmpt
     state.updateLexerContext(lexer:LEXER_START);
     check checkToken(state, peek = true);
 
-    // If separate is optional, skip the check when either lexer:EOL or separate-in-line is not detected.
-    if optional && !(state.tokenBuffer.token == lexer:EOL || state.tokenBuffer.token == lexer:SEPARATION_IN_LINE) {
+    // If separate is optional, skip the check when either end-of-line or separate-in-line is not detected.
+    if optional && !(state.tokenBuffer.token == lexer:EOL || state.tokenBuffer.token == lexer:SEPARATION_IN_LINE || state.tokenBuffer.token == lexer:COMMENT) {
         return;
     }
 
@@ -297,29 +305,28 @@ function separate(ParserState state, boolean optional = false, boolean allowEmpt
     if state.currentToken.token == lexer:SEPARATION_IN_LINE {
         // Check for s-b comment
         check checkToken(state, peek = true);
-        if state.tokenBuffer.token != lexer:EOL {
+        if state.tokenBuffer.token != lexer:EOL && state.tokenBuffer.token != lexer:COMMENT {
             return;
         }
         check checkToken(state);
     }
 
     // For the rest of the contexts, check either separation in line or comment lines
-    while state.currentToken.token == lexer:EOL || state.currentToken.token == lexer:EMPTY_LINE {
+    while state.currentToken.token == lexer:EOL || state.currentToken.token == lexer:EMPTY_LINE || state.currentToken.token == lexer:COMMENT {
         ParsingError? err = state.initLexer();
         if err is ParsingError {
             return optional || allowEmptyNode ? () : err;
         }
         check checkToken(state, peek = true);
 
-        //TODO: account flow-line prefix
         match state.tokenBuffer.token {
-            lexer:EOL|lexer:EMPTY_LINE => { // Check for multi-lines
+            lexer:EOL|lexer:EMPTY_LINE|lexer:COMMENT => { // Check for multi-lines
                 check checkToken(state);
             }
             lexer:SEPARATION_IN_LINE => { // Check for l-comment
                 check checkToken(state);
                 check checkToken(state, peek = true);
-                if state.tokenBuffer.token != lexer:EOL {
+                if state.tokenBuffer.token != lexer:EOL && state.tokenBuffer.token != lexer:COMMENT {
                     return;
                 }
                 check checkToken(state);

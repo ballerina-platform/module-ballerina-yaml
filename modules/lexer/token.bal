@@ -64,6 +64,7 @@ public enum YAMLToken {
     CHOMPING_INDICATOR = "<chomping-indicator>",
     EMPTY_LINE,
     EOL,
+    COMMENT = "<comment>",
     TRAILING_COMMENT = "<trailing-comment>",
     DUMMY
 }

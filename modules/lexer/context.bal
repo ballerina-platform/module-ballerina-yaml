@@ -129,7 +129,7 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
 
     if state.peek() == "#" && (isWhitespace(state, -1) || state.peek(-1) == ()) {
         state.forward(-1);
-        return state.tokenize(EOL);
+        return state.tokenize(COMMENT);
     }
 
     if matchRegexPattern(state, BOM_PATTERN) {
@@ -343,7 +343,7 @@ function contextExplicitKey(LexerState state) returns LexerState|LexicalError {
 
     if state.peek() == "#" && (isWhitespace(state, -1) || state.peek(-1) == ()) {
         state.forward(-1);
-        return state.tokenize(EOL);
+        return state.tokenize(COMMENT);
     }
 
     if isPlainSafe(state) {

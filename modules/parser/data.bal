@@ -17,6 +17,7 @@ type TagStructure record {|
 function appendData(ParserState state, ParserOption option,
     TagStructure tagStructure = {}, boolean peeked = false, TagStructure? definedProperties = ())
     returns common:Event|ParsingError {
+
     state.blockSequenceState = VALUE;
     common:Event? buffer = ();
 
@@ -29,6 +30,7 @@ function appendData(ParserState state, ParserOption option,
         }
 
     }
+    boolean explicitKey = state.explicitKey;
 
     if option == EXPECT_VALUE && state.currentToken.token == lexer:MAPPING_KEY {
         buffer = {value: ()};
@@ -42,15 +44,13 @@ function appendData(ParserState state, ParserOption option,
 
     state.updateLexerContext(state.explicitKey ? lexer:LEXER_EXPLICIT_KEY : lexer:LEXER_START);
 
-    map<json> contentValue = check content(state, peeked, option, tagStructure);
+    map<json> contentValue = check content(state, peeked, option, state.explicitKey, tagStructure);
     boolean isAlias = contentValue.hasKey("alias");
 
-    if !state.explicitKey {
+    state.explicitKey = false;
+    if !explicitKey {
         indentation = state.currentToken.indentation;
     }
-
-    boolean explicitKey = state.explicitKey;
-    state.explicitKey = false;
 
     // Check if the current node is a key
     boolean isJsonKey = state.lexerState.isJsonKey;
@@ -178,9 +178,12 @@ function differentiateTagProperty(ParserState state, lexer:YAMLToken[] tokens, m
 # + state - Current parser state  
 # + peeked - If the expected token is already in the state  
 # + option - Expected values inside a mapping collection  
+# + explicitKey - Whether the current node is an explicit key
 # + tagStructure - Tag structure of the current node
 # + return - String if a scalar event. The respective collection if a start event. Else, returns an error.
-function content(ParserState state, boolean peeked, ParserOption option, TagStructure tagStructure = {}) returns map<json>|ParsingError {
+function content(ParserState state, boolean peeked, ParserOption option, boolean explicitKey,
+    TagStructure tagStructure = {}) returns map<json>|ParsingError {
+
     if !peeked {
         check checkToken(state);
     }
@@ -228,6 +231,9 @@ function content(ParserState state, boolean peeked, ParserOption option, TagStru
         }
         lexer:ANCHOR|lexer:TAG|lexer:TAG_HANDLE => {
             common:Event event = check nodeComplete(state, EXPECT_KEY, tagStructure);
+            if explicitKey {
+                return event;
+            }
             if event is common:StartEvent && event.startType == common:MAPPING {
                 return {startType: common:MAPPING};
             }

@@ -106,8 +106,8 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
                 // Block collection nodes cannot be next to the directive marker.
                 if explicit && (state.tokenBuffer.token == lexer:PLANAR_CHAR && state.tokenBuffer.indentation != ()
                     || state.tokenBuffer.token == lexer:SEQUENCE_ENTRY) {
-                    return generateGrammarError(state,
-                        string `'${state.tokenBuffer.token}' token cannot start in the same line as the directive marker`);
+                        return generateGrammarError(state,
+                            string `'${state.tokenBuffer.token}' token cannot start in the same line as the directive marker`);
                 }
             }
             return {

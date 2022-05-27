@@ -187,12 +187,24 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
             return {startType: common:SEQUENCE, flowStyle: true};
         }
         lexer:SEQUENCE_END => {
+            if state.lexerState.isFlowCollection() {
+                check separate(state, true);
+                if state.tokenBuffer.token == lexer:SEPARATOR {
+                    check checkToken(state);
+                }
+            }
             return {endType: common:SEQUENCE};
         }
         lexer:MAPPING_END => {
             if option == EXPECT_VALUE {
                 state.eventBuffer.push({endType: common:MAPPING});
                 return {value: ()};
+            }
+            if state.lexerState.isFlowCollection() {
+                check separate(state, true);
+                if state.tokenBuffer.token == lexer:SEPARATOR {
+                    check checkToken(state);
+                }
             }
             return {endType: common:MAPPING};
         }

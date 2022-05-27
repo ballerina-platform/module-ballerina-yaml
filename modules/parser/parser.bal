@@ -148,7 +148,9 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
             }
         }
         lexer:SEPARATOR => { // Empty node as the value in flow mappings
-            return {value: ()};
+            if option == EXPECT_MAP_VALUE { // Check for empty values in flow mappings
+                return {value: ()};
+            }
         }
         lexer:MAPPING_KEY => { // Explicit key
             state.explicitKey = true;

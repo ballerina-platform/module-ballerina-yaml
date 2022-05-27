@@ -142,7 +142,7 @@ function appendData(ParserState state, ParserOption option,
         if option == EXPECT_MAP_KEY && !explicitKey {
             return generateGrammarError(state, "Expected a key for the block mapping");
         }
-        // There is already tag properties defined adn the value is not a key
+        // There is already tag properties defined and the value is not a key
         if definedProperties is TagStructure {
             if definedProperties.anchor != () && tagStructure.anchor != () {
                 return generateGrammarError(state, "Only one anchor is allowed for a node");

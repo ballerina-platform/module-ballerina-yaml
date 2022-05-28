@@ -111,6 +111,9 @@ function appendData(ParserState state, ParserOption option,
 
     // If there are no whitespace, and the current token is ","
     if state.currentToken.token == lexer:SEPARATOR {
+        if !state.lexerState.isFlowCollection() {
+            return generateGrammarError(state, "',' are only allowed in flow collections");
+        }
         check separate(state, true);
         if option == EXPECT_MAP_KEY {
             state.eventBuffer.push({value: ()});
@@ -235,7 +238,13 @@ function content(ParserState state, boolean peeked, ParserOption option, boolean
         lexer:PLANAR_CHAR => {
             return {value: check planarScalar(state)};
         }
-        lexer:SEQUENCE_START|lexer:SEQUENCE_ENTRY => {
+        lexer:SEQUENCE_START => {
+            return {startType: common:SEQUENCE};
+        }
+        lexer:SEQUENCE_ENTRY => {
+            if state.tagPropertiesInLine {
+                return generateGrammarError(state, "'-' cannot be defined after tag properties");
+            }
             return {startType: common:SEQUENCE};
         }
         lexer:MAPPING_START => {

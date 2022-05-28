@@ -45,6 +45,8 @@ public class ParserState {
 
     public boolean directiveDocument = false;
 
+    boolean tagPropertiesInLine = false;
+
     common:Event[] eventBuffer = [];
 
     public function init(string[] lines) returns ParsingError? {
@@ -75,6 +77,7 @@ public class ParserState {
         }
         self.explicitDoc = false;
         self.blockSequenceState = ENTRY;
+        self.tagPropertiesInLine = false;
         self.lexerState.setLine(self.lines[self.lineIndex], self.lineIndex);
     }
 }

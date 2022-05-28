@@ -20,7 +20,6 @@ function nodeTag(ParserState state) returns [string?, string?]|ParsingError|lexe
             check separate(state);
         }
     }
-
     return [tagHandle, tagPrefix];
 }
 
@@ -41,6 +40,9 @@ function nodeAnchor(ParserState state) returns string?|ParsingError {
 # + definedProperties - Tag properties defined by the previous node
 # + return - Constructed node with the properties and the value.
 function nodeComplete(ParserState state, ParserOption option, TagStructure? definedProperties = ()) returns common:Event|ParsingError {
+    TagStructure tagStructure = {};
+    state.tagPropertiesInLine = true;
+
     match state.currentToken.token {
         lexer:TAG_HANDLE => {
             string tagHandle = state.currentToken.value;
@@ -49,31 +51,27 @@ function nodeComplete(ParserState state, ParserOption option, TagStructure? defi
             state.updateLexerContext(lexer:LEXER_TAG_NODE);
             check checkToken(state, lexer:TAG);
             string tagPrefix = state.currentToken.value;
+            tagStructure.tag = check generateCompleteTagName(state, tagHandle, tagPrefix);
 
             // Check if there is a separate 
             check separate(state, true);
 
             // Obtain the anchor if there exists
-            string? anchor = check nodeAnchor(state);
-
-            return appendData(state, option,
-                {tag: check generateCompleteTagName(state, tagHandle, tagPrefix), anchor}, false, definedProperties);
+            tagStructure.anchor = check nodeAnchor(state);
         }
         lexer:TAG => {
             // Obtain the tagPrefix name
-            string tagPrefix = state.currentToken.value;
+            tagStructure.tag = state.currentToken.value;
 
             // There must be a separate after the tagPrefix
             check separate(state);
 
             // Obtain the anchor if there exists
-            string? anchor = check nodeAnchor(state);
-
-            return appendData(state, option, {tag: tagPrefix, anchor}, false, definedProperties);
+            tagStructure.anchor = check nodeAnchor(state);
         }
         lexer:ANCHOR => {
             // Obtain the anchor name
-            string anchor = state.currentToken.value;
+            tagStructure.anchor = state.currentToken.value;
 
             // Check if there is a separate
             check separate(state);
@@ -84,16 +82,11 @@ function nodeComplete(ParserState state, ParserOption option, TagStructure? defi
             [tagHandle, tagPrefix] = check nodeTag(state);
 
             // Construct the complete tag
-            string? tag;
-            if tagPrefix == () {
-                tag = ();
-            } else {
-                tag = tagHandle == () ? tagPrefix : check generateCompleteTagName(state, tagHandle, tagPrefix);
+            if tagPrefix != () {
+                tagStructure.tag = tagHandle == () ? tagPrefix : check generateCompleteTagName(state, tagHandle, tagPrefix);
             }
-
-            return appendData(state, option, {tag, anchor}, false, definedProperties);
         }
     }
-
-    return generateGrammarError(state, "Invalid token to start a node");
+    return appendData(state, option, tagStructure, false, definedProperties);
 }
+

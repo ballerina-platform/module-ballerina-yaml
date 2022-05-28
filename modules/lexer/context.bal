@@ -521,6 +521,7 @@ function contextBlockScalar(LexerState state) returns LexerState|LexicalError {
 
         match state.peek() {
             "#" => { // Generate beginning of the trailing comment
+                state.forward(-1);
                 return state.trailingComment ? state.tokenize(EOL) : state.tokenize(TRAILING_COMMENT);
             }
             "'"|"\""|"." => { // Possible flow scalar
@@ -546,6 +547,7 @@ function contextBlockScalar(LexerState state) returns LexerState|LexicalError {
                     state.forward();
                 }
                 "#" => { // Generate beginning of the trailing comment
+                    state.forward(-1);
                     return state.tokenize(EOL);
                 }
                 () => { // Empty lines are allowed in trailing comments
@@ -573,7 +575,9 @@ function contextBlockScalar(LexerState state) returns LexerState|LexicalError {
         }
 
         state.addIndent += additionalIndent;
-        state.captureIndent = false;
+        if state.index < state.line.length() {
+            state.captureIndent = false;
+        }
     }
 
     if state.index >= state.line.length() {

@@ -247,6 +247,7 @@ function blockScalar(ParserState state, boolean isFolded) returns ParsingError|s
     string lexemeBuffer = "";
     string newLineBuffer = "";
     boolean isFirstLine = true;
+    boolean onlyEmptyLine = false;
     boolean prevTokenIndented = false;
     boolean tokenProcessed = false;
 
@@ -284,12 +285,15 @@ function blockScalar(ParserState state, boolean isFolded) returns ParsingError|s
                     break;
                 }
                 check state.initLexer();
+                onlyEmptyLine = isFirstLine;
                 isFirstLine = false;
             }
             lexer:TRAILING_COMMENT => {
                 state.lexerState.trailingComment = true;
+
                 // Terminate at the end of the line
                 if state.lineIndex == state.numLines - 1 {
+                    check checkToken(state);
                     tokenProcessed = true;
                     break;
                 }
@@ -330,7 +334,9 @@ function blockScalar(ParserState state, boolean isFolded) returns ParsingError|s
                 lexemeBuffer += newLineBuffer;
             }
             "=" => {
-                lexemeBuffer += "\n";
+                if !onlyEmptyLine {
+                    lexemeBuffer += "\n";
+                }
             }
         }
     }

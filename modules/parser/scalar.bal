@@ -258,7 +258,7 @@ function blockScalar(ParserState state, boolean isFolded) returns ParsingError|s
             lexer:PRINTABLE_CHAR => {
                 if !isFirstLine {
                     string suffixChar = "\n";
-                    if isFolded && prevTokenIndented && state.tokenBuffer.value[0] != " " {
+                    if isFolded && prevTokenIndented && (state.tokenBuffer.value[0] != " " && state.tokenBuffer.value[0] != "\t") {
                         suffixChar = newLineBuffer.length() == 0 ? " " : "";
                     }
                     lexemeBuffer += newLineBuffer + suffixChar;
@@ -266,7 +266,7 @@ function blockScalar(ParserState state, boolean isFolded) returns ParsingError|s
                 }
 
                 lexemeBuffer += state.tokenBuffer.value;
-                prevTokenIndented = state.tokenBuffer.value[0] != " ";
+                prevTokenIndented = (state.tokenBuffer.value[0] != " " && state.tokenBuffer.value[0] != "\t");
                 isFirstLine = false;
             }
             lexer:EOL => {

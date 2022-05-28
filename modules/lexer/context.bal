@@ -117,14 +117,25 @@ function contextYamlDirective(LexerState state) returns LexerState|LexicalError 
 # + state - Current lexer state.
 # + return - Tokenized token
 function contextStart(LexerState state) returns LexerState|LexicalError {
-    match state.peek() {
-        " "|"\t" => {
-            // Return empty line if there is only whitespace
-            // Else, return separation in line
-            boolean isFirstChar = state.index == 0;
-            _ = check iterate(state, scanWhitespace, SEPARATION_IN_LINE);
-            return (state.peek() == () && isFirstChar) ? state.tokenize(EMPTY_LINE) : state;
-        }
+    boolean isFirstChar = state.index == 0;
+    boolean startsWithWhitespace = false;
+
+    if isWhitespace(state) {
+        // Return empty line if there is only whitespace
+        // Else, return separation in line
+        _ = check iterate(state, scanWhitespace, SEPARATION_IN_LINE);
+        startsWithWhitespace = true;
+    }
+
+    if state.isFlowCollection() && isFirstChar && state.peek() != () {
+        check assertIndent(state, 1);
+        if isTabInIndent(state, state.indent) {
+        return generateIndentationError(state, "Cannot have tab as an indentation");
+    }
+    }
+
+    if startsWithWhitespace {
+        return (state.peek() == () && isFirstChar) ? state.tokenize(EMPTY_LINE) : state;
     }
 
     if state.peek() == "#" && (isWhitespace(state, -1) || state.peek(-1) == ()) {

@@ -19,8 +19,8 @@ type Indent record {|
 function checkIndent(LexerState state, int? mapIndex = ()) returns Indentation|LexicalError {
     int startIndex = mapIndex == () ? state.index - 1 : mapIndex;
 
-    if state.tabInWhitespace {
-        return generateIndentationError(state, "Cannot have tab in indent");
+    if isTabInIndent(state, startIndex) {
+        return generateIndentationError(state, "Cannot have tab as an indentation");
     }
 
     common:Collection collection = mapIndex == () ? common:SEQUENCE : common:MAPPING;

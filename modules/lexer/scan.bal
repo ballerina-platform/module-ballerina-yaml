@@ -354,7 +354,7 @@ function scanWhitespace(LexerState state) returns boolean {
         return false;
     }
     if state.peek() == "\t" {
-        state.tabInWhitespace = true;
+        state.updateFirstTabIndex();
         return false;
     }
     return true;
@@ -367,7 +367,7 @@ function scanWS(LexerState state) returns string {
         if state.peek() == " " {
             whitespace += " ";
         } else if state.peek() == "\t" {
-            state.tabInWhitespace = true;
+            state.updateFirstTabIndex();
             whitespace += "\t";
         } else {
             break;

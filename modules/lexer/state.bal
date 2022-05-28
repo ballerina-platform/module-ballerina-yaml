@@ -48,7 +48,7 @@ public class LexerState {
 
     boolean enforceMapping = false;
 
-    boolean tabInWhitespace = false;
+    int tabInWhitespace = -1;
 
     boolean indentationBreak = false;
 
@@ -89,6 +89,12 @@ public class LexerState {
         }
     }
 
+    function updateFirstTabIndex() {
+        if self.index < self.tabInWhitespace || self.tabInWhitespace < 0 {
+            self.tabInWhitespace = self.index;
+        }
+    }
+
     # Add the output YAML token to the current state
     #
     # + token - YAML token
@@ -123,7 +129,7 @@ public class LexerState {
         self.lastEscapedChar = -1;
         self.indentStartIndex = -1;
         self.tokensForMappingValue = [];
-        self.tabInWhitespace = false;
+        self.tabInWhitespace = -1;
     }
 
     # Reset the current lexer state

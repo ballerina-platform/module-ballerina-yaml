@@ -109,6 +109,9 @@ function isPlainSafe(LexerState state) returns boolean
 function isWhitespace(LexerState state, int offset = 0) returns boolean
     => state.peek(offset) == " " || state.peek(offset) == "\t";
 
+function isTabInIndent(LexerState state, int upperLimit) returns boolean 
+    => state.indent > -1 && state.tabInWhitespace > -1 && state.tabInWhitespace <= upperLimit;
+
 function discernTagPropertyFromPlanar(LexerState state, int offset = 0) returns boolean
     => (!state.allowTokensAsPlanar || state.index < state.indent + 1 + offset);
 

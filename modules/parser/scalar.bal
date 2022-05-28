@@ -55,17 +55,23 @@ function doubleQuoteScalar(ParserState state) returns ParsingError|string {
                 }
             }
             lexer:EMPTY_LINE => {
-                if state.lexerState.firstLine { // Whitespace is preserved on the first line
-                    lexemeBuffer += state.currentToken.value;
-                    state.lexerState.firstLine = false;
-                } else if escaped { // Whitespace is preserved when escaped
+                if escaped && !state.lexerState.firstLine { // Whitespace is preserved when escaped
                     lexemeBuffer += state.currentToken.value + "\n";
-                } else { // Whitespace is ignored when line folding
+                } else if !state.lexerState.firstLine { // Whitespace is ignored when line folding
                     lexemeBuffer = trimTailWhitespace(lexemeBuffer);
                     lexemeBuffer += "\n";
                 }
                 emptyLine = true;
                 check state.initLexer("Expected to end the multi-line double-quoted scalar");
+
+                boolean firstLineBuffer = state.lexerState.firstLine;
+                state.lexerState.firstLine = false;
+
+                check checkToken(state, peek = true);
+                if state.tokenBuffer.token == lexer:DOUBLE_QUOTE_DELIMITER && firstLineBuffer {
+                    lexemeBuffer += " ";
+                }
+                state.lexerState.firstLine = false;
             }
             _ => {
                 return generateInvalidTokenError(state, "double-quoted scalar");
@@ -119,15 +125,21 @@ function singleQuoteScalar(ParserState state) returns ParsingError|string {
                 }
             }
             lexer:EMPTY_LINE => {
-                if state.lexerState.firstLine { // Whitespace is preserved on the first line
-                    lexemeBuffer += state.currentToken.value;
-                    state.lexerState.firstLine = false;
-                } else { // Whitespace is ignored when line folding
+                if !state.lexerState.firstLine { // Whitespace is ignored when line folding
                     lexemeBuffer = trimTailWhitespace(lexemeBuffer);
                     lexemeBuffer += "\n";
                 }
                 emptyLine = true;
                 check state.initLexer("Expected to end the multi-line single-quoted scalar");
+
+                boolean firstLineBuffer = state.lexerState.firstLine;
+                state.lexerState.firstLine = false;
+
+                check checkToken(state, peek = true);
+                if state.tokenBuffer.token == lexer:SINGLE_QUOTE_DELIMITER && firstLineBuffer {
+                    lexemeBuffer += " ";
+                }
+                state.lexerState.firstLine = false;
             }
             _ => {
                 return generateInvalidTokenError(state, "single-quoted scalar");

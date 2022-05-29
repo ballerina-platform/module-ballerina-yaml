@@ -290,7 +290,7 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
             _ = state.tokenize(MAPPING_KEY);
 
             // Capture the for empty key mapping values
-            if state.numOpenedFlowCollections == 0 {
+            if !state.isFlowCollection() {
                 state.indentation = check checkIndent(state, state.index - 1);
             }
             return state;
@@ -354,7 +354,7 @@ function contextExplicitKey(LexerState state) returns LexerState|LexicalError {
             return (state.peek() == () && isFirstChar) ? state.tokenize(EMPTY_LINE) : state;
         }
         ":" => {
-            if state.numOpenedFlowCollections > 0 {
+            if state.isFlowCollection() {
                 return state.tokenize(MAPPING_VALUE);
             }
 
@@ -372,7 +372,7 @@ function contextExplicitKey(LexerState state) returns LexerState|LexicalError {
     }
 
     if isPlainSafe(state) {
-        return iterate(state, scanPlanarChar, PLANAR_CHAR);
+        return scanMappingValueKey(state, PLANAR_CHAR, scanPlanarChar);
     }
 
     return contextStart(state);

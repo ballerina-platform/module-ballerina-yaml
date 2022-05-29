@@ -2,25 +2,29 @@ import ballerina/test;
 import yaml.common;
 
 @test:Config {
-    groups: ["directives"]
+    groups: ["directives", "parser"]
 }
 function testAccurateYAMLDirective() returns error? {
-    ParserState state = check new (["%YAML 1.3"]);
+    ParserState state = check new (["%YAML 1.3", "---"]);
     _ = check parse(state, docType = ANY_DOCUMENT);
     test:assertEquals(state.yamlVersion, 1.3);
 }
 
-@test:Config {}
+@test:Config {
+    groups: ["parser"]
+}
 function testYAMLVersionsOfMultipleDocuments() returns error? {
-    ParserState state = check new (["%YAML 1.3", "---", "...", "%YAML 1.1"]);
+    ParserState state = check new (["%YAML 1.3", "---", "...", "%YAML 1.1", "---"]);
     _ = check parse(state, docType = DIRECTIVE_DOCUMENT);
+    test:assertEquals(state.yamlVersion, 1.3);
     _ = check parse(state, docType = BARE_DOCUMENT);
     _ = check parse(state, docType = DIRECTIVE_DOCUMENT);
     test:assertEquals(state.yamlVersion, 1.1);
 }
 
 @test:Config {
-    dataProvider: invalidYAMLVersionDataGen
+    dataProvider: invalidYAMLVersionDataGen,
+    groups: ["parser"]
 }
 function testOnlySupportMajorVersionOne(string line) returns error? {
     check assertParsingError([line]);
@@ -34,14 +38,14 @@ function invalidYAMLVersionDataGen() returns map<[string]> {
 }
 
 @test:Config {
-    groups: ["directives"]
+    groups: ["directives", "parser"]
 }
 function testOnlySupportVersion1() returns error? {
     check assertParsingError(["%YAML 1.3", "%YAML 1.1"]);
 }
 
 @test:Config {
-    groups: ["directives"]
+    groups: ["directives", "parser"]
 }
 function testDuplicateYAMLDirectives() returns error? {
     check assertParsingError(["%YAML 1.3", "%YAML 1.1"]);
@@ -49,7 +53,7 @@ function testDuplicateYAMLDirectives() returns error? {
 
 @test:Config {
     dataProvider: invalidDirectiveDataGen,
-    groups: ["directives"]
+    groups: ["directives", "parser"]
 }
 function testInvalidYAMLDirectives(string line) returns error? {
     check assertParsingError(line);
@@ -63,13 +67,16 @@ function invalidDirectiveDataGen() returns map<[string]> {
     };
 }
 
-@test:Config {}
+@test:Config {
+    groups: ["parser"]
+}
 function testTagDuplicates() returns error? {
     check assertParsingError(["%TAG !a! firstPrefix ", "%TAG !a! secondPrefix "]);
 }
 
 @test:Config {
-    dataProvider: tagHandlesDataGen
+    dataProvider: tagHandlesDataGen,
+    groups: ["parser"]
 }
 function testTagHandles(string line, string tagHandle, string tagPrefix) returns error? {
     ParserState state = check new ([line, "---"]);
@@ -85,12 +92,16 @@ function tagHandlesDataGen() returns map<[string, string, string]> {
     };
 }
 
-@test:Config {}
+@test:Config {
+    groups: ["parser"]
+}
 function testInvalidContentInDirectiveDocument() returns error? {
     check assertParsingError(["%TAG ! local", "anything that is not %"]);
 }
 
-@test:Config {}
+@test:Config {
+    groups: ["parser"]
+}
 function testInvalidDirectiveInBareDocument() returns error? {
     ParserState state = check new (["---", "%TAG ! local"]);
 
@@ -100,13 +111,16 @@ function testInvalidDirectiveInBareDocument() returns error? {
     test:assertTrue(err is ParsingError);
 }
 
-@test:Config {}
+@test:Config {
+    groups: ["parser"]
+}
 function testStartingEmptyLines() returns error? {
     check assertParsingEvent(["", " ", "", " value"], "value");
 }
 
 @test:Config {
-    dataProvider: reservedDirectiveDataGen
+    dataProvider: reservedDirectiveDataGen,
+    groups: ["parser"]
 }
 function testValidReservedDirective(string line, string reservedDirective) returns error? {
     ParserState state = check new ([line, "---"]);

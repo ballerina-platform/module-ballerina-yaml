@@ -93,9 +93,9 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
 
             check checkToken(state, [lexer:SEPARATION_IN_LINE, lexer:EOL, lexer:COMMENT]);
             state.lexerState.resetState();
-            state.yamlVersion = ();
 
             if !explicit {
+                state.yamlVersion = ();
                 state.customTagHandles = {};
             }
 

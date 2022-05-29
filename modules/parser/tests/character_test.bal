@@ -3,7 +3,8 @@ import yaml.common;
 import yaml.schema;
 
 @test:Config {
-    dataProvider: lineFoldingDataGen
+    dataProvider: lineFoldingDataGen,
+    groups: ["parser"]
 }
 function testProcessLineFolding(string[] arr, string value) returns error? {
     check assertParsingEvent(arr, value);
@@ -17,7 +18,8 @@ function lineFoldingDataGen() returns map<[string[], string]> {
 }
 
 @test:Config {
-    dataProvider: invalidNodeTagDataGen
+    dataProvider: invalidNodeTagDataGen,
+    groups: ["parser"]
 }
 function testInvalidNodeTagToken(string line, boolean isLexical) returns error? {
     check assertParsingError(line, isLexical, customTagHandles = {"!e!": "tag:named:"});
@@ -32,7 +34,8 @@ function invalidNodeTagDataGen() returns map<[string, boolean]> {
 }
 
 @test:Config {
-    dataProvider: tagShorthandDataGen
+    dataProvider: tagShorthandDataGen,
+    groups: ["parser"]
 }
 function testTagShorthandEvent(string line, string tag) returns error? {
     check assertParsingEvent(line, tag = tag, customTagHandles = {"!e!": "tag:named:"});
@@ -49,7 +52,8 @@ function tagShorthandDataGen() returns map<[string, string]> {
 }
 
 @test:Config {
-    dataProvider: invalidTagShorthandDataGen
+    dataProvider: invalidTagShorthandDataGen,
+    groups: ["parser"]
 }
 function testInvalidTagShorthandEvent(string line, boolean isLexical) returns error? {
     check assertParsingError(line, isLexical, customTagHandles = {"!e!": "tag:named:"});
@@ -63,7 +67,8 @@ function invalidTagShorthandDataGen() returns map<[string, boolean]> {
 }
 
 @test:Config {
-    dataProvider: nodeSeparateDataGen
+    dataProvider: nodeSeparateDataGen,
+    groups: ["parser"]
 }
 function testNodeSeparationEvent(string[] arr, string tag) returns error? {
     check assertParsingEvent(arr, "value", tag, "anchor");
@@ -79,7 +84,9 @@ function nodeSeparateDataGen() returns map<[string[], string]> {
     };
 }
 
-@test:Config {}
+@test:Config {
+    groups: ["parser"]
+}
 function testAliasEvent() returns error? {
     ParserState state = check new (["*anchor"]);
     common:Event event = check parse(state);
@@ -88,7 +95,8 @@ function testAliasEvent() returns error? {
 }
 
 @test:Config {
-    dataProvider: endEventDataGen
+    dataProvider: endEventDataGen,
+    groups: ["parser"]
 }
 function testEndEvent(string line, common:Collection endType) returns error? {
     ParserState state = check new ([line]);
@@ -106,7 +114,8 @@ function endEventDataGen() returns map<[string, common:Collection]> {
 }
 
 @test:Config {
-    dataProvider: startEventDataGen
+    dataProvider: startEventDataGen,
+    groups: ["parser"]
 }
 function testStartEvent(string line, common:Collection eventType, string? anchor) returns error? {
     ParserState state = check new ([line]);

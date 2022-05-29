@@ -2,7 +2,24 @@ import ballerina/test;
 import yaml.common;
 
 @test:Config {
-    dataProvider: singleQuoteDataGen
+    dataProvider: doubleQuoteLineBreakDataGen,
+    groups: ["parser"]
+}
+function testDoubleQuoteLineBreakEvent(string[] arr, string value) returns error? {
+    check assertParsingEvent(arr, value);
+}
+
+function doubleQuoteLineBreakDataGen() returns map<[string[], string]> {
+    return {
+        "flow-folded": [["\"folded ", "to a space,   ", " ", "to a line feed\""], "folded to a space,\nto a line feed"],
+        "escaped-line-break": [["\"folded to \\", " non-content\""], "folded to non-content"],
+        "first-line-space": [["\"space \""], "space "]
+    };
+}
+
+@test:Config {
+    dataProvider: singleQuoteDataGen,
+    groups: ["parser"]
 }
 function testSingleQuoteEvent(string[] arr, string value) returns error? {
     check assertParsingEvent(arr, value);
@@ -17,16 +34,19 @@ function singleQuoteDataGen() returns map<[string[], string]> {
     };
 }
 
-@test:Config {}
+@test:Config {
+    groups: ["parser"]
+}
 function testMultilinePlanarEvent() returns error? {
     check assertParsingEvent(["1st non-empty", " ", " 2nd non-empty ", "  3rd non-empty"], "1st non-empty\n2nd non-empty 3rd non-empty");
 }
 
 @test:Config {
-    dataProvider: flowKeyDataGen
+    dataProvider: flowKeyDataGen,
+    groups: ["parser"]
 }
 function testFlowKeyEvent(string line, string? key, string? value) returns error? {
-    ParserState state = check new([line]);
+    ParserState state = check new ([line]);
 
     common:Event event = check parse(state);
     test:assertEquals((<common:StartEvent>event).startType, common:MAPPING);
@@ -52,10 +72,11 @@ function flowKeyDataGen() returns map<[string, string?, string?]> {
 }
 
 @test:Config {
-    dataProvider: multipleMapEntriesDataGen
+    dataProvider: multipleMapEntriesDataGen,
+    groups: ["parser"]
 }
 function testMultipleMapEntriesEvent(string[] arr, string?[] keys, string?[] values) returns error? {
-    ParserState state = check new(arr);
+    ParserState state = check new (arr);
 
     common:Event event = check parse(state);
     test:assertEquals((<common:StartEvent>event).startType, common:MAPPING);
@@ -71,7 +92,6 @@ function testMultipleMapEntriesEvent(string[] arr, string?[] keys, string?[] val
 
 function multipleMapEntriesDataGen() returns map<[string[], string?[], string?[]]> {
     return {
-        "multiple values": [["{first: second ,", "third: forth"], ["first", "third"], ["second", "forth"]],
         "ends with comma": [["{first: second ,", "third: forth ,"], ["first", "third"], ["second", "forth"]],
         "anchors in mapping": [["&a a: b", "c: &d d"], ["a", "c"], ["b", "d"]],
         "tags in mapping": [["!a a: b", "c: !d d"], ["a", "c"], ["b", "d"]],

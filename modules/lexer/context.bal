@@ -20,6 +20,13 @@ public enum Context {
 # + state - Current lexer state.
 # + return - Tokenized double quoted scalar
 function contextDoubleQuote(LexerState state) returns LexerState|LexicalError {
+    if isMarker(state, true) {
+        return state.tokenize(DIRECTIVE_MARKER);
+    }
+    if isMarker(state, false) {
+        return state.tokenize(DOCUMENT_MARKER);
+    }
+
     // Check for empty lines
     if isWhitespace(state) {
         string whitespace = scanWS(state);
@@ -49,6 +56,13 @@ function contextDoubleQuote(LexerState state) returns LexerState|LexicalError {
 # + state - Current lexer state.
 # + return - Tokenized single quoted scalar
 function contextSingleQuote(LexerState state) returns LexerState|LexicalError {
+    if isMarker(state, true) {
+        return state.tokenize(DIRECTIVE_MARKER);
+    }
+    if isMarker(state, false) {
+        return state.tokenize(DOCUMENT_MARKER);
+    }
+
     // Check for empty lines
     if isWhitespace(state) {
         string whitespace = scanWS(state);
@@ -130,8 +144,8 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
     if state.isFlowCollection() && isFirstChar && state.peek() != () {
         check assertIndent(state, 1);
         if isTabInIndent(state, state.indent) {
-        return generateIndentationError(state, "Cannot have tab as an indentation");
-    }
+            return generateIndentationError(state, "Cannot have tab as an indentation");
+        }
     }
 
     if startsWithWhitespace {
@@ -147,14 +161,15 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
         return state.tokenize(BOM);
     }
 
+    if isMarker(state, true) {
+        return state.tokenize(DIRECTIVE_MARKER);
+    }
+    if isMarker(state, false) {
+        return state.tokenize(DOCUMENT_MARKER);
+    }
+
     match state.peek() {
         "-" => {
-            // Scan for directive marker
-            if state.peek(1) == "-" && state.peek(2) == "-" && (isWhitespace(state, 3) || state.peek(3) == ()) {
-                state.forward(2);
-                return state.tokenize(DIRECTIVE_MARKER);
-            }
-
             // Scan for planar characters
             if discernPlanarFromIndicator(state) {
                 state.updateStartIndex();
@@ -174,12 +189,6 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
             return state;
         }
         "." => {
-            // Scan for directive marker
-            if state.peek(1) == "." && state.peek(2) == "." && (isWhitespace(state, 3) || state.peek(3) == ()) {
-                state.forward(2);
-                return state.tokenize(DOCUMENT_MARKER);
-            }
-
             // Scan for planar characters
             state.updateStartIndex();
             state.forward();

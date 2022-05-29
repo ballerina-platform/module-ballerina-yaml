@@ -25,7 +25,8 @@ string yamlMap = string `${schema:defaultGlobalTagHandle}map`;
 string yamlStr = string `${schema:defaultGlobalTagHandle}str`;
 
 @test:Config {
-    dataProvider: serializingEventDataGen
+    dataProvider: serializingEventDataGen,
+    groups: ["serializer"]
 }
 function testGenerateSerializingEvent(json structure, common:Event[] assertingEvents) returns error? {
     common:Event[] events = check serialize(structure, {}, 1, "\"", false);
@@ -46,7 +47,8 @@ function serializingEventDataGen() returns map<[json, common:Event[]]> {
 }
 
 @test:Config {
-    dataProvider: keySerializeDataGen
+    dataProvider: keySerializeDataGen,
+    groups: ["serializer"]
 }
 function testTagInSerializedEvent(json structure, common:Event[] assertingEvents) returns error? {
     common:Event[] events = check serialize(structure, schema:getCoreSchemaTags(), 1, "\"", false);
@@ -66,7 +68,9 @@ function keySerializeDataGen() returns map<[json, common:Event[]]> {
     };
 }
 
-@test:Config {}
+@test:Config {
+    groups: ["serializer"]
+}
 function testCustomTag() returns error? {
     map<schema:YAMLTypeConstructor> tagHandles = schema:getJsonSchemaTags();
     tagHandles["!rgb"] = {
@@ -83,7 +87,9 @@ function testCustomTag() returns error? {
     test:assertEquals(events[0], expectedEvent);
 }
 
-@test:Config {}
+@test:Config {
+    groups: ["serializer"]
+}
 function testSwitchFlowStyleUponBlockLevel() returns error? {
     common:Event[] events = check serialize([["value"]], {}, 1, "\"", false);
 
@@ -92,7 +98,8 @@ function testSwitchFlowStyleUponBlockLevel() returns error? {
 }
 
 @test:Config {
-    dataProvider: invalidPlanarDataGen
+    dataProvider: invalidPlanarDataGen,
+    groups: ["serializer"]
 }
 function testQuotesForInvalidPlanarChar(string line) returns error? {
     common:Event[] events = check serialize(line, {}, 1, "\"", false);
@@ -110,14 +117,18 @@ function invalidPlanarDataGen() returns map<[string]> {
     };
 }
 
-@test:Config {}
+@test:Config {
+    groups: ["serializer"]
+}
 function testSingleQuotesOption() returns error? {
     common:Event[] events = check serialize("? value", {}, 1, "'", false);
     common:Event expectedEvent = {value: "'? value'", tag: yamlStr};
     test:assertEquals(events[0], expectedEvent);
 }
 
-@test:Config {}
+@test:Config {
+    groups: ["serializer"]
+}
 function testEnforceQuotesOption() returns error? {
     common:Event[] events = check serialize("value", {}, 1, "\"", true);
     common:Event expectedEvent = {value: "\"value\"", tag: yamlStr};

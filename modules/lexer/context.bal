@@ -178,14 +178,15 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
                 return scanMappingValueKey(state, PLANAR_CHAR, scanPlanarChar);
             }
 
-            // Return block sequence entry
-            _ = state.tokenize(SEQUENCE_ENTRY);
-            Indentation indentation = check checkIndent(state);
-            if indentation.change == 1 && state.allowTokensAsPlanar {
+            if state.indent < state.index && state.allowTokensAsPlanar {
                 state.lexeme += "-";
+                state.forward();
                 return iterate(state, scanPlanarChar, PLANAR_CHAR);
             }
-            state.indentation = indentation;
+
+            // Return block sequence entry
+            _ = state.tokenize(SEQUENCE_ENTRY);
+            state.indentation = check checkIndent(state);
             return state;
         }
         "." => {

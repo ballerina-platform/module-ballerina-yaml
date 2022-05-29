@@ -38,9 +38,9 @@ function jsonLineDataGen() returns map<[string, json]> {
         "negative int": ["-1", -1],
         "plus prefix value is string": ["+1", "+1"],
         "leading zero value is string": ["01", "01"],
-        "decimal point float": ["1.1", 1.1],
-        "decimal point negative exponential float": ["1.1E-10", 1.1E-10],
-        "decimal point positive exponential float": ["1.1E10", 1.1E10],
+        "decimal point float": ["1.1", <decimal>1.1],
+        "decimal point negative exponential float": ["1.1E-10", <decimal>1.1E-10],
+        "decimal point positive exponential float": ["1.1E10", <decimal>1.1E10],
         "null": ["null", ()],
         "must change the type to the explicit tag": ["!!int 123", 123]
     };

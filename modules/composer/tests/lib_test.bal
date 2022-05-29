@@ -31,9 +31,12 @@ function nativeDataStructureDataGen() returns map<[string|string[], json]> {
         "explicit key empty key": [["? ", ": value"], {"": "value"}],
         "empty value flow mapping": ["{key,}", {"key": ()}],
         "empty values in block mapping": [["first:", "second:"], {"first": (), "second": ()}],
+        "anchoring the key after empty node": [["a: ", "&anchor b: *anchor"], {"a": (), "b": "b"}],
+        "anchoring the key of nested value": [["a: ", "  &anchor b: *anchor"], {"a": {"b": "b"}}],
+        "anchoring the empty node of a map": [["a: &anchor", "b: *anchor"], {"a": (), "b": ()}],
         "single flow implicit map": ["[key: value]", [{"key": "value"}]],
-        "nested flow implicit map": ["[outer: {nested: value}]", [{"outer": {"nested" : "value"}}]],
-        "multiple flow implicit maps": [["[first: value1,", "second: value2]"],[{"first": "value1"}, {"second": "value2"}]] 
+        "nested flow implicit map": ["[outer: {nested: value}]", [{"outer": {"nested": "value"}}]],
+        "multiple flow implicit maps": [["[first: value1,", "second: value2]"], [{"first": "value1"}, {"second": "value2"}]]
     };
 }
 
@@ -54,7 +57,8 @@ function invalidEventStreamDataGen() returns map<[string[]]> {
         "flow style sequence without end": [["[", " first, ", "second "]],
         "aliasing anchor does note exist": [["*alias"]],
         "invalid explicit tags must return an error": [["!!int alias"]],
-        "cyclic reference": [["- &anchor [*anchor]"]]
+        "cyclic reference": [["- &anchor [*anchor]"]],
+        "two block keys in same line": [["first: value1 second: value2"]]
     };
 }
 

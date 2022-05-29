@@ -2,7 +2,7 @@ import ballerina/test;
 
 @test:Config {
     dataProvider: escapedCharacterDataGen,
-    groups: ["escaped"]
+    groups: ["escaped", "lexer"]
 }
 function testEscapedCharacterToken(string lexeme, string value) returns error? {
     LexerState state = setLexerString("\\" + lexeme, LEXER_DOUBLE_QUOTE);
@@ -36,7 +36,7 @@ function escapedCharacterDataGen() returns map<[string, string]> {
 
 @test:Config {
     dataProvider: invalidEscapedCharDataGen,
-    groups: ["escaped"]
+    groups: ["escaped", "lexer"]
 }
 function testInvalidEscapedCharacter(string lexeme) {
     assertLexicalError("\\" + lexeme, context = LEXER_DOUBLE_QUOTE);
@@ -48,5 +48,52 @@ function invalidEscapedCharDataGen() returns map<[string]> {
         "u-3": ["u333"],
         "U-7": ["U7777777"],
         "invalid-char": ["z"]
+    };
+}
+
+@test:Config {
+    dataProvider: planarDataGen,
+    groups: ["lexer"]
+}
+function testPlanarToken(string line, string lexeme) returns error? {
+    LexerState state = setLexerString(line);
+    check assertToken(state, PLANAR_CHAR, lexeme = lexeme);
+}
+
+function planarDataGen() returns map<[string, string]> {
+    return {
+        "ns-char": ["ns", "ns"],
+        ":": ["::0", "::0"],
+        "?": ["??", "??"],
+        "-": ["--", "--"],
+        "ignore-comment": ["plain #comment", "plain"],
+        "#": ["plain#comment", "plain#comment"],
+        "space": ["plain space", "plain space"],
+        "single character": ["a", "a"]
+    };
+}
+
+@test:Config {
+    groups: ["lexer"]
+}
+function testSeparateInLineAfterPlanar() returns error? {
+    LexerState state = setLexerString("planar space      ");
+    check assertToken(state, PLANAR_CHAR, lexeme = "planar space");
+    check assertToken(state, SEPARATION_IN_LINE);
+}
+
+@test:Config {
+    dataProvider: blockScalarTokenDataGen,
+    groups: ["lexer"]
+}
+function testBlockScalarToken(string line, YAMLToken token, string value) returns error? {
+    LexerState state = setLexerString(line, LEXER_BLOCK_HEADER);
+    check assertToken(state, token, lexeme = value);
+}
+
+function blockScalarTokenDataGen() returns map<[string, YAMLToken, string]> {
+    return {
+        "chomping-indicator strip": ["-", CHOMPING_INDICATOR, "-"],
+        "chomping-indicator keep": ["+", CHOMPING_INDICATOR, "+"]
     };
 }

@@ -2,7 +2,7 @@ import ballerina/test;
 
 @test:Config {
     dataProvider: indicatorDataGen,
-    groups: ["character-productions"]
+    groups: ["character-productions", "lexer"]
 }
 function testIndicatorTokens(string lexeme, YAMLToken expectedToken) returns error? {
     LexerState state = setLexerString(lexeme);
@@ -20,30 +20,40 @@ function indicatorDataGen() returns map<[string, YAMLToken]> {
         "mapping-start": ["{", MAPPING_START],
         "folding": [">", FOLDED],
         "literal": ["|", LITERAL],
-        "mapping-end": ["}", MAPPING_END]
+        "mapping-end": ["}", MAPPING_END],
+        "directive-marker": ["---", DIRECTIVE_MARKER],
+        "document-marker": ["...", DOCUMENT_MARKER]
     };
 }
 
-@test:Config {}
+@test:Config {
+    groups: ["lexer"]
+}
 function testAnchorToken() returns error? {
     LexerState state = setLexerString("&anchor value", LEXER_TAG_NODE);
     check assertToken(state, ANCHOR, lexeme = "anchor");
 }
 
-@test:Config {}
+@test:Config {
+    groups: ["lexer"]
+}
 function testAliasToken() returns error? {
     LexerState state = setLexerString("*anchor");
     check assertToken(state, ALIAS, lexeme = "anchor");
 }
 
-@test:Config {}
+@test:Config {
+    groups: ["lexer"]
+}
 function testSeparationSpacesToken() returns error? {
     LexerState state = setLexerString("  1");
     check assertToken(state, SEPARATION_IN_LINE);
     check assertToken(state, PLANAR_CHAR, lexeme = "1");
 }
 
-@test:Config {}
+@test:Config {
+    groups: ["lexer"]
+}
 function testEmptyLineToken() returns error? {
     LexerState state = setLexerString("");
     check assertToken(state, EMPTY_LINE);

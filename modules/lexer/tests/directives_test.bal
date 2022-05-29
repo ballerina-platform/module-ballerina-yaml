@@ -2,7 +2,7 @@ import ballerina/test;
 
 @test:Config {
     dataProvider: directiveDataGen,
-    groups: ["directives"]
+    groups: ["directives", "lexer"]
 }
 function testDirectivesToken(string lexeme, string value) returns error? {
     LexerState state = setLexerString(lexeme);
@@ -18,7 +18,8 @@ function directiveDataGen() returns map<[string, string]> {
 }
 
 @test:Config {
-    dataProvider: invalidUriHexDataGen
+    dataProvider: invalidUriHexDataGen,
+    groups: ["lexer"]
 }
 function testInvalidURIHexCharacters(string lexeme) returns error? {
     assertLexicalError(lexeme, context = LEXER_TAG_PREFIX);
@@ -33,7 +34,8 @@ function invalidUriHexDataGen() returns map<[string]> {
 }
 
 @test:Config {
-    dataProvider: validTagDataGen
+    dataProvider: validTagDataGen,
+    groups: ["lexer"]
 }
 function testValidTagHandlers(string tag, string lexeme) returns error? {
     LexerState state = setLexerString(tag, LEXER_TAG_HANDLE);
@@ -49,7 +51,8 @@ function validTagDataGen() returns map<[string, string]> {
 }
 
 @test:Config {
-    dataProvider: tagPrefixDataGen
+    dataProvider: tagPrefixDataGen,
+    groups: ["lexer"]
 }
 function testTagPrefixTokens(string lexeme, string value) returns error? {
     LexerState state = setLexerString(lexeme, LEXER_TAG_PREFIX);

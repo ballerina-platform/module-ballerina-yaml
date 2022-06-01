@@ -8,6 +8,7 @@ import yaml.schema;
 # + forceQuotes - If set, all the scalars are surrounded by quotes.  
 # + schema - YAML schema used for writing  
 # + yamlTypes - Custom YAML types for the schema
+# + isStream - If set, the parser will write a stream of YAML documents
 public type WriteConfig record {|
     int indentationPolicy = 2;
     int blockLevel = 1;
@@ -16,15 +17,18 @@ public type WriteConfig record {|
     boolean forceQuotes = false;
     YAMLSchema schema = CORE_SCHEMA;
     YAMLType[] yamlTypes = [];
+    boolean isStream = false;
 |};
 
 # Configurations for reading a YAML document.
 #
 # + schema - YAML schema used for writing
 # + yamlTypes - Custom YAML types for the schema
+# + isStream - If set, the parser reads a stream of YAML documents
 public type ReadConfig record {|
     YAMLSchema schema = CORE_SCHEMA;
     YAMLType[] yamlTypes = [];
+    boolean isStream = false;
 |};
 
 # Represents the attributes of the custom YAML type.

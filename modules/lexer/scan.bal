@@ -56,7 +56,7 @@ function scanUnicodeEscapedCharacters(LexerState state, string escapedChar, int 
     // Check if the digits adhere to the hexadecimal code pattern.
     foreach int i in 0 ... length - 1 {
         state.forward();
-        if matchRegexPattern(state, HEXADECIMAL_DIGIT_PATTERN) {
+        if matchPattern(state, patternHexadecimal) {
             unicodeDigits += <string>state.peek();
             continue;
         }
@@ -84,7 +84,7 @@ function scanUnicodeEscapedCharacters(LexerState state, string escapedChar, int 
 # + return - False to continue. True to terminate the token. An error on failure.
 function scanDoubleQuoteChar(LexerState state) returns boolean|LexicalError {
     // Process nb-json characters
-    if matchRegexPattern(state, JSON_PATTERN, exclusionPatterns = ["\\\\", "\""]) {
+    if matchPattern(state, patternJson, ["\\", "\""]) {
         state.lexeme += <string>state.peek();
         return false;
     }
@@ -111,7 +111,7 @@ function scanDoubleQuoteChar(LexerState state) returns boolean|LexicalError {
 # + return - False to continue. True to terminate the token. An error on failure.
 function scanSingleQuotedChar(LexerState state) returns boolean|LexicalError {
     // Process nb-json characters
-    if matchRegexPattern(state, JSON_PATTERN, exclusionPatterns = ["'"]) {
+    if matchPattern(state, patternJson, "'") {
         state.lexeme += <string>state.peek();
         return false;
     }
@@ -150,12 +150,12 @@ function scanPlanarChar(LexerState state) returns boolean|LexicalError {
     }
 
     // Terminate when the flow indicators are detected inside flow style collections
-    if matchRegexPattern(state, [FLOW_INDICATOR_PATTERN]) && state.isFlowCollection() {
+    if matchPattern(state, patternFlowIndicator) && state.isFlowCollection() {
         return true;
     }
 
     // Process ns-plain-safe character
-    if matchRegexPattern(state, [PRINTABLE_PATTERN], [LINE_BREAK_PATTERN, BOM_PATTERN, WHITESPACE_PATTERN, "#", ":"]) {
+    if matchPattern(state, patternPrintable, [patternLineBreak, patternBom, patternWhitespace, "#", ":"]) {
         state.lexeme += whitespace + <string>state.peek();
         return false;
     }
@@ -198,7 +198,7 @@ function scanPlanarChar(LexerState state) returns boolean|LexicalError {
 # + state - Current lexer state
 # + return - False to continue. True to terminate the token. An error on failure.
 function scanPrintableChar(LexerState state) returns boolean|LexicalError {
-    if matchRegexPattern(state, PRINTABLE_PATTERN, [BOM_PATTERN, LINE_BREAK_PATTERN]) {
+    if matchPattern(state, patternPrintable, [patternBom, patternLineBreak]) {
         state.lexeme += <string>state.peek();
         return false;
     }
@@ -211,7 +211,7 @@ function scanPrintableChar(LexerState state) returns boolean|LexicalError {
 # + state - Current lexer state
 # + return - False to continue. True to terminate the token. An error on failure.
 function scanNoSpacePrintableChar(LexerState state) returns boolean|LexicalError {
-    if matchRegexPattern(state, PRINTABLE_PATTERN, [BOM_PATTERN, LINE_BREAK_PATTERN, WHITESPACE_PATTERN]) {
+    if matchPattern(state, patternPrintable, [patternBom, patternLineBreak, patternWhitespace]) {
         state.lexeme += <string>state.peek();
         return false;
     }
@@ -225,12 +225,12 @@ function scanNoSpacePrintableChar(LexerState state) returns boolean|LexicalError
 # + return - False to continue. True to terminate the token. An error on failure.
 function scanTagCharacter(LexerState state) returns boolean|LexicalError {
     // Check for URI character
-    if matchRegexPattern(state, [URI_CHAR_PATTERN, WORD_PATTERN], ["!", FLOW_INDICATOR_PATTERN]) {
+    if matchPattern(state, [patternUri, patternWord], ["!", patternFlowIndicator]) {
         state.lexeme += <string>state.peek();
         return false;
     }
 
-    if matchRegexPattern(state, WHITESPACE_PATTERN) {
+    if matchPattern(state, patternWhitespace) {
         return true;
     }
 
@@ -255,7 +255,7 @@ function scanTagCharacter(LexerState state) returns boolean|LexicalError {
 function scanURICharacter(boolean isVerbatim = false) returns function (LexerState state) returns boolean|LexicalError {
     return function(LexerState state) returns boolean|LexicalError {
         // Check for URI characters
-        if matchRegexPattern(state, [URI_CHAR_PATTERN, WORD_PATTERN]) {
+        if matchPattern(state, [patternUri, patternWord]) {
             state.lexeme += <string>state.peek();
             return false;
         }
@@ -267,7 +267,7 @@ function scanURICharacter(boolean isVerbatim = false) returns function (LexerSta
         }
 
         // Ignore the comments
-        if matchRegexPattern(state, [LINE_BREAK_PATTERN, WHITESPACE_PATTERN]) {
+        if matchPattern(state, [patternLineBreak, patternWhitespace]) {
             return true;
         }
 
@@ -287,7 +287,7 @@ function scanURICharacter(boolean isVerbatim = false) returns function (LexerSta
 function scanTagHandle(boolean differentiate = false) returns function (LexerState state) returns boolean|LexicalError {
     return function(LexerState state) returns boolean|LexicalError {
         // Scan the word of the name tag.
-        if matchRegexPattern(state, WORD_PATTERN) {
+        if matchPattern(state, patternWord) {
             state.lexeme += <string>state.peek();
             // Store the complete primary tag if another '!' cannot be detected.
             if differentiate && state.peek(1) == () {
@@ -306,7 +306,7 @@ function scanTagHandle(boolean differentiate = false) returns function (LexerSta
 
         // If the tag handle contains non-word character before '!', 
         // Then the tag is primary
-        if differentiate && matchRegexPattern(state, [URI_CHAR_PATTERN, WORD_PATTERN], FLOW_INDICATOR_PATTERN) {
+        if differentiate && matchPattern(state, [patternUri, patternWord], patternFlowIndicator) {
             state.lexemeBuffer = state.lexeme.substring(1) + <string>state.peek();
             state.lexeme = "!";
             return true;
@@ -322,7 +322,7 @@ function scanTagHandle(boolean differentiate = false) returns function (LexerSta
         }
 
         // Store the complete primary tag if a white space is detected
-        if differentiate && matchRegexPattern(state, WHITESPACE_PATTERN) {
+        if differentiate && matchPattern(state, patternWhitespace) {
             state.forward(-1);
             state.lexemeBuffer = state.lexeme.substring(1);
             state.lexeme = "!";
@@ -338,7 +338,7 @@ function scanTagHandle(boolean differentiate = false) returns function (LexerSta
 # + state - Current lexer state
 # + return - False to continue. True to terminate the token. An error on failure.
 function scanAnchorName(LexerState state) returns boolean|LexicalError {
-    if matchRegexPattern(state, [PRINTABLE_PATTERN], [LINE_BREAK_PATTERN, BOM_PATTERN, FLOW_INDICATOR_PATTERN, WHITESPACE_PATTERN]) {
+    if matchPattern(state, [patternPrintable], [patternLineBreak, patternBom, patternFlowIndicator, patternWhitespace]) {
         state.lexeme += <string>state.peek();
         return false;
     }
@@ -383,7 +383,7 @@ function scanWS(LexerState state) returns string {
 # + state - Current lexer state
 # + return - Generates a function which checks the lexemes for the given number system.
 function scanDigit(LexerState state) returns boolean|LexicalError {
-    if matchRegexPattern(state, DECIMAL_DIGIT_PATTERN) {
+    if matchPattern(state, patternDecimal) {
         state.lexeme += <string>state.peek();
         return false;
     }

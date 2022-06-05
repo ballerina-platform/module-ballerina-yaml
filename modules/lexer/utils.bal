@@ -1,5 +1,3 @@
-import ballerina/regex;
-
 # Encapsulate a function to run isolated on the remaining characters.
 # Function lookahead to capture the lexemes for a targeted token.
 #
@@ -31,24 +29,48 @@ function iterate(LexerState state, function (LexerState state) returns boolean|L
 # Check if the given character matches the regex pattern.
 #
 # + state - Current lexer state
-# + inclusionPatterns - Included the regex patterns
+# + inclusionPattern - Included YAML patterns
 # + offset - Offset of the character from the current index. Default = 0  
-# + exclusionPatterns - Exclude the regex patterns
+# + exclusionPattern - Excluded YAML patterns
 # + return - True if the pattern matches
-function matchRegexPattern(LexerState state, string|string[] inclusionPatterns, string|string[]? exclusionPatterns = (), int offset = 0) returns boolean {
+function matchPattern(LexerState state, patternParamterType|patternParamterType[] inclusionPattern,
+    patternParamterType|patternParamterType[] exclusionPattern = [], int offset = 0) returns boolean {
+
     // If there is no character to check the pattern, then return false.
     if state.peek(offset) == () {
         return false;
     }
+    string:Char currentChar = <string:Char>state.peek(offset);
 
-    string inclusionPattern = "[" + concatenateStringArray(inclusionPatterns) + "]";
-    string exclusionPattern = "";
-
-    if exclusionPatterns != () {
-        exclusionPattern = "(?![" + concatenateStringArray(exclusionPatterns) + "])";
+    // Process the exclusion pattern
+    if exclusionPattern is patternParamterType[] {
+        foreach patternParamterType item in exclusionPattern {
+            if checkPattern(currentChar, item) {
+                return false;
+            }
+        }
+    } else {
+        if checkPattern(currentChar, exclusionPattern) {
+            return false;
+        }
     }
-    return regex:matches(<string>state.peek(offset), exclusionPattern + inclusionPattern + "{1}");
+
+    // Process the inclusion pattern
+    if inclusionPattern is patternParamterType[] {
+        foreach patternParamterType item in inclusionPattern {
+            if checkPattern(currentChar, item) {
+                return true;
+            }
+        }
+    } else {
+        return checkPattern(currentChar, inclusionPattern);
+    }
+    
+    return false;
 }
+
+function checkPattern(string:Char currentChar, patternParamterType pattern) returns boolean
+    => pattern is string ? currentChar == pattern : pattern(currentChar);
 
 # Concatenate one or more strings.
 #
@@ -104,21 +126,21 @@ function checkCharacter(LexerState state, string|string[] expectedCharacters, in
 # + state - Current lexer state/
 # + return - Return true if a planar safe character is found.
 function isPlainSafe(LexerState state) returns boolean
-    => matchRegexPattern(state, [PRINTABLE_PATTERN], [LINE_BREAK_PATTERN, BOM_PATTERN, WHITESPACE_PATTERN, INDICATOR_PATTERN]);
+    => matchPattern(state, [patternPrintable], [patternLineBreak, patternBom, patternWhitespace, patternIndicator]);
 
 function isWhitespace(LexerState state, int offset = 0) returns boolean
     => state.peek(offset) == " " || state.peek(offset) == "\t";
 
-function isTabInIndent(LexerState state, int upperLimit) returns boolean 
+function isTabInIndent(LexerState state, int upperLimit) returns boolean
     => state.indent > -1 && state.tabInWhitespace > -1 && state.tabInWhitespace <= upperLimit;
 
 function isMarker(LexerState state, boolean directive) returns boolean {
     string directiveChar = directive ? "-" : ".";
-    if state.peek(0) == directiveChar && state.peek(1) == directiveChar && state.peek(2) == directiveChar 
+    if state.peek(0) == directiveChar && state.peek(1) == directiveChar && state.peek(2) == directiveChar
         && (isWhitespace(state, 3) || state.peek(3) == ()) {
         state.forward(2);
         return true;
-    } 
+    }
     return false;
 }
 
@@ -126,6 +148,6 @@ function discernTagPropertyFromPlanar(LexerState state, int offset = 0) returns 
     => (!state.allowTokensAsPlanar || state.index < state.indent + 1 + offset);
 
 function discernPlanarFromIndicator(LexerState state) returns boolean
-    => matchRegexPattern(state, [PRINTABLE_PATTERN], state.isFlowCollection()
-            ? [LINE_BREAK_PATTERN, BOM_PATTERN, WHITESPACE_PATTERN, FLOW_INDICATOR_PATTERN]
-            : [LINE_BREAK_PATTERN, BOM_PATTERN, WHITESPACE_PATTERN], 1);
+    => matchPattern(state, [patternPrintable], state.isFlowCollection()
+            ? [patternLineBreak, patternBom, patternWhitespace, patternFlowIndicator]
+            : [patternLineBreak, patternBom, patternWhitespace], 1);

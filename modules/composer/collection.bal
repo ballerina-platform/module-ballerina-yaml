@@ -91,6 +91,9 @@ function composeMapping(ComposerState state, boolean flowStyle, boolean implicit
 
         // Compose the key
         json key = check composeNode(state, event);
+        if key is map<json>|json[] {
+            return generateComposeError(state, "Cannot have collection as a key in mapping", key);
+        }
 
         // Compose the value
         event = check checkEvent(state, parser:EXPECT_MAP_VALUE);

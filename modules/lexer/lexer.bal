@@ -1,19 +1,3 @@
-enum RegexPattern {
-    PRINTABLE_PATTERN = "\\x09\\x0a\\x0d\\x20-\\x7e\\x85\\xa0-\\ud7ff\\ue000-\\ufffd",
-    JSON_PATTERN = "\\x09\\x20-\\uffff",
-    BOM_PATTERN = "\\ufeff",
-    DECIMAL_DIGIT_PATTERN = "0-9",
-    HEXADECIMAL_DIGIT_PATTERN = "0-9a-fA-F",
-    OCTAL_DIGIT_PATTERN = "0-7",
-    BINARY_DIGIT_PATTERN = "0-1",
-    LINE_BREAK_PATTERN = "\\x0a\\x0d",
-    WORD_PATTERN = "a-zA-Z0-9\\-",
-    FLOW_INDICATOR_PATTERN = "\\,\\[\\]\\{\\}",
-    WHITESPACE_PATTERN = "\\s\\t",
-    URI_CHAR_PATTERN = "#;/\\?:@&=\\+\\$,_\\.!~\\*'\\(\\)\\[\\]",
-    INDICATOR_PATTERN = "\\-\\?:\\,\\[\\]\\{\\}#&\\*!\\|\\>\\'\\\"%@\\`"
-}
-
 final readonly & map<string> escapedCharMap = {
     "0": "\u{00}",
     "a": "\u{07}",
@@ -52,13 +36,13 @@ public function scan(LexerState state) returns LexerState|LexicalError {
         }
 
         // The complete primary tag is stored in the buffer
-        if matchRegexPattern(state, WHITESPACE_PATTERN) {
+        if matchPattern(state, patternWhitespace) {
             state.forward(-1);
             return state.tokenize(TAG);
         }
 
         // A first portion of the primary tag is stored in the buffer
-        if matchRegexPattern(state, [URI_CHAR_PATTERN, WORD_PATTERN], ["!", FLOW_INDICATOR_PATTERN]) {
+        if matchPattern(state, [patternUri, patternWord], ["!", patternFlowIndicator]) {
             return iterate(state, scanTagCharacter, TAG);
         }
 
@@ -73,7 +57,7 @@ public function scan(LexerState state) returns LexerState|LexicalError {
         return state.index == 0 ? state.tokenize(EMPTY_LINE) : state.tokenize(EOL);
     }
 
-    if matchRegexPattern(state, LINE_BREAK_PATTERN) {
+    if matchPattern(state, patternLineBreak) {
         return state.tokenize(LINE_BREAK);
     }
 

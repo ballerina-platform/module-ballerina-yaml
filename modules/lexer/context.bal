@@ -44,7 +44,7 @@ function contextDoubleQuote(LexerState state) returns LexerState|LexicalError {
     }
 
     // Regular double quoted characters
-    if matchRegexPattern(state, JSON_PATTERN, exclusionPatterns = ["\""]) {
+    if matchPattern(state, patternJson, "\"") {
         return iterate(state, scanDoubleQuoteChar, DOUBLE_QUOTE_CHAR);
     }
 
@@ -90,7 +90,7 @@ function contextSingleQuote(LexerState state) returns LexerState|LexicalError {
     }
 
     // Regular single quoted characters
-    if matchRegexPattern(state, JSON_PATTERN, exclusionPatterns = ["'"]) {
+    if matchPattern(state, patternJson, "'") {
         return iterate(state, scanSingleQuotedChar, SINGLE_QUOTE_CHAR);
     }
 
@@ -109,7 +109,7 @@ function contextYamlDirective(LexerState state) returns LexerState|LexicalError 
     }
 
     // Check for decimal digits
-    if matchRegexPattern(state, DECIMAL_DIGIT_PATTERN) {
+    if matchPattern(state, patternDecimal) {
         return iterate(state, scanDigit, DECIMAL);
     }
 
@@ -155,10 +155,6 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
     if state.peek() == "#" && (isWhitespace(state, -1) || state.peek(-1) == ()) {
         state.forward(-1);
         return state.tokenize(COMMENT);
-    }
-
-    if matchRegexPattern(state, BOM_PATTERN) {
-        return state.tokenize(BOM);
     }
 
     if isMarker(state, true) {
@@ -228,7 +224,7 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
                         return generateScanningError(state, "'verbatim tag' is not resolved. Hence, '!' is invalid");
                     }
 
-                    return matchRegexPattern(state, [URI_CHAR_PATTERN, WORD_PATTERN]) ?
+                    return matchPattern(state, [patternUri, patternWord]) ?
                             iterate(state, scanURICharacter(true), TAG, true)
                             : generateScanningError(state, "Expected a 'uri-char' after '<' in a 'verbatim tag'");
                 }
@@ -433,8 +429,7 @@ function contextTagPrefix(LexerState state) returns LexerState|LexicalError {
     }
 
     // Match the global tag prefix or local tag prefix
-    if matchRegexPattern(state, [URI_CHAR_PATTERN, WORD_PATTERN], exclusionPatterns = ["!", FLOW_INDICATOR_PATTERN])
-        || state.peek() == "!" {
+    if matchPattern(state, [patternUri, patternWord], [patternFlowIndicator]) {
         return iterate(state, scanURICharacter(), TAG_PREFIX);
     }
 
@@ -465,7 +460,7 @@ function contextTagNode(LexerState state) returns LexerState|LexicalError {
     }
 
     // Match the tag with the tag character pattern
-    if matchRegexPattern(state, [URI_CHAR_PATTERN, WORD_PATTERN], exclusionPatterns = ["!", FLOW_INDICATOR_PATTERN]) {
+    if matchPattern(state, [patternUri, patternWord], ["!", patternFlowIndicator]) {
         return iterate(state, scanTagCharacter, TAG);
     }
 
@@ -501,7 +496,7 @@ function contextBlockHeader(LexerState state) returns LexerState|LexicalError {
     }
 
     // Check for indentation indicators and adjust the current indent
-    if matchRegexPattern(state, "1-9") {
+    if matchPattern(state, patternDecimal, "0") {
         state.captureIndent = false;
         state.addIndent += <int>(check common:processTypeCastingError('int:fromString(<string>state.peek()))) - 1;
         state.forward();
@@ -617,7 +612,8 @@ function contextBlockScalar(LexerState state) returns LexerState|LexicalError {
     }
 
     // Scan printable character
-    if matchRegexPattern(state, PRINTABLE_PATTERN, [BOM_PATTERN, LINE_BREAK_PATTERN]) {
+
+    if matchPattern(state, patternPrintable, [patternBom, patternLineBreak]) {
         return iterate(state, scanPrintableChar, PRINTABLE_CHAR);
     }
 
@@ -635,7 +631,7 @@ function contextReservedDirective(LexerState state) returns LexicalError|LexerSt
     }
 
     // Scan printable character
-    if matchRegexPattern(state, PRINTABLE_PATTERN, [BOM_PATTERN, LINE_BREAK_PATTERN, WHITESPACE_PATTERN]) {
+    if matchPattern(state, patternPrintable, [patternBom, patternLineBreak, patternWhitespace]) {
         return iterate(state, scanNoSpacePrintableChar, PRINTABLE_CHAR);
     }
 

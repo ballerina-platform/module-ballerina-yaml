@@ -1,11 +1,6 @@
 import yaml.lexer;
 import yaml.common;
 
-enum BlockSequenceState {
-    ENTRY,
-    VALUE
-}
-
 public class ParserState {
     # Properties for the TOML lines
     string[] lines;
@@ -25,7 +20,7 @@ public class ParserState {
     # Lexical analyzer tool for getting the tokens
     lexer:LexerState lexerState = new ();
 
-    BlockSequenceState blockSequenceState = ENTRY;
+    boolean expectBlockSequenceValue = false;
 
     boolean explicitKey = false;
 
@@ -76,7 +71,7 @@ public class ParserState {
             return generateGrammarError(self, message);
         }
         self.explicitDoc = false;
-        self.blockSequenceState = ENTRY;
+        self.expectBlockSequenceValue = false;
         self.tagPropertiesInLine = false;
         self.lexerState.setLine(self.lines[self.lineIndex], self.lineIndex);
     }

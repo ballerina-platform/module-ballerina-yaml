@@ -19,7 +19,7 @@ function appendData(ParserState state, ParserOption option,
     TagStructure tagStructure = {}, boolean peeked = false, TagStructure? definedProperties = ())
     returns common:Event|ParsingError {
 
-    state.blockSequenceState = VALUE;
+    state.expectBlockSequenceValue = true;
     common:Event? buffer = ();
 
     // Check for nested explicit keys

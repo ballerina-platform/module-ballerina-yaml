@@ -1,4 +1,5 @@
 import yaml.schema;
+
 # Configurations for writing a YAML document.
 #
 # + indentationPolicy - Number of whitespace for an indentation  

@@ -1,5 +1,8 @@
-public function generateConversionError(string message) returns ConversionError =>
-    error(message);
+# Generate an error for conversion fault between Ballerina and YAML.
+#
+# + message - Cause of the error message
+# + return - Formatted error message
+public function generateConversionError(string message) returns ConversionError => error(message);
 
 # Check errors during type casting to Ballerina types.
 #
@@ -17,7 +20,7 @@ public function processTypeCastingError(json|error value) returns json|Conversio
 
 # Generate the string error message of the template,
 # "Expected '${expectedEvent}' before '-${actualEvent}'"
-# 
+#
 # + actualEvent - Obtained invalid event
 # + expectedEvent - Next expected event of the stream
 # + return - Formatted error message as a string

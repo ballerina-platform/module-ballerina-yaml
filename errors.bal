@@ -13,7 +13,7 @@ public type Error ComposingError|SerializingError|EmittingError|FileError;
 
 // Level 1
 # Represents an error caused when failed to access the file.
-public type FileError distinct io:Error|file:Error;
+public type FileError distinct (io:Error|file:Error);
 
 # Represents an error caused during the composing.
 public type ComposingError composer:ComposingError;

@@ -3,41 +3,36 @@ import yaml.emitter;
 import yaml.serializer;
 import yaml.composer;
 
-# Parses YAML document(s) to Ballerina data structures.
+# Parses a Ballerina string of YAML content into a Ballerina map object.
 #
-# + filePath - Path to the YAML file  
-# + config - Configurations for reading a YAML file  
-# + return - The ballerina data structure on success.
-public function read(string filePath, *ReadConfig config) returns json|Error {
-    string[] lines = check io:fileReadLines(filePath);
-    composer:ComposerState composerState = check new (lines, generateTagHandlesMap(config.yamlTypes, config.schema));
-
-    return config.isStream ? composer:composeStream(composerState) : composer:composeDocument(composerState);
-}
-
-# Parses single YAML string line to Ballerina data structures.
-#
-# + yamlString - Single YAML line string to be parsed
-# + config - Configurations for reading a YAML file  
-# + return - The ballerina data structure on success.
+# + yamlString - YAML content
+# + config - Configuration for reading a YAML file
+# + return - YAML map object on success. Else, returns an error
 public function readString(string yamlString, *ReadConfig config) returns json|Error {
-    composer:ComposerState composerState = check new([yamlString],generateTagHandlesMap(config.yamlTypes, config.schema));
+    composer:ComposerState composerState = check new ([yamlString], generateTagHandlesMap(config.yamlTypes, config.schema));
     return composer:composeDocument(composerState);
 }
 
-# Write a single YAML document into a file.
+# Parses a YAML file into a Ballerina json object.
 #
-# + fileName - Path to the file  
-# + yamlDoc - Document to be written to the file  
-# + config - Configurations for writing a YAML file  
-# + return - An error on failure
-public function write(string fileName, json yamlDoc, *WriteConfig config) returns Error? {
-    check openFile(fileName);
+# + filePath - Path to the YAML file
+# + config - Configuration for reading a YAML file
+# + return - YAML map object on success. Else, returns an error
+public function readFile(string filePath, *ReadConfig config) returns json|Error {
+    string[] lines = check io:fileReadLines(filePath);
+    composer:ComposerState composerState = check new (lines, generateTagHandlesMap(config.yamlTypes, config.schema));
+    return config.isStream ? composer:composeStream(composerState) : composer:composeDocument(composerState);
+}
 
-    // Obtain the content for the YAML file
-    string[] output = check emitter:emit(
+# Converts the YAML structure to an array of strings.
+#
+# + yamlStructure - Structure to be written to the file
+# + config - Configurations for writing a YAML file
+# + return - YAML content on success. Else, an error on failure
+public function writeString(json yamlStructure, *WriteConfig config) returns string[]|Error
+    => emitter:emit(
         events = check serializer:serialize(
-            data = yamlDoc,
+            data = yamlStructure,
             tagSchema = generateTagHandlesMap(config.yamlTypes, config.schema),
             blockLevel = config.blockLevel,
             delimiter = config.useSingleQuotes ? "'" : "\"",
@@ -49,5 +44,14 @@ public function write(string fileName, json yamlDoc, *WriteConfig config) return
         canonical = config.canonical
     );
 
-    check io:fileWriteLines(fileName, output);
+# Writes the YAML structure to a file.
+#
+# + filePath - Path to the file  
+# + yamlStructure - Structure to be written to the file
+# + config - Configurations for writing a YAML file
+# + return - An error on failure
+public function writeFile(string filePath, json yamlStructure, *WriteConfig config) returns Error? {
+    check openFile(filePath);
+    string[] output = check writeString(yamlStructure, config);
+    check io:fileWriteLines(filePath, output);
 }

@@ -17,6 +17,11 @@ function openFile(string fileName) returns FileError? {
     }
 }
 
+# Generates all the tag handles for the conversion request.
+#
+# + yamlTypes - List of custom YAML types
+# + yamlSchema - YAML schema for the current request
+# + return - List of all the YAML tags
 function generateTagHandlesMap(YAMLType[] yamlTypes, YAMLSchema yamlSchema) returns map<schema:YAMLTypeConstructor> {
     map<schema:YAMLTypeConstructor> tagHandles = {};
 

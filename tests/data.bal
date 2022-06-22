@@ -1,13 +1,6 @@
 import ballerina/file;
 import ballerina/io;
 
-string[] ignoredCases = [
-    "8XYN",
-    "9MMW",
-    "S98Z",
-    "ZXT5"
-];
-
 function yamlDataGen() returns map<[string, json, boolean, boolean]>|error {
     file:MetaData[] data = check file:readDir("tests/resources");
     map<[string, json, boolean, boolean]> testMetaData = {};
@@ -19,10 +12,6 @@ function yamlDataGen() returns map<[string, json, boolean, boolean]>|error {
         }
         file:MetaData[] testFiles = check file:readDir(item.absPath);
         string dirName = item.absPath.substring(<int>item.absPath.indexOf("resources") + 10);
-
-        if ignoredCases.indexOf(dirName) is int {
-            continue;
-        }
 
         if testFiles[0].dir {
             foreach file:MetaData subItem in testFiles {

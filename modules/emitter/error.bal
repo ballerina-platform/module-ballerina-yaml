@@ -4,7 +4,7 @@ import yaml.common;
 public type EmittingError distinct error<common:WriteErrorDetails>;
 
 # Generate an error message based on the template,
-# "Expected '${expectedEvent}' before '-${actualEvent}'"
+# "Expected '-${expectedEvent}' before '-${actualEvent}'"
 #
 # + actualEvent - Obtained invalid event
 # + expectedEvent - Next expected event of the stream

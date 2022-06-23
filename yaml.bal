@@ -34,14 +34,14 @@ public function readFile(string filePath, *ReadConfig config) returns json|Error
 public function writeString(json yamlStructure, *WriteConfig config) returns string[]|Error
     => emitter:emit(
         events = serializer:serialize({
-            tagSchema: generateTagHandlesMap(config.yamlTypes, config.schema),
-            blockLevel: config.blockLevel,
-            delimiter: config.useSingleQuotes ? "'" : "\"",
-            forceQuotes: config.forceQuotes},
+    tagSchema: generateTagHandlesMap(config.yamlTypes, config.schema),
+    blockLevel: config.blockLevel,
+    delimiter: config.useSingleQuotes ? "'" : "\"",
+    forceQuotes: config.forceQuotes
+},
             data = yamlStructure
         ),
         indentationPolicy = config.indentationPolicy,
-        tagSchema = {},
         isStream = config.isStream,
         canonical = config.canonical
     );

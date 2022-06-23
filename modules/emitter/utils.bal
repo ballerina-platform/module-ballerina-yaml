@@ -12,7 +12,6 @@ function getEvent(EmitterState state) returns common:Event {
     return state.events.shift();
 }
 
-
 # Reduce the long tag name to shorthand using the tag schema.
 # Else, represent it fully via a verbatim tag.
 #

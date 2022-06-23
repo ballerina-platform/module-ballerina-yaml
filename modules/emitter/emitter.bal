@@ -1,33 +1,28 @@
-import yaml.schema;
 import yaml.common;
 
 # Represents the variables of the Emitter state.
 #
-# + output - Lines to be written.  
+# + output - YAML content as an array of strings.  
 # + indent - Total whitespace for a single indent  
 # + canonical - If set, the tag is written explicitly along with the value.
-# + tagSchema - Custom tags for the YAML parser  
-# + events - Event tree to be written
+# + events - Event tree to be converted
 type EmitterState record {|
     string[] output;
     readonly string indent;
     readonly boolean canonical;
-    readonly & map<schema:YAMLTypeConstructor> tagSchema;
     common:Event[] events;
 |};
 
-# Obtain the output string lines for given event trees.
+# Obtain the output string lines for a given event tree.
 #
 # + events - Event tree to be converted  
-# + indentationPolicy - Number of whitespace for an indent  
+# + indentationPolicy - Number of spaces for an indent  
 # + canonical - If set, the tag is written explicitly along with the value.
-# + tagSchema - Custom tags for the YAML parser
 # + isStream - Whether the event tree is a stream  
 # + return - YAML string lines
 public function emit(common:Event[] events,
     int indentationPolicy,
     boolean canonical,
-    readonly & map<schema:YAMLTypeConstructor> tagSchema,
     boolean isStream) returns string[]|EmittingError {
 
     // Setup the total whitespace for an indentation
@@ -40,14 +35,13 @@ public function emit(common:Event[] events,
         output: [],
         indent,
         canonical,
-        tagSchema,
         events
     };
 
     if isStream { // Write YAML stream
         while state.events.length() > 0 {
             check write(state);
-            state.output.push("...");
+            state.output.push("---");
         }
     } else { // Write a single YAML document
         check write(state);
@@ -59,7 +53,7 @@ public function emit(common:Event[] events,
     return state.output;
 }
 
-# Convert a single YAML document to YAML strings
+# Convert a single YAML document to array of YAML strings
 #
 # + state - Current emitter state
 # + return - An error on failure

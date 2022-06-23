@@ -2,24 +2,6 @@ import ballerina/test;
 import yaml.schema;
 import yaml.common;
 
-type RGB [int, int, int];
-
-function constructRGB(json data) returns json|schema:SchemaError {
-    RGB|error value = data.cloneWithType();
-
-    if value is error {
-        return error("Invalid shape for RGB");
-    }
-
-    foreach int index in value {
-        if index > 255 || index < 0 {
-            return error("One RGB value must be between 0-255");
-        }
-    }
-
-    return value;
-}
-
 string yamlSeq = string `${schema:defaultGlobalTagHandle}seq`;
 string yamlMap = string `${schema:defaultGlobalTagHandle}map`;
 string yamlStr = string `${schema:defaultGlobalTagHandle}str`;
@@ -29,7 +11,7 @@ string yamlStr = string `${schema:defaultGlobalTagHandle}str`;
     groups: ["serializer"]
 }
 function testGenerateSerializingEvent(json structure, common:Event[] assertingEvents) returns error? {
-    common:Event[] events = check serialize(structure, {}, 1, "\"", false);
+    common:Event[] events = getSerializedEvents(structure);
     test:assertEquals(events, assertingEvents);
 }
 
@@ -51,7 +33,7 @@ function serializingEventDataGen() returns map<[json, common:Event[]]> {
     groups: ["serializer"]
 }
 function testTagInSerializedEvent(json structure, common:Event[] assertingEvents) returns error? {
-    common:Event[] events = check serialize(structure, schema:getCoreSchemaTags(), 1, "\"", false);
+    common:Event[] events = getSerializedEvents(structure, tagSchema = schema:getCoreSchemaTags());
     test:assertEquals(events, assertingEvents);
 }
 
@@ -71,27 +53,8 @@ function keySerializeDataGen() returns map<[json, common:Event[]]> {
 @test:Config {
     groups: ["serializer"]
 }
-function testCustomTag() returns error? {
-    map<schema:YAMLTypeConstructor> tagHandles = schema:getJsonSchemaTags();
-    tagHandles["!rgb"] = {
-        kind: schema:SEQUENCE,
-        construct: constructRGB,
-        identity: schema:generateIdentityFunction(RGB),
-        represent: function(json data) returns string => data.toString()
-    };
-
-    RGB testingInput = [123, 12, 32];
-    common:Event[] events = check serialize(testingInput, tagHandles, 1, "\"", false);
-    common:Event expectedEvent = {startType: common:SEQUENCE, tag: "!rgb"};
-
-    test:assertEquals(events[0], expectedEvent);
-}
-
-@test:Config {
-    groups: ["serializer"]
-}
 function testSwitchFlowStyleUponBlockLevel() returns error? {
-    common:Event[] events = check serialize([["value"]], {}, 1, "\"", false);
+    common:Event[] events = getSerializedEvents([["value"]]);
 
     test:assertFalse((<common:StartEvent>events[0]).flowStyle);
     test:assertTrue((<common:StartEvent>events[1]).flowStyle);
@@ -102,7 +65,7 @@ function testSwitchFlowStyleUponBlockLevel() returns error? {
     groups: ["serializer"]
 }
 function testQuotesForInvalidPlanarChar(string line) returns error? {
-    common:Event[] events = check serialize(line, {}, 1, "\"", false);
+    common:Event[] events = getSerializedEvents(line);
     common:Event expectedEvent = {value: string `"${line}"`, tag: yamlStr};
     test:assertEquals(events[0], expectedEvent);
 }
@@ -121,7 +84,8 @@ function invalidPlanarDataGen() returns map<[string]> {
     groups: ["serializer"]
 }
 function testSingleQuotesOption() returns error? {
-    common:Event[] events = check serialize("? value", {}, 1, "'", false);
+    common:Event[] events = getSerializedEvents("? value", delimiter = "'");
+
     common:Event expectedEvent = {value: "'? value'", tag: yamlStr};
     test:assertEquals(events[0], expectedEvent);
 }
@@ -130,7 +94,8 @@ function testSingleQuotesOption() returns error? {
     groups: ["serializer"]
 }
 function testEnforceQuotesOption() returns error? {
-    common:Event[] events = check serialize("value", {}, 1, "\"", true);
+    common:Event[] events = getSerializedEvents("value", forceQuotes = true);
+
     common:Event expectedEvent = {value: "\"value\"", tag: yamlStr};
     test:assertEquals(events[0], expectedEvent);
 }

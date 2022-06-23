@@ -1,5 +1,4 @@
 import yaml.common;
-import yaml.serializer;
 import yaml.emitter;
 import yaml.composer;
 import yaml.lexer;
@@ -9,7 +8,7 @@ import ballerina/file;
 import yaml.schema;
 
 # Represents the generic error type for the YAML package.
-public type Error ComposingError|SerializingError|EmittingError|FileError;
+public type Error ComposingError|EmittingError|FileError;
 
 // Level 1
 # Represents an error caused when failed to access the file.
@@ -17,9 +16,6 @@ public type FileError distinct (io:Error|file:Error);
 
 # Represents an error caused during the composing.
 public type ComposingError composer:ComposingError;
-
-# Represents an error caused during the serializing.
-public type SerializingError serializer:SerializingError;
 
 # Represents an error caused during the emitting.
 public type EmittingError emitter:EmittingError;

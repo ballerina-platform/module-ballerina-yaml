@@ -23,13 +23,15 @@ public type WriteConfig record {|
 
 # Configurations for reading a YAML document.
 #
-# + schema - YAML schema used for writing
-# + yamlTypes - Custom YAML types for the schema
-# + isStream - If set, the parser reads a stream of YAML documents
+# + schema - YAML schema used for writing  
+# + yamlTypes - Custom YAML types for the schema  
+# + isStream - If set, the parser reads a stream of YAML documents  
+# + allowAnchorRedefinition - Flag is set if anchors can be redefined multiple times
 public type ReadConfig record {|
     YAMLSchema schema = CORE_SCHEMA;
     YAMLType[] yamlTypes = [];
     boolean isStream = false;
+    boolean allowAnchorRedefinition = true;
 |};
 
 # Represents the attributes of the custom YAML type.

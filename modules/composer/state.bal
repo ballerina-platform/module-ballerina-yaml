@@ -16,8 +16,14 @@ public class ComposerState {
     # Custom tag schema for the YAML parser.
     map<schema:YAMLTypeConstructor> tagSchema = {};
 
-    public function init(string[] lines, map<schema:YAMLTypeConstructor> tagSchema) returns parser:ParsingError? {
+    # Flag is set if anchors can be redefined multiple times
+    readonly & boolean allowAnchorRedefinition;
+
+    public function init(string[] lines, map<schema:YAMLTypeConstructor> tagSchema,
+        boolean allowAnchorRedefinition) returns parser:ParsingError? {
+
         self.parserState = check new (lines);
         self.tagSchema = tagSchema;
+        self.allowAnchorRedefinition = allowAnchorRedefinition;
     }
 }

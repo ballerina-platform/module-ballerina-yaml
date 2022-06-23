@@ -24,7 +24,7 @@ function constructRGB(json data) returns json|schema:SchemaError {
     groups: ["composer"]
 }
 function testJSONSchema(string line, json expectedOutput) returns error? {
-    ComposerState state = check new ([line], schema:getJsonSchemaTags());
+    ComposerState state = check new ([line], schema:getJsonSchemaTags(), true);
     json output = check composeDocument(state);
     test:assertEquals(output, expectedOutput);
 }
@@ -51,7 +51,7 @@ function jsonLineDataGen() returns map<[string, json]> {
     groups: ["composer"]
 }
 function testCORESchema(string line, json expectedOutput) returns error? {
-    ComposerState state = check new ([line], schema:getCoreSchemaTags());
+    ComposerState state = check new ([line], schema:getCoreSchemaTags(), true);
     json output = check composeDocument(state);
     test:assertEquals(output, expectedOutput);
 }
@@ -85,7 +85,7 @@ function testCustomTag() returns error? {
         represent: function(json data) returns string => data.toString()
     };
 
-    ComposerState state = check new (["!rgb [123, 12, 32]"], tagHandles);
+    ComposerState state = check new (["!rgb [123, 12, 32]"], tagHandles, true);
     json output = check composeDocument(state);
     RGB expectedOutput = [123, 12, 32];
 
@@ -104,7 +104,7 @@ function testInvalidCustomTag() returns error? {
         represent: function(json data) returns string => data.toString()
     };
 
-    ComposerState state = check new (["!rgb [256, 12, 32]"], tagHandles);
+    ComposerState state = check new (["!rgb [256, 12, 32]"], tagHandles, true);
     json|error output = composeDocument(state);
 
     test:assertTrue(output is schema:SchemaError);

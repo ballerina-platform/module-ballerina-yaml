@@ -61,9 +61,9 @@ function composeNode(ComposerState state, common:Event event) returns json|lexer
 # + return - An error on failure
 function checkAnchor(ComposerState state, common:StartEvent|common:ScalarEvent event, json assignedValue) returns ComposingError? {
     if event.anchor != () {
-        // if state.anchorBuffer.hasKey(<string>event.anchor) {
-        //     return generateAliasingError(state, string `Duplicate anchor definition of '${<string>event.anchor}'`, event);
-        // }
+        if state.anchorBuffer.hasKey(<string>event.anchor) && !state.allowAnchorRedefinition {
+            return generateAliasingError(state, string `Duplicate anchor definition of '${<string>event.anchor}'`, event);
+        }
         state.anchorBuffer[<string>event.anchor] = assignedValue;
     }
 }

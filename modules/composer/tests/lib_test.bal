@@ -6,7 +6,7 @@ import yaml.common;
     groups: ["composer"]
 }
 function testGenerateNativeDataStructure(string|string[] line, json structure) returns error? {
-    ComposerState state = check new ((line is string) ? [line] : line, {});
+    ComposerState state = check new ((line is string) ? [line] : line, {}, true);
     json output = check composeDocument(state);
 
     test:assertEquals(output, structure);
@@ -46,7 +46,7 @@ function nativeDataStructureDataGen() returns map<[string|string[], json]> {
     groups: ["composer"]
 }
 function testComposeInvalidEventTree(string[] lines) returns error? {
-    ComposerState state = check new (lines, {});
+    ComposerState state = check new (lines, {}, true);
 
     json|error output = composeDocument(state);
     test:assertTrue(output is ComposingError);
@@ -77,7 +77,7 @@ function invalidEventTreeDataGen() returns map<[string[]]> {
     groups: ["composer"]
 }
 function testComposeMultipleDocuments(string[] lines, json[] expectedDocs) returns error? {
-    ComposerState state = check new (lines, {});
+    ComposerState state = check new (lines, {}, true);
     json[] docs = check composeStream(state);
 
     test:assertEquals(docs, expectedDocs);
@@ -103,8 +103,18 @@ function streamDataGen() returns map<[string[], json[]]> {
     groups: ["composer"]
 }
 function testInvalidStartEventOfStream() returns error? {
-    ComposerState state = check new ([""], {});
+    ComposerState state = check new ([""], {}, true);
     json|error output = composeNode(state, {startType: common:STREAM});
 
     test:assertTrue(output is ComposeError);
+}
+
+@test:Config {
+    groups: ["composer"]
+}
+function testRestrictRedefiningOfAliases() returns error? {
+    ComposerState state = check new (["first: &anchor first", "second: &anchor second"], {}, false);
+    json|error output = composeDocument(state);
+
+    test:assertTrue(output is common:AliasingError);
 }

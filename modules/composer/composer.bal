@@ -1,11 +1,11 @@
 import yaml.parser;
 import yaml.common;
 
-# Compose single YAML document to native Ballerina structure.
+# Compose single YAML document to Ballerina.
 #
 # + state - Initiated composer state  
-# + eventParam - Passed the expected event if already fetched
-# + return - Native Ballerina data structure on success
+# + eventParam - Passed root event if already fetched
+# + return - Ballerina data structure on success
 public function composeDocument(ComposerState state, common:Event? eventParam = ()) returns json|ComposingError {
     // Obtain the root event
     common:Event event = eventParam is () ? check checkEvent(state, docType = parser:ANY_DOCUMENT) : eventParam;
@@ -30,7 +30,7 @@ public function composeDocument(ComposerState state, common:Event? eventParam = 
     return generateComposeError(state, "There can only be one root event to a document", event);
 }
 
-# Compose a stream YAML documents to an array of native Ballerina structure.
+# Compose a stream YAML documents to an array of Ballerina structures.
 #
 # + state - Initiated composer state  
 # + return - Native Ballerina data structure on success

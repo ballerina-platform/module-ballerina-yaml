@@ -3,7 +3,7 @@ import yaml.common;
 import yaml.schema;
 import yaml.lexer;
 
-# Compose the native Ballerina data structure for the given node event.
+# Compose the Ballerina data structure for the given node event.
 #
 # + state - Current composer state
 # + event - Node event to be composed
@@ -33,10 +33,10 @@ function composeNode(ComposerState state, common:Event event) returns json|lexer
     if event is common:StartEvent {
         output = {};
         match event.startType {
-            common:SEQUENCE => { // Check for +SEQ
+            common:SEQUENCE => { // Check for sequence
                 output = check castData(state, check composeSequence(state, event.flowStyle), schema:SEQUENCE, event.tag);
             }
-            common:MAPPING => {
+            common:MAPPING => { // Check for mapping
                 output = check castData(state, check composeMapping(state, event.flowStyle, event.implicit), schema:MAPPING, event.tag);
             }
             _ => {
@@ -47,7 +47,7 @@ function composeNode(ComposerState state, common:Event event) returns json|lexer
         return output;
     }
 
-    // Check for SCALAR
+    // Check for scalar
     output = check castData(state, event.value, schema:STRING, event.tag);
     check checkAnchor(state, event, output);
     return output;
@@ -68,7 +68,7 @@ function checkAnchor(ComposerState state, common:StartEvent|common:ScalarEvent e
     }
 }
 
-# Construct the ballerina data structures from the fail safe schema data.
+# Construct the ballerina data structures from the failsafe schema data.
 #
 # + state - Current composer state
 # + data - Original fail safe schema data
@@ -79,7 +79,7 @@ function castData(ComposerState state, json data,
     schema:FailSafeSchema kind, string? tag) returns json|ComposingError|schema:SchemaError {
     // Check for explicit keys 
     if tag != () {
-        // Check for the tags in the YAML core schema
+        // Check for the tags in the YAML failsafe schema
         if tag == schema:defaultGlobalTagHandle + "str" {
             return kind == schema:STRING
                 ? data
@@ -98,6 +98,7 @@ function castData(ComposerState state, json data,
                 : generateExpectedKindError(state, kind, schema:MAPPING, tag);
         }
 
+        // Check for tags defined in the tag schema
         if !state.tagSchema.hasKey(tag) {
             return generateComposeError(state, string `There is no tag schema for '${tag}'`, data);
         }
@@ -123,6 +124,6 @@ function castData(ComposerState state, json data,
         return result;
     }
 
-    // Return as a type of the YAML FailSafe schema.
+    // Return as a type of the YAML failsafe schema.
     return data;
 }

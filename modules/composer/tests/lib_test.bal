@@ -1,4 +1,5 @@
 import ballerina/test;
+import yaml.common;
 
 @test:Config {
     dataProvider: nativeDataStructureDataGen,
@@ -41,24 +42,33 @@ function nativeDataStructureDataGen() returns map<[string|string[], json]> {
 }
 
 @test:Config {
-    dataProvider: invalidEventStreamDataGen,
+    dataProvider: invalidEventTreeDataGen,
     groups: ["composer"]
 }
-function testComposeInvalidEventStream(string[] lines) returns error? {
+function testComposeInvalidEventTree(string[] lines) returns error? {
     ComposerState state = check new (lines, {});
 
     json|error output = composeDocument(state);
     test:assertTrue(output is ComposingError);
 }
 
-function invalidEventStreamDataGen() returns map<[string[]]> {
+function invalidEventTreeDataGen() returns map<[string[]]> {
     return {
         "multiple root data values": [["|-", " 123", "", "-", " 123"]],
         "flow style sequence without end": [["[", " first, ", "second "]],
         "aliasing anchor does note exist": [["*alias"]],
         "invalid explicit tags must return an error": [["!!int alias"]],
         "cyclic reference": [["- &anchor [*anchor]"]],
-        "two block keys in same line": [["first: value1 second: value2"]]
+        "two block keys in same line": [["first: value1 second: value2"]],
+        "not closing flow-style sequence": [["[1, 2"]],
+        "not closing flow-style mapping": [["{a: b, c: d"]],
+        "ending a sequence with }": [["[1, 2}"]],
+        "ending a mapping with ]": [["{a: b, c: d]"]],
+        "ending a sequence with document marker": [["[1, 2", "..."]],
+        "ending a mapping with document marker": [["{a: b, c: d", "..."]],
+        "mapping with sequence tag": [["!!seq {a: b}"]],
+        "sequence with mapping tag": [["!!map [1, 2]"]],
+        "scalar with sequence tag": [["!!str [1, 2]"]]
     };
 }
 
@@ -87,4 +97,14 @@ function streamDataGen() returns map<[string[], json[]]> {
         "multiple end document markers": [["first doc", "...", "..."], ["first doc"]],
         "hoping out from block collection": [["-", " - value", "...", "second doc"], [[["value"]], "second doc"]]
     };
+}
+
+@test:Config {
+    groups: ["composer"]
+}
+function testInvalidStartEventOfStream() returns error? {
+    ComposerState state = check new ([""], {});
+    json|error output = composeNode(state, {startType: common:STREAM});
+
+    test:assertTrue(output is ComposeError);
 }

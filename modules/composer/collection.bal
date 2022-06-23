@@ -3,7 +3,7 @@ import yaml.parser;
 import yaml.lexer;
 import yaml.schema;
 
-# Compose the sequence collection into Ballerina array.
+# Compose the YAML sequence collection into Ballerina array.
 #
 # + state - Current composer state
 # + flowStyle - If a collection is flow sequence
@@ -12,7 +12,7 @@ function composeSequence(ComposerState state, boolean flowStyle) returns json[]|
     json[] sequence = [];
     common:Event event = check checkEvent(state, parser:EXPECT_SEQUENCE_VALUE);
 
-    // Iterate until the end event is detected
+    // Iterate until the end sequence event is detected
     while true {
         if event is common:DocumentMarkerEvent {
             state.terminatedDocEvent = event;
@@ -45,7 +45,7 @@ function composeSequence(ComposerState state, boolean flowStyle) returns json[]|
     return (sequence == [] && !flowStyle) ? [null] : sequence;
 }
 
-# Compose the mapping collection into Ballerina map.
+# Compose the YAML mapping collection into Ballerina map.
 #
 # + state - Current composer state  
 # + flowStyle - If a collection is flow mapping  
@@ -91,9 +91,6 @@ function composeMapping(ComposerState state, boolean flowStyle, boolean implicit
 
         // Compose the key
         json key = check composeNode(state, event);
-        if key is map<json>|json[] {
-            return generateComposeError(state, "Cannot have collection as a key in mapping", key);
-        }
 
         // Compose the value
         event = check checkEvent(state, parser:EXPECT_MAP_VALUE);
@@ -102,6 +99,7 @@ function composeMapping(ComposerState state, boolean flowStyle, boolean implicit
         // Map the key value pair
         structure[key.toString()] = value;
 
+        // Terminate after single key-value pair if implicit mapping flag is set.
         if implicitMapping {
             break;
         }

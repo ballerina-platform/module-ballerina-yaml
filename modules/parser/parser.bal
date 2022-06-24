@@ -121,23 +121,32 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
         }
         lexer:MAPPING_VALUE => { // Empty node as the key
             lexer:Indentation? indentation = state.currentToken.indentation;
-            if indentation == () {
-                return generateIndentationError(state, "Empty key requires an indentation");
-            }
-            check separate(state);
-            match indentation.change {
-                1 => { // Increase in indent
+
+            if state.lexerState.isFlowCollection() {
+                if option == EXPECT_SEQUENCE_ENTRY || option == EXPECT_SEQUENCE_VALUE {
                     state.eventBuffer.push({value: ()});
-                    return {startType: common:MAPPING};
+                    return {startType: common:MAPPING, implicit: true};
                 }
-                0 => { // Same indent
-                    return {value: ()};
+                return {value: ()};
+            } else {
+                if indentation == () {
+                    return generateIndentationError(state, "Empty key requires an indentation");
                 }
-                -1 => { // Decrease in indent
-                    foreach common:Collection collectionItem in indentation.collection {
-                        state.eventBuffer.push({endType: collectionItem});
+                check separate(state);
+                match indentation.change {
+                    1 => { // Increase in indent
+                        state.eventBuffer.push({value: ()});
+                        return {startType: common:MAPPING};
                     }
-                    return state.eventBuffer.shift();
+                    0 => { // Same indent
+                        return {value: ()};
+                    }
+                    -1 => { // Decrease in indent
+                        foreach common:Collection collectionItem in indentation.collection {
+                            state.eventBuffer.push({endType: collectionItem});
+                        }
+                        return state.eventBuffer.shift();
+                    }
                 }
             }
         }

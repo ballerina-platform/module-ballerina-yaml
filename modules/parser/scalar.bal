@@ -222,7 +222,9 @@ function planarScalar(ParserState state) returns ParsingError|string {
         check checkToken(state, peek = true);
     }
 
-    check verifyKey(state, isFirstLine);
+    if state.tokenBuffer.indentation == () {
+        check verifyKey(state, isFirstLine);
+    }
     state.lexerState.allowTokensAsPlanar = false;
     return trimTailWhitespace(lexemeBuffer);
 }

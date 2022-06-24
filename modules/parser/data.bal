@@ -53,7 +53,7 @@ function appendData(ParserState state, ParserOption option,
         indentation = state.currentToken.indentation;
     }
 
-    // The tokens described in the indentaion.tokens belong to the second node.
+    // The tokens described in the indentation.tokens belong to the second node.
     TagStructure newNodeTagStructure = {};
     TagStructure currentNodeTagStructure = {};
     if indentation is lexer:Indentation {
@@ -135,7 +135,11 @@ function appendData(ParserState state, ParserOption option,
         }
 
         check separate(state, isJsonKey || state.lexerState.isFlowCollection(), true);
-        if option == EXPECT_MAP_VALUE {
+        if state.emptyKey && option == EXPECT_MAP_VALUE {
+            state.emptyKey = false;
+            state.eventBuffer.push({value: ()});
+        }
+        else if option == EXPECT_MAP_VALUE {
             buffer = check constructEvent(state, {value: ()}, newNodeTagStructure);
         }
         else if option == EXPECT_SEQUENCE_ENTRY || option == EXPECT_SEQUENCE_VALUE {

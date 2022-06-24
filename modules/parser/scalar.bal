@@ -215,6 +215,12 @@ function planarScalar(ParserState state) returns ParsingError|string {
                     break;
                 }
             }
+            lexer:MAPPING_VALUE => { // Check for empty keys
+                if state.tokenBuffer.indentation != () {
+                    state.emptyKey = true;
+                }
+                break;
+            }
             _ => { // Break the character when the token does not belong to planar scalar
                 break;
             }

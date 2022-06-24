@@ -42,6 +42,8 @@ public class ParserState {
 
     boolean tagPropertiesInLine = false;
 
+    boolean emptyKey = false;
+
     common:Event[] eventBuffer = [];
 
     public function init(string[] lines) returns ParsingError? {

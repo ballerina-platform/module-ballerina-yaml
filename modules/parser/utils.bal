@@ -44,38 +44,15 @@ function trimTailWhitespace(string value, int? lastEscapedChar = ()) returns str
     return value.substring(0, i + 1);
 }
 
-# Trims the leading whitespace of a string.
-#
-# + value - String to be trimmed
-# + return - Trimmed string
-function trimHeadWhitespace(string value) returns string {
-    int len = value.length();
-
-    if len < 1 {
-        return "";
-    }
-
-    int i = 0;
-    while value[i] == " " || value[i] == "\t" {
-        if i == len - 1 {
-            break;
-        }
-        i += 1;
-    }
-
-    return value.substring(i);
-}
-
 # Assert the next lexer token with the predicted token.
 # If no token is provided, then the next token is retrieved without an error checking.
 # Hence, the error checking must be done explicitly.
 #
-# + state - Current parser state
+# + state - Current parser state  
 # + expectedTokens - Predicted token or tokens  
-# + customMessage - Error message to be displayed if the expected token not found  
 # + peek - Stores the token in the buffer
 # + return - Parsing error if not found
-function checkToken(ParserState state, lexer:YAMLToken|lexer:YAMLToken[] expectedTokens = lexer:DUMMY, string customMessage = "", boolean peek = false) returns (ParsingError)? {
+function checkToken(ParserState state, lexer:YAMLToken|lexer:YAMLToken[] expectedTokens = lexer:DUMMY, boolean peek = false) returns (ParsingError)? {
     lexer:Token token;
 
     // Obtain a token form the lexer if there is none in the buffer.
@@ -100,20 +77,10 @@ function checkToken(ParserState state, lexer:YAMLToken|lexer:YAMLToken[] expecte
         return;
     }
 
-    // Generate an error if the expected token differ from the actual token.
-    // Automatically generates a template error message if there is no custom message.
-    if expectedTokens is lexer:YAMLToken {
-        if token.token != expectedTokens {
-            return customMessage.length() == 0
-                ? generateExpectError(state, expectedTokens, state.prevToken)
-                : generateGrammarError(state, customMessage);
-        }
-    } else {
-        if expectedTokens.indexOf(token.token) == () {
-            return customMessage.length() == 0
-                ? generateExpectError(state, expectedTokens, state.prevToken)
-                : generateGrammarError(state, customMessage);
-        }
+    // Generate a template error message if the expected token differ from the actual token.
+    if (expectedTokens is lexer:YAMLToken && token.token != expectedTokens) ||
+        (expectedTokens is lexer:YAMLToken[] && expectedTokens.indexOf(token.token) == ()) {
+        return generateExpectError(state, expectedTokens, state.prevToken);
     }
 }
 

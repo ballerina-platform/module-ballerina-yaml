@@ -28,7 +28,7 @@ function generateExpectError(ParserState state,
         expectedTokensMessage = " '" + <string>expectedTokens + "'";
     }
     string message =
-        string `Expected '${expectedTokensMessage}' after '${beforeToken}', but found '${state.currentToken.token}'`;
+        string `Expected${expectedTokensMessage} after '${beforeToken}', but found '${state.currentToken.token}'`;
 
     return generateGrammarError(state, message, expectedTokens);
 }

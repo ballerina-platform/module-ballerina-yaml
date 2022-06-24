@@ -12,7 +12,8 @@ function testDoubleQuoteLineBreakEvent(string[] arr, string value) returns error
 function doubleQuoteLineBreakDataGen() returns map<[string[], string]> {
     return {
         "flow-folded": [["\"folded ", "to a space,   ", " ", "to a line feed\""], "folded to a space,\nto a line feed"],
-        "escaped-line-break": [["\"folded to \\", " non-content\""], "folded to non-content"],
+        "escaped line-break": [["\"folded to \\", " non-content\""], "folded to non-content"],
+        "escaped empty-line": [["\"some \\", "  ", "value\""], "some \nvalue"],
         "first-line-space": [["\"space \""], "space "]
     };
 }

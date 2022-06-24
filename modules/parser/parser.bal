@@ -38,7 +38,8 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
     if state.currentToken.token == lexer:EOL || state.currentToken.token == lexer:EMPTY_LINE
         || state.currentToken.token == lexer:COMMENT {
 
-        if state.lineIndex >= state.numLines - 1 {
+        if (!state.lexerState.isNewLine && state.lineIndex >= state.numLines - 1) ||
+            (state.lexerState.isNewLine && state.lexerState.isEndOfStream()) {
             if docType == DIRECTIVE_DOCUMENT {
                 return generateExpectError(state, lexer:DIRECTIVE_MARKER, lexer:DIRECTIVE);
             }
@@ -78,12 +79,6 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
             }
             check checkToken(state, [lexer:SEPARATION_IN_LINE, lexer:EOL]);
 
-            if state.directiveDocument {
-                return generateGrammarError(state,
-                    "Expected a '<explicit-document>' after directive, but found another directive",
-                    "<explicit-document>",
-                    "<directive-document");
-            }
             state.directiveDocument = true;
             return check parse(state, docType = DIRECTIVE_DOCUMENT);
         }
@@ -115,8 +110,7 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
                 }
             }
             return {
-                explicit,
-                directive: state.directiveDocument
+                explicit
             };
         }
         lexer:DOUBLE_QUOTE_DELIMITER|lexer:SINGLE_QUOTE_DELIMITER|lexer:PLANAR_CHAR|lexer:ALIAS => {
@@ -199,6 +193,10 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
                 check separate(state, true);
                 if state.tokenBuffer.token == lexer:SEPARATOR {
                     check checkToken(state);
+                } else if state.tokenBuffer.token != lexer:MAPPING_END
+                    && state.tokenBuffer.token != lexer:SEQUENCE_END {
+                    return generateExpectError(state,
+                        [lexer:SEPARATOR, lexer:MAPPING_END, lexer:SEQUENCE_END], lexer:MAPPING_END);
                 }
             }
             return {endType: common:SEQUENCE};
@@ -212,6 +210,10 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
                 check separate(state, true);
                 if state.tokenBuffer.token == lexer:SEPARATOR {
                     check checkToken(state);
+                } else if state.tokenBuffer.token != lexer:MAPPING_END
+                    && state.tokenBuffer.token != lexer:SEQUENCE_END {
+                    return generateExpectError(state,
+                        [lexer:SEPARATOR, lexer:MAPPING_END, lexer:SEQUENCE_END], lexer:MAPPING_END);
                 }
             }
             return {endType: common:MAPPING};

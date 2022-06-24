@@ -142,15 +142,6 @@ function appendData(ParserState state, ParserOption option,
             buffer = {startType: common:MAPPING, implicit: true};
         }
     } else {
-        if state.lexerState.isFlowCollection() && !contentValue.hasKey("startType") {
-            lexer:YAMLToken prevToken = state.currentToken.token;
-            check separate(state, true);
-            check checkToken(state, peek = true);
-            if state.tokenBuffer.token != lexer:MAPPING_END && state.tokenBuffer.token != lexer:SEQUENCE_END {
-                return generateExpectError(state, [lexer:SEPARATOR, lexer:MAPPING_VALUE], prevToken);
-            }
-        }
-
         if option == EXPECT_MAP_KEY && !explicitKey {
             return generateGrammarError(state, "Expected a key for the block mapping");
         }

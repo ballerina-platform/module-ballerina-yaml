@@ -59,7 +59,7 @@ function constructInteger(json data) returns json|SchemaError {
 
 function constructFloat(json data) returns json|SchemaError {
     string value = data.toString();
-    
+
     if value.length() == 0 {
         return generateError("An integer cannot be empty");
     }

@@ -67,12 +67,19 @@ public class ParserState {
     # + return - An error if it fails to initialize  
     function initLexer(string message = "Unexpected end of stream") returns ParsingError? {
         self.lineIndex += 1;
-        if self.lineIndex >= self.numLines {
-            return generateGrammarError(self, message);
+        string line;
+        if self.lexerState.isNewLine {
+            line = self.lexerState.line.substring(self.lexerState.index);
+        } else {
+            if self.lineIndex >= self.numLines {
+                return generateGrammarError(self, message);
+            }
+            line = self.lines[self.lineIndex];
         }
+
         self.explicitDoc = false;
         self.expectBlockSequenceValue = false;
         self.tagPropertiesInLine = false;
-        self.lexerState.setLine(self.lines[self.lineIndex], self.lineIndex);
+        self.lexerState.setLine(line, self.lineIndex);
     }
 }

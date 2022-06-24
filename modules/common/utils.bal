@@ -25,4 +25,4 @@ public function processTypeCastingError(json|error value) returns json|Conversio
 # + expectedEvent - Next expected event of the stream
 # + return - Formatted error message as a string
 public function generateExpectedEndEventErrorMessage(string actualEvent, string expectedEvent) returns string
-    => string `Expected '${expectedEvent}' before '-${actualEvent}'`;
+    => string `Expected '-${expectedEvent}' before '-${actualEvent}'`;

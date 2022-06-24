@@ -542,6 +542,11 @@ function contextBlockScalar(LexerState state) returns LexerState|LexicalError {
 
         match state.peek() {
             "#" => { // Generate beginning of the trailing comment
+                if !state.trailingComment && state.captureIndent {
+                    return generateScanningError(state, "Block scalars with more-indented leading empty lines"
+                        + "must use an explicit indentation indicator");
+                }
+
                 state.forward(-1);
                 return state.trailingComment ? state.tokenize(EOL) : state.tokenize(TRAILING_COMMENT);
             }

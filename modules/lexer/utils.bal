@@ -65,46 +65,12 @@ function matchPattern(LexerState state, patternParamterType|patternParamterType[
     } else {
         return checkPattern(currentChar, inclusionPattern);
     }
-    
+
     return false;
 }
 
 function checkPattern(string:Char currentChar, patternParamterType pattern) returns boolean
     => pattern is string ? currentChar == pattern : pattern(currentChar);
-
-# Concatenate one or more strings.
-#
-# + strings - Strings to be concatenated
-# + return - Concatenated string
-function concatenateStringArray(string[]|string strings) returns string {
-    if strings is string {
-        return strings;
-    }
-    string output = "";
-    strings.forEach(function(string line) {
-        output += line;
-    });
-    return output;
-}
-
-# Check if the tokens adhere to the given string.
-#
-# + state - Current lexer state
-# + chars - Expected string  
-# + successToken - Output token if succeed
-# + return - If success, returns the token. Else, returns the parsing error.  
-function tokensInSequence(LexerState state, string chars, YAMLToken successToken) returns LexerState|LexicalError {
-    foreach string char in chars {
-        // The expected character is not found
-        if state.peek() == () || !checkCharacter(state, char) {
-            return generateScanningError(state, string `Expected '${char}' for ${successToken}`);
-        }
-        state.forward();
-    }
-    state.lexeme += chars;
-    state.index -= 1;
-    return state.tokenize(successToken);
-}
 
 # Assert the character of the current index
 #

@@ -54,6 +54,8 @@ public class LexerState {
 
     public boolean firstLine = true;
 
+    public boolean isNewLine = false;
+
     # Output TOML token
     YAMLToken token = DUMMY;
 
@@ -130,6 +132,7 @@ public class LexerState {
         self.indentStartIndex = -1;
         self.tokensForMappingValue = [];
         self.tabInWhitespace = -1;
+        self.isNewLine = false;
     }
 
     # Reset the current lexer state
@@ -145,4 +148,6 @@ public class LexerState {
     }
 
     public function isFlowCollection() returns boolean => self.numOpenedFlowCollections > 0;
+
+    public function isEndOfStream() returns boolean => self.index >= self.line.length();
 }

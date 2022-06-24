@@ -29,7 +29,8 @@ function invalidNodeTagDataGen() returns map<[string, boolean]> {
     return {
         "verbatim primary": ["!<!>", true],
         "verbatim empty": ["!<>", true],
-        "tag-shorthand no-suffix": ["!e!", false]
+        "tag-shorthand no-suffix": ["!e!", false],
+        "undefined tag handle": ["!u!tag", false]
     };
 }
 
@@ -77,7 +78,8 @@ function testNodeSeparationEvent(string[] arr, string tag) returns error? {
 function nodeSeparateDataGen() returns map<[string[], string]> {
     return {
         "single space": [["!tag &anchor value"], "!tag"],
-        "verbatim tag": [["!<tag> &anchor value"], "tag"],
+        "verbatim tag before anchor": [["!<tag> &anchor value"], "tag"],
+        "verbatim tag after anchor": [["&anchor !<tag> value"], "tag"],
         "new line": [["!!tag", "&anchor value"], "tag:yaml.org,2002:tag"],
         "with comment": [["!tag #first-comment", "#second-comment", "&anchor value"], "!tag"],
         "anchor first": [["&anchor !tag value"], "!tag"]

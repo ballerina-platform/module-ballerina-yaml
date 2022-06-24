@@ -186,7 +186,8 @@ function planarScalar(ParserState state) returns ParsingError|string {
                 check checkToken(state);
 
                 // Terminate at the end of the line
-                if state.lineIndex == state.numLines - 1 {
+                if (!state.lexerState.isNewLine && state.lineIndex >= state.numLines - 1) ||
+                    (state.lexerState.isNewLine && state.lexerState.isEndOfStream()) {
                     break;
                 }
                 check state.initLexer();
@@ -249,9 +250,6 @@ function blockScalar(ParserState state, boolean isFolded) returns ParsingError|s
         lexer:EOL => { // Clip chomping indicator
             check state.initLexer();
             chompingIndicator = "=";
-        }
-        _ => { // Any other characters are not allowed
-            return generateExpectError(state, lexer:CHOMPING_INDICATOR, state.prevToken);
         }
     }
 

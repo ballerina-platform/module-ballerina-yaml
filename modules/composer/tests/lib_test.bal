@@ -32,6 +32,8 @@ function nativeDataStructureDataGen() returns map<[string|string[], json]> {
         "explicit key empty key": [["? ", ": value"], {"": "value"}],
         "empty value flow mapping": ["{key,}", {"key": ()}],
         "empty values in block mapping": [["first:", "second:"], {"first": (), "second": ()}],
+        // "empty key indented in block mapping": [["first:", "  : value"], {"first": {"": "value"}}],
+        // "empty key at same indent in block mapping": [["key: first", ": second"], {"key": "first", "": "second"}],
         "anchoring the key after empty node": [["a: ", "&anchor b: *anchor"], {"a": (), "b": "b"}],
         "anchoring the key of nested value": [["a: ", "  &anchor b: *anchor"], {"a": {"b": "b"}}],
         "anchoring the empty node of a map": [["a: &anchor", "b: *anchor"], {"a": (), "b": ()}],
@@ -68,7 +70,8 @@ function invalidEventTreeDataGen() returns map<[string[]]> {
         "ending a mapping with document marker": [["{a: b, c: d", "..."]],
         "mapping with sequence tag": [["!!seq {a: b}"]],
         "sequence with mapping tag": [["!!map [1, 2]"]],
-        "scalar with sequence tag": [["!!str [1, 2]"]]
+        "scalar with sequence tag": [["!!str [1, 2]"]],
+        "two consecutive directive documents": [["%YAML 1.2", "---", "%YAML 1.3", "---"]]
     };
 }
 

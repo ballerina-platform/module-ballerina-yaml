@@ -1,4 +1,4 @@
-type patternParamterType string|function(string:Char char) returns boolean;
+type patternParamterType string|function (string:Char char) returns boolean;
 
 function patternPrintable(string:Char char) returns boolean {
     int codePoint = char.toCodePointInt();
@@ -41,11 +41,11 @@ function patternWord(string:Char char) returns boolean {
         || char == "-";
 }
 
-function patternFlowIndicator(string:Char char) returns boolean 
+function patternFlowIndicator(string:Char char) returns boolean
     => char is ","|"["|"]"|"{"|"}";
 
-function patternIndicator(string:Char char) returns boolean 
+function patternIndicator(string:Char char) returns boolean
     => char is "-"|"?"|":"|","|"["|"]"|"{"|"}"|"#"|"&"|"*"|"!"|"|"|">"|"'"|"\""|"%"|"@"|"`";
 
-function patternUri(string:Char char) returns boolean 
+function patternUri(string:Char char) returns boolean
     => char is "#"|";"|"/"|"?"|":"|"@"|"&"|"="|"+"|"$"|","|"_"|"."|"!"|"~"|"*"|"'"|"("|")"|"["|"]";

@@ -27,11 +27,13 @@ public type WriteConfig record {|
 # + yamlTypes - Custom YAML types for the schema  
 # + isStream - If set, the parser reads a stream of YAML documents  
 # + allowAnchorRedefinition - Flag is set if anchors can be redefined multiple times
+# + allowMapEntryRedefinition - Flag is set if same map keys are allowed in a mapping
 public type ReadConfig record {|
     YAMLSchema schema = CORE_SCHEMA;
     YAMLType[] yamlTypes = [];
     boolean isStream = false;
     boolean allowAnchorRedefinition = true;
+    boolean allowMapEntryRedefinition = false;
 |};
 
 # Represents the attributes of the custom YAML type.

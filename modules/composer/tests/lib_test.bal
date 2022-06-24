@@ -6,7 +6,7 @@ import yaml.common;
     groups: ["composer"]
 }
 function testGenerateNativeDataStructure(string|string[] line, json structure) returns error? {
-    ComposerState state = check new ((line is string) ? [line] : line, {}, true);
+    ComposerState state = check obtainComposerState((line is string) ? [line] : line);
     json output = check composeDocument(state);
 
     test:assertEquals(output, structure);
@@ -48,7 +48,7 @@ function nativeDataStructureDataGen() returns map<[string|string[], json]> {
     groups: ["composer"]
 }
 function testComposeInvalidEventTree(string[] lines) returns error? {
-    ComposerState state = check new (lines, {}, true);
+    ComposerState state = check obtainComposerState(lines);
 
     json|error output = composeDocument(state);
     test:assertTrue(output is ComposingError);
@@ -80,7 +80,7 @@ function invalidEventTreeDataGen() returns map<[string[]]> {
     groups: ["composer"]
 }
 function testComposeMultipleDocuments(string[] lines, json[] expectedDocs) returns error? {
-    ComposerState state = check new (lines, {}, true);
+    ComposerState state = check obtainComposerState(lines);
     json[] docs = check composeStream(state);
 
     test:assertEquals(docs, expectedDocs);
@@ -106,7 +106,7 @@ function streamDataGen() returns map<[string[], json[]]> {
     groups: ["composer"]
 }
 function testInvalidStartEventOfStream() returns error? {
-    ComposerState state = check new ([""], {}, true);
+    ComposerState state = check obtainComposerState([""]);
     json|error output = composeNode(state, {startType: common:STREAM});
 
     test:assertTrue(output is ComposeError);
@@ -116,8 +116,18 @@ function testInvalidStartEventOfStream() returns error? {
     groups: ["composer"]
 }
 function testRestrictRedefiningOfAliases() returns error? {
-    ComposerState state = check new (["first: &anchor first", "second: &anchor second"], {}, false);
+    ComposerState state = check obtainComposerState(["first: &anchor first", "second: &anchor second"], allowAnchorRedefinition = false);
     json|error output = composeDocument(state);
 
     test:assertTrue(output is common:AliasingError);
+}
+
+@test:Config {
+    groups: ["composer"]
+}
+function testAllowRedefinitionOfMapEntires() returns error? {
+    ComposerState state = check obtainComposerState(["key: first", "key: second"], allowMapEntryRedefinition = true);
+    json output = check composeDocument(state);
+
+    test:assertEquals(output.key, "second");
 }

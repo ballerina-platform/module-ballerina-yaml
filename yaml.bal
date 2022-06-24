@@ -10,7 +10,8 @@ import yaml.composer;
 # + return - YAML map object on success. Else, returns an error
 public function readString(string yamlString, *ReadConfig config) returns json|Error {
     composer:ComposerState composerState = check new ([yamlString],
-        generateTagHandlesMap(config.yamlTypes, config.schema), config.allowAnchorRedefinition);
+        generateTagHandlesMap(config.yamlTypes, config.schema), config.allowAnchorRedefinition,
+        config.allowMapEntryRedefinition);
     return composer:composeDocument(composerState);
 }
 
@@ -22,7 +23,7 @@ public function readString(string yamlString, *ReadConfig config) returns json|E
 public function readFile(string filePath, *ReadConfig config) returns json|Error {
     string[] lines = check io:fileReadLines(filePath);
     composer:ComposerState composerState = check new (lines, generateTagHandlesMap(config.yamlTypes, config.schema),
-        config.allowAnchorRedefinition);
+        config.allowAnchorRedefinition, config.allowMapEntryRedefinition);
     return config.isStream ? composer:composeStream(composerState) : composer:composeDocument(composerState);
 }
 

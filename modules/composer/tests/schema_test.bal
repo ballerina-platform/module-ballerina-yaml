@@ -24,7 +24,7 @@ function constructRGB(json data) returns json|schema:SchemaError {
     groups: ["composer"]
 }
 function testJSONSchema(string line, json expectedOutput) returns error? {
-    ComposerState state = check new ([line], schema:getJsonSchemaTags(), true);
+    ComposerState state = check obtainComposerState([line], tagSchema = schema:getJsonSchemaTags());
     json output = check composeDocument(state);
     test:assertEquals(output, expectedOutput);
 }
@@ -51,7 +51,7 @@ function jsonLineDataGen() returns map<[string, json]> {
     groups: ["composer"]
 }
 function testCORESchema(string line, json expectedOutput) returns error? {
-    ComposerState state = check new ([line], schema:getCoreSchemaTags(), true);
+    ComposerState state = check obtainComposerState([line], tagSchema = schema:getCoreSchemaTags());
     json output = check composeDocument(state);
     test:assertEquals(output, expectedOutput);
 }
@@ -74,8 +74,8 @@ function coreLineDataGen() returns map<[string, json]> {
     groups: ["composer"]
 }
 function testCustomTag() returns error? {
-    map<schema:YAMLTypeConstructor> tagHandles = schema:getJsonSchemaTags();
-    tagHandles["!rgb"] = {
+    map<schema:YAMLTypeConstructor> tagSchema = schema:getJsonSchemaTags();
+    tagSchema["!rgb"] = {
         kind: schema:SEQUENCE,
         construct: constructRGB,
         identity: function(json data) returns boolean {
@@ -85,7 +85,7 @@ function testCustomTag() returns error? {
         represent: function(json data) returns string => data.toString()
     };
 
-    ComposerState state = check new (["!rgb [123, 12, 32]"], tagHandles, true);
+    ComposerState state = check obtainComposerState(["!rgb [123, 12, 32]"], tagSchema = tagSchema);
     json output = check composeDocument(state);
     RGB expectedOutput = [123, 12, 32];
 
@@ -96,15 +96,16 @@ function testCustomTag() returns error? {
     groups: ["composer"]
 }
 function testInvalidCustomTag() returns error? {
-    map<schema:YAMLTypeConstructor> tagHandles = schema:getJsonSchemaTags();
-    tagHandles["!rgb"] = {
+    map<schema:YAMLTypeConstructor> tagSchema = schema:getJsonSchemaTags();
+    tagSchema["!rgb"] = {
         kind: schema:SEQUENCE,
         construct: constructRGB,
         identity: schema:generateIdentityFunction(RGB),
         represent: function(json data) returns string => data.toString()
     };
 
-    ComposerState state = check new (["!rgb [256, 12, 32]"], tagHandles, true);
+    
+    ComposerState state = check obtainComposerState(["!rgb [256, 12, 32]"], tagSchema = tagSchema);
     json|error output = composeDocument(state);
 
     test:assertTrue(output is schema:SchemaError);

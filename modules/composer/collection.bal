@@ -92,6 +92,10 @@ function composeMapping(ComposerState state, boolean flowStyle, boolean implicit
         // Compose the key
         json key = check composeNode(state, event);
 
+        if !state.allowMapEntryRedefinition && structure.hasKey(key.toString()) {
+            return generateComposeError(state, string `Cannot have duplicate map entries for '${key.toString()}'`, event);
+        }
+
         // Compose the value
         event = check checkEvent(state, parser:EXPECT_MAP_VALUE);
         json value = check composeNode(state, event);

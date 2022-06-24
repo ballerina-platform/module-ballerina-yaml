@@ -138,7 +138,7 @@ function appendData(ParserState state, ParserOption option,
         if option == EXPECT_MAP_VALUE {
             buffer = check constructEvent(state, {value: ()}, newNodeTagStructure);
         }
-        if option == EXPECT_SEQUENCE_ENTRY || option == EXPECT_SEQUENCE_VALUE {
+        else if option == EXPECT_SEQUENCE_ENTRY || option == EXPECT_SEQUENCE_VALUE {
             buffer = {startType: common:MAPPING, implicit: true};
         }
     } else {

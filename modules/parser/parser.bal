@@ -132,7 +132,7 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
                 if indentation == () {
                     return generateIndentationError(state, "Empty key requires an indentation");
                 }
-                check separate(state);
+                check separate(state, true);
                 match indentation.change {
                     1 => { // Increase in indent
                         state.eventBuffer.push({value: ()});

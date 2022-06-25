@@ -73,7 +73,7 @@ function composeMapping(ComposerState state, boolean flowStyle, boolean implicit
                 common:SEQUENCE => {
                     return generateExpectedEndEventError(state, common:SEQUENCE, common:MAPPING);
                 }
-                common:STREAM => {
+                _ => {
                     if !flowStyle {
                         break;
                     }
@@ -98,10 +98,28 @@ function composeMapping(ComposerState state, boolean flowStyle, boolean implicit
 
         // Compose the value
         event = check checkEvent(state, parser:EXPECT_MAP_VALUE);
-        json value = check composeNode(state, event);
 
-        // Map the key value pair
-        structure[key.toString()] = value;
+        // Check for mapping end events
+        if event is common:EndEvent {
+            match event.endType {
+                common:MAPPING => {
+                    structure[key.toString()] = ();
+                    break;
+                }
+                common:SEQUENCE => {
+                    return generateExpectedEndEventError(state, common:SEQUENCE, common:MAPPING);
+                }
+                _ => {
+                    if !flowStyle {
+                        structure[key.toString()] = ();
+                        break;
+                    }
+                    return generateExpectedEndEventError(state, common:STREAM, common:MAPPING);
+                }
+            }
+        } else {
+            structure[key.toString()] = check composeNode(state, event);
+        }
 
         // Terminate after single key-value pair if implicit mapping flag is set.
         if implicitMapping {

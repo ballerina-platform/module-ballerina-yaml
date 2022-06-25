@@ -18,6 +18,9 @@ type Indent record {|
 # + return - Change of indentation. Else, an indentation error on failure
 function checkIndent(LexerState state, int? mapIndex = ()) returns Indentation|LexicalError {
     int startIndex = mapIndex == () ? state.index - 1 : mapIndex;
+    if mapIndex != () {
+        state.keyDefinedForLine = true;
+    }
 
     if isTabInIndent(state, startIndex) {
         return generateIndentationError(state, "Cannot have tab as an indentation");

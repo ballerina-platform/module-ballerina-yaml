@@ -71,7 +71,10 @@ function invalidEventTreeDataGen() returns map<[string[]]> {
         "mapping with sequence tag": [["!!seq {a: b}"]],
         "sequence with mapping tag": [["!!map [1, 2]"]],
         "scalar with sequence tag": [["!!str [1, 2]"]],
-        "two consecutive directive documents": [["%YAML 1.2", "---", "%YAML 1.3", "---"]]
+        "two consecutive directive documents": [["%YAML 1.2", "---", "%YAML 1.3", "---"]],
+        "explicit key and mapping value without indent": [["? first", " second", " : value"]],
+        "explicit key without indent": [["? first", "second", ": value"]],
+        "multiline implicit key": [["first", "second", " : value"]]
     };
 }
 

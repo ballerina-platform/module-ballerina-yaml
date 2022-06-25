@@ -143,12 +143,13 @@ function appendData(ParserState state, ParserOption option,
             buffer = check constructEvent(state, {value: ()}, newNodeTagStructure);
         }
         else if option == EXPECT_SEQUENCE_ENTRY || option == EXPECT_SEQUENCE_VALUE {
-            buffer = {startType: common:MAPPING, implicit: true};
+            buffer = {startType: common:MAPPING, implicit: state.lexerState.isFlowCollection()};
         }
     } else {
         if option == EXPECT_MAP_KEY && !explicitKey {
             return generateGrammarError(state, "Expected a key for the block mapping");
         }
+
         // There is already tag properties defined and the value is not a key
         if definedProperties is TagStructure {
             if definedProperties.anchor != () && tagStructure.anchor != () {
@@ -160,7 +161,7 @@ function appendData(ParserState state, ParserOption option,
         }
     }
 
-    if indentation is lexer:Indentation {
+    if indentation is lexer:Indentation && !state.indentationProcessed {
         match indentation.change {
             1 => { // Increased
                 // Block sequence
@@ -179,6 +180,7 @@ function appendData(ParserState state, ParserOption option,
             }
         }
     }
+    state.indentationProcessed = false;
 
     if isJsonKey && currentNodeTagStructure.tag == () {
         currentNodeTagStructure.tag = schema:defaultGlobalTagHandle + "str";
@@ -188,7 +190,12 @@ function appendData(ParserState state, ParserOption option,
     if buffer == () {
         return event;
     }
-    state.eventBuffer.push(event);
+    if explicitKey {
+        state.eventBuffer.unshift(event);
+    } else {
+        state.eventBuffer.push(event);
+    }
+    
     return buffer;
 }
 
@@ -204,15 +211,16 @@ function content(ParserState state, boolean peeked, ParserOption option, boolean
     TagStructure tagStructure = {}) returns map<json>|ParsingError {
 
     if !peeked {
+        check separate(state, true);
         check checkToken(state);
     }
 
     match state.currentToken.token {
         lexer:SEPARATOR|lexer:MAPPING_VALUE => {
-            return {value: ""};
+            return {value: ()};
         }
-        lexer:EOL|lexer:COMMENT => {
-            return {value: ""};
+        lexer:EOL|lexer:COMMENT|lexer:EMPTY_LINE => {
+            return {value: ()};
         }
     }
 
@@ -240,7 +248,22 @@ function content(ParserState state, boolean peeked, ParserOption option, boolean
             if state.tagPropertiesInLine {
                 return generateGrammarError(state, "'-' cannot be defined after tag properties");
             }
-            return {startType: common:SEQUENCE};
+
+            match (<lexer:Indentation>state.currentToken.indentation).change {
+                1 => {
+                    return {startType: common:SEQUENCE};
+                }
+                0 => {
+                    return {value: ()};
+                }
+                -1 => {
+                    state.indentationProcessed = true;
+                    foreach common:Collection collectionItem in (<lexer:Indentation>state.currentToken.indentation).collection {
+                        state.eventBuffer.push({endType: collectionItem});
+                    }
+                    return constructEvent(state, {value: ()}, tagStructure);
+                }
+            }
         }
         lexer:MAPPING_START => {
             return {startType: common:MAPPING};
@@ -264,7 +287,7 @@ function content(ParserState state, boolean peeked, ParserOption option, boolean
             }
             if event is common:ScalarEvent {
                 state.eventBuffer.push(event);
-                return {value: ""};
+                return {value: ()};
             }
         }
     }
@@ -273,20 +296,20 @@ function content(ParserState state, boolean peeked, ParserOption option, boolean
     if state.explicitKey {
         match state.currentToken.token {
             lexer:MAPPING_VALUE => {
-                return {value: ""};
+                return {value: ()};
             }
             lexer:SEPARATOR => {
                 state.eventBuffer.push({value: ()});
-                return {value: ""};
+                return {value: ()};
             }
             lexer:MAPPING_END => {
                 state.eventBuffer.push({value: ()});
                 state.eventBuffer.push({endType: common:MAPPING});
-                return {value: ""};
+                return {value: ()};
             }
             lexer:EOL => { // Only the mapping key
                 state.eventBuffer.push({value: ()});
-                return {value: ""};
+                return {value: ()};
             }
         }
     }

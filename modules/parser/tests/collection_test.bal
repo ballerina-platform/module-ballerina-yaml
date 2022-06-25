@@ -54,28 +54,12 @@ function explicitKeysDataGen() returns map<[string|string[], common:Event[]]> {
         ],
         "empty key in flow mapping": [
             "{? : value}",
-            [{startType: common:MAPPING, flowStyle: true}, {value: ""}, {value: "value"}]
+            [{startType: common:MAPPING, flowStyle: true}, {value: ()}, {value: "value"}]
         ],
         "only explicit key in flow mapping": [
             "{? }",
-            [{startType: common:MAPPING, flowStyle: true}, {value: ""}, {value: ()}]
+            [{startType: common:MAPPING, flowStyle: true}, {value: ()}, {value: ()}]
         ]
-    };
-}
-
-@test:Config {
-    dataProvider: invalidKeyDataGen,
-    groups: ["parser"]
-}
-function testInvalidBlockKeys(string|string[] lines, boolean isLexical) returns error? {
-    check assertParsingError(lines, isLexical);
-}
-
-function invalidKeyDataGen() returns map<[string|string[], boolean]> {
-    return {
-        "explicit key and mapping value without indent": [["? first", " second", " : value"], true],
-        "explicit key without indent": [["? first", "second", ": value"], true],
-        "multiline implicit key": [["first", "second", " : value"], false]
     };
 }
 

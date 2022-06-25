@@ -74,7 +74,7 @@ function nodeComplete(ParserState state, ParserOption option, TagStructure? defi
             tagStructure.anchor = state.currentToken.value;
 
             // Check if there is a separate
-            check separate(state);
+            check separate(state, true);
 
             // Obtain the tag if there exists
             string? tagHandle;

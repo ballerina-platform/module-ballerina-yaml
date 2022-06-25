@@ -82,7 +82,7 @@ function castData(ComposerState state, json data,
         // Check for the tags in the YAML failsafe schema
         if tag == schema:defaultGlobalTagHandle + "str" {
             return kind == schema:STRING
-                ? data
+                ? data.toString()
                 : generateExpectedKindError(state, kind, schema:STRING, tag);
         }
 

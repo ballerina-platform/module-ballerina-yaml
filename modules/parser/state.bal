@@ -44,6 +44,8 @@ public class ParserState {
 
     boolean emptyKey = false;
 
+    boolean indentationProcessed = false;
+
     common:Event[] eventBuffer = [];
 
     public function init(string[] lines) returns ParsingError? {

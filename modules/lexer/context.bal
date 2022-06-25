@@ -269,12 +269,17 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
                 state.forward();
                 return scanMappingValueKey(state, PLANAR_CHAR, scanPlanarChar);
             }
-            _ = state.tokenize(MAPPING_VALUE);
-
             // Capture the for empty key mapping values
-            if state.indentStartIndex == -1 && state.numOpenedFlowCollections == 0 {
-                state.indentation = check checkIndent(state, state.index - 1);
+            if !state.keyDefinedForLine && !state.isFlowCollection() {
+                if state.mappingKeyColumn != state.index && state.mappingKeyColumn > -1 {
+                    return generateIndentationError(state, "'?' and ':' should have the same indentation");
+                }
+                state.mappingKeyColumn = -1;
+                state.updateStartIndex();
+                state.keyDefinedForLine = true;
+                state.indentation = check checkIndent(state, state.indentStartIndex);
             }
+            _ = state.tokenize(MAPPING_VALUE);
             return state;
         }
         "?" => {
@@ -284,6 +289,7 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
                 state.forward();
                 return scanMappingValueKey(state, PLANAR_CHAR, scanPlanarChar);
             }
+            state.mappingKeyColumn = state.index;
             _ = state.tokenize(MAPPING_KEY);
 
             // Capture the for empty key mapping values
@@ -301,7 +307,6 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
             return state.tokenize(SINGLE_QUOTE_DELIMITER);
         }
         "," => {
-            //TODO: only valid in flow sequence
             return state.tokenize(SEPARATOR);
         }
         "[" => {

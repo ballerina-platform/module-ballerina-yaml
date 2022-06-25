@@ -52,9 +52,13 @@ public class LexerState {
 
     boolean indentationBreak = false;
 
+    boolean keyDefinedForLine = false;
+
     public boolean firstLine = true;
 
     public boolean isNewLine = false;
+
+    int mappingKeyColumn = -1;
 
     # Output TOML token
     YAMLToken token = DUMMY;
@@ -133,6 +137,7 @@ public class LexerState {
         self.tokensForMappingValue = [];
         self.tabInWhitespace = -1;
         self.isNewLine = false;
+        self.keyDefinedForLine = false;
     }
 
     # Reset the current lexer state

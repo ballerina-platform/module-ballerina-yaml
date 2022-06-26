@@ -132,7 +132,7 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
                 if indentation == () {
                     return generateIndentationError(state, "Empty key requires an indentation");
                 }
-                check separate(state, true);
+                check separate(state);
                 match indentation.change {
                     1 => { // Increase in indent
                         state.eventBuffer.push({value: ()});
@@ -199,7 +199,7 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
         }
         lexer:SEQUENCE_END => {
             if state.lexerState.isFlowCollection() {
-                check separate(state, true);
+                check separate(state);
                 if state.tokenBuffer.token == lexer:SEPARATOR {
                     check checkToken(state);
                 } else if state.tokenBuffer.token != lexer:MAPPING_END
@@ -216,7 +216,7 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
                 return {value: ()};
             }
             if state.lexerState.isFlowCollection() {
-                check separate(state, true);
+                check separate(state);
                 if state.tokenBuffer.token == lexer:SEPARATOR {
                     check checkToken(state);
                 } else if state.tokenBuffer.token != lexer:MAPPING_END

@@ -40,7 +40,7 @@ function appendData(ParserState state, ParserOption option,
     lexer:Indentation? indentation = ();
     if state.explicitKey {
         indentation = state.currentToken.indentation;
-        check separate(state, true);
+        check separate(state);
     }
 
     state.updateLexerContext(state.explicitKey ? lexer:LEXER_EXPLICIT_KEY : lexer:LEXER_START);
@@ -98,7 +98,7 @@ function appendData(ParserState state, ParserOption option,
 
     // Ignore the whitespace and lines if there is any
     if state.currentToken.token != lexer:MAPPING_VALUE && state.currentToken.token != lexer:SEPARATOR {
-        check separate(state, true);
+        check separate(state);
     }
     check checkToken(state, peek = true);
 
@@ -114,7 +114,7 @@ function appendData(ParserState state, ParserOption option,
         if !state.lexerState.isFlowCollection() {
             return generateGrammarError(state, "',' are only allowed in flow collections");
         }
-        check separate(state, true);
+        check separate(state);
         if option == EXPECT_MAP_KEY {
             state.eventBuffer.push({value: ()});
         }
@@ -134,7 +134,7 @@ function appendData(ParserState state, ParserOption option,
                 string `'${lexer:PLANAR_CHAR}' token cannot start in the same line as the directive marker`);
         }
 
-        check separate(state, isJsonKey || state.lexerState.isFlowCollection(), true);
+        check separate(state);
         if state.emptyKey && option == EXPECT_MAP_VALUE {
             state.emptyKey = false;
             state.eventBuffer.push({value: ()});
@@ -211,7 +211,7 @@ function content(ParserState state, boolean peeked, ParserOption option, boolean
     TagStructure tagStructure = {}) returns map<json>|ParsingError {
 
     if !peeked {
-        check separate(state, true);
+        check separate(state);
         check checkToken(state);
     }
 
@@ -319,16 +319,14 @@ function content(ParserState state, boolean peeked, ParserOption option, boolean
 
 # Verifies the grammar production for separation between nodes.
 #
-# + state - Current parser state  
-# + optional - If the separation is optional  
-# + allowEmptyNode - If it is possible to have an empty node.
+# + state - Current parser state
 # + return - An error on invalid separation.
-function separate(ParserState state, boolean optional = false, boolean allowEmptyNode = false) returns ()|ParsingError {
+function separate(ParserState state) returns ()|ParsingError {
     state.updateLexerContext(lexer:LEXER_START);
     check checkToken(state, peek = true);
 
-    // If separate is optional, skip the check when either end-of-line or separate-in-line is not detected.
-    if optional && !(state.tokenBuffer.token == lexer:EOL || state.tokenBuffer.token == lexer:SEPARATION_IN_LINE || state.tokenBuffer.token == lexer:COMMENT) {
+    // Skip the check when either end-of-line or separate-in-line is not detected.
+    if !(state.tokenBuffer.token == lexer:EOL || state.tokenBuffer.token == lexer:SEPARATION_IN_LINE || state.tokenBuffer.token == lexer:COMMENT) {
         return;
     }
 
@@ -348,7 +346,7 @@ function separate(ParserState state, boolean optional = false, boolean allowEmpt
     while state.currentToken.token == lexer:EOL || state.currentToken.token == lexer:EMPTY_LINE || state.currentToken.token == lexer:COMMENT {
         ParsingError? err = state.initLexer();
         if err is ParsingError {
-            return optional || allowEmptyNode ? () : err;
+            return;
         }
         check checkToken(state, peek = true);
 

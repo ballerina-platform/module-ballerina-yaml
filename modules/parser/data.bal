@@ -29,7 +29,6 @@ function appendData(ParserState state, ParserOption option,
             state.explicitKey = true;
             check checkToken(state);
         }
-
     }
     boolean explicitKey = state.explicitKey;
 
@@ -43,7 +42,7 @@ function appendData(ParserState state, ParserOption option,
         check separate(state);
     }
 
-    state.updateLexerContext(state.explicitKey ? lexer:LEXER_EXPLICIT_KEY : lexer:LEXER_START);
+    state.updateLexerContext(lexer:LEXER_START);
 
     map<json> contentValue = check content(state, peeked, option, state.explicitKey, tagStructure);
     boolean isAlias = contentValue.hasKey("alias");
@@ -124,8 +123,12 @@ function appendData(ParserState state, ParserOption option,
         if state.lastKeyLine == state.lineIndex && !state.lexerState.isFlowCollection() {
             return generateGrammarError(state, "Two block mapping keys cannot be defined in the same line");
         }
-        if explicitKey {
-            state.lastExplicitKeyLine = state.lineIndex;
+        
+        // In a block scalar, if there is a mapping key as in the same line as a mapping value, 
+        // then that mapping value does not correspond to the mapping key. the mapping value forms a
+        // new mapping pair which represents the explicit key.
+        if state.lastExplicitKeyLine == state.lineIndex && !state.lexerState.isFlowCollection() {
+            return generateGrammarError(state, "Mappings are not allowed as keys for explicit keys");
         }
         state.lastKeyLine = state.lineIndex;
 
@@ -135,19 +138,28 @@ function appendData(ParserState state, ParserOption option,
         }
 
         check separate(state);
-        if state.emptyKey && option == EXPECT_MAP_VALUE {
+        if state.emptyKey && (option == EXPECT_MAP_VALUE || option == EXPECT_SEQUENCE_VALUE) {
             state.emptyKey = false;
             state.eventBuffer.push({value: ()});
         }
         else if option == EXPECT_MAP_VALUE {
             buffer = check constructEvent(state, {value: ()}, newNodeTagStructure);
         }
-        else if option == EXPECT_SEQUENCE_ENTRY || option == EXPECT_SEQUENCE_VALUE {
-            buffer = {startType: common:MAPPING, implicit: state.lexerState.isFlowCollection()};
+        else if option == EXPECT_SEQUENCE_ENTRY || option == EXPECT_SEQUENCE_VALUE 
+            && state.lexerState.isFlowCollection() {
+                buffer = {startType: common:MAPPING, implicit: true};
         }
     } else {
         if option == EXPECT_MAP_KEY && !explicitKey {
             return generateGrammarError(state, "Expected a key for the block mapping");
+        }
+
+        if explicitKey {
+            lexer:Indentation? peekedIndentation = state.tokenBuffer.indentation;
+            if peekedIndentation is lexer:Indentation && peekedIndentation.change == 1 
+                && state.tokenBuffer.token != lexer:MAPPING_KEY {
+                return generateGrammarError(state, "Invalid explicit key");
+            }
         }
 
         // There is already tag properties defined and the value is not a key
@@ -195,7 +207,7 @@ function appendData(ParserState state, ParserOption option,
     } else {
         state.eventBuffer.push(event);
     }
-    
+
     return buffer;
 }
 
@@ -232,14 +244,20 @@ function content(ParserState state, boolean peeked, ParserOption option, boolean
     match state.currentToken.token {
         lexer:SINGLE_QUOTE_DELIMITER => {
             state.lexerState.isJsonKey = true;
-            return {value: check singleQuoteScalar(state)};
+            string value = check singleQuoteScalar(state);
+            check checkEmptyKey(state);
+            return {value};
         }
         lexer:DOUBLE_QUOTE_DELIMITER => {
             state.lexerState.isJsonKey = true;
-            return {value: check doubleQuoteScalar(state)};
+            string value = check doubleQuoteScalar(state);
+            check checkEmptyKey(state);
+            return {value};
         }
         lexer:PLANAR_CHAR => {
-            return {value: check planarScalar(state)};
+            string value = check planarScalar(state);
+            check checkEmptyKey(state);
+            return {value};
         }
         lexer:SEQUENCE_START => {
             return {startType: common:SEQUENCE};
@@ -369,4 +387,26 @@ function separate(ParserState state) returns ()|ParsingError {
     }
 
     return generateExpectError(state, [lexer:EOL, lexer:SEPARATION_IN_LINE], state.currentToken.token);
+}
+
+function checkEmptyKey(ParserState state) returns ParsingError? {
+    check separate(state);
+    check checkToken(state, peek = true);
+
+    if state.tokenBuffer.token != lexer:MAPPING_VALUE || state.tokenBuffer.indentation == () {
+        return;
+    }
+
+    state.emptyKey = true;
+    lexer:Indentation indentation = <lexer:Indentation>state.tokenBuffer.indentation;
+    match indentation.change {
+        1 => {
+            state.eventBuffer.push({startType: indentation.collection.pop()});
+        }
+        -1 => {
+            foreach common:Collection collectionItem in indentation.collection {
+                state.eventBuffer.push({endType: collectionItem});
+            }
+        }
+    }
 }

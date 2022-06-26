@@ -120,8 +120,6 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
             return nodeComplete(state, option);
         }
         lexer:MAPPING_VALUE => { // Empty node as the key
-            lexer:Indentation? indentation = state.currentToken.indentation;
-
             if state.lexerState.isFlowCollection() {
                 if option == EXPECT_SEQUENCE_ENTRY || option == EXPECT_SEQUENCE_VALUE {
                     state.eventBuffer.push({value: ()});
@@ -129,9 +127,7 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
                 }
                 return {value: ()};
             } else {
-                if indentation == () {
-                    return generateIndentationError(state, "Empty key requires an indentation");
-                }
+                lexer:Indentation indentation = <lexer:Indentation>state.currentToken.indentation;
                 check separate(state);
                 match indentation.change {
                     1 => { // Increase in indent
@@ -157,19 +153,12 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
         }
         lexer:MAPPING_KEY => { // Explicit key
             state.explicitKey = true;
+            state.lastExplicitKeyLine = state.lineIndex;
             return appendData(state, option);
         }
         lexer:SEQUENCE_ENTRY => {
-            if state.currentToken.indentation == () {
-                return generateIndentationError(state, "Block sequence must have an indentation");
-            }
             if state.expectBlockSequenceValue {
                 return generateGrammarError(state, "Cannot have nested sequence for a defined value");
-            }
-            if state.lastKeyLine == state.lineIndex && state.lastExplicitKeyLine != state.lineIndex
-                && !state.lexerState.isFlowCollection() && option == EXPECT_MAP_VALUE
-                && state.currentToken.token == lexer:SEQUENCE_ENTRY {
-                return generateGrammarError(state, "Block sequence cannot be nested under a key in the same line");
             }
             match (<lexer:Indentation>state.currentToken.indentation).change {
                 1 => { // Indent increase

@@ -71,9 +71,6 @@ public function scan(LexerState state) returns LexerState|LexicalError {
         LEXER_START => {
             return contextStart(state);
         }
-        LEXER_EXPLICIT_KEY => {
-            return contextExplicitKey(state);
-        }
         LEXER_TAG_HANDLE => {
             return contextTagHandle(state);
         }

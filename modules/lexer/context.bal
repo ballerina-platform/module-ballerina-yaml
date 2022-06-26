@@ -3,7 +3,6 @@ import yaml.common;
 # Represents the current context of the Lexer.
 public enum Context {
     LEXER_START,
-    LEXER_EXPLICIT_KEY,
     LEXER_TAG_HANDLE,
     LEXER_TAG_PREFIX,
     LEXER_TAG_NODE,
@@ -269,16 +268,20 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
                 state.forward();
                 return scanMappingValueKey(state, PLANAR_CHAR, scanPlanarChar);
             }
+
             // Capture the for empty key mapping values
             if !state.keyDefinedForLine && !state.isFlowCollection() {
-                if state.mappingKeyColumn != state.index && state.mappingKeyColumn > -1 {
+                if state.mappingKeyColumn != state.index && !state.isFlowCollection() && state.mappingKeyColumn > -1 {
                     return generateIndentationError(state, "'?' and ':' should have the same indentation");
                 }
+                if state.mappingKeyColumn == -1 {
+                    state.updateStartIndex();
+                    state.keyDefinedForLine = true;
+                    state.indentation = check checkIndent(state, state.indentStartIndex);
+                }
                 state.mappingKeyColumn = -1;
-                state.updateStartIndex();
-                state.keyDefinedForLine = true;
-                state.indentation = check checkIndent(state, state.indentStartIndex);
             }
+
             _ = state.tokenize(MAPPING_VALUE);
             return state;
         }
@@ -340,44 +343,6 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
     }
 
     return generateInvalidCharacterError(state, "<yaml-document>");
-}
-
-# Scan the lexemes for Explicit key scalar.
-#
-# + state - Current lexer state.
-# + return - Tokenized Explicit key scalar
-function contextExplicitKey(LexerState state) returns LexerState|LexicalError {
-    match state.peek() {
-        " " => {
-            // Return empty line if there is only whitespace
-            // Else, return separation in line
-            boolean isFirstChar = state.index == 0;
-            _ = check iterate(state, scanWhitespace, SEPARATION_IN_LINE);
-            return (state.peek() == () && isFirstChar) ? state.tokenize(EMPTY_LINE) : state;
-        }
-        ":" => {
-            if state.isFlowCollection() {
-                return state.tokenize(MAPPING_VALUE);
-            }
-
-            // Mapping value and mapping key should have the same indent.
-            if state.indents[state.indents.length() - 1].index == state.index {
-                return state.tokenize(MAPPING_VALUE);
-            }
-            return generateIndentationError(state, "Invalid indentation for an explicit key");
-        }
-    }
-
-    if state.peek() == "#" && (isWhitespace(state, -1) || state.peek(-1) == ()) {
-        state.forward(-1);
-        return state.tokenize(COMMENT);
-    }
-
-    if isPlainSafe(state) {
-        return scanMappingValueKey(state, PLANAR_CHAR, scanPlanarChar);
-    }
-
-    return contextStart(state);
 }
 
 # Scan the lexemes for YAML tag handle directive.

@@ -179,17 +179,7 @@ function scanPlanarChar(LexerState state) returns boolean|LexicalError {
         state.lexeme += whitespace + ":";
         return false;
     }
-
-    // If the whitespace is at the trail, discard it from the planar chars
-    if numWhitespace > 0 {
-        state.forward(-numWhitespace);
-        return true;
-    }
-
-    if checkCharacter(state, ["}", "]"]) {
-        return true;
-    }
-
+    
     return generateInvalidCharacterError(state, PLANAR_CHAR);
 }
 

@@ -58,5 +58,4 @@ function assertParsingError(string|string[] lines, boolean isLexical = false, in
     } else {
         test:assertTrue(err is ParsingError);
     }
-
 }

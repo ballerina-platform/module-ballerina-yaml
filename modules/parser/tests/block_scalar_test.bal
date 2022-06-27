@@ -62,15 +62,18 @@ function blockScalarInCollection() returns map<[string[], common:Event[]]> {
 }
 
 @test:Config {
-    dataProvider: invalidBlockScalarEventDataGen,
+    dataProvider: invalidScalarEventDataGen,
     groups: ["parser"]
 }
-function testInvalidBlockScalarEvent(string[] lines) returns error? {
+function testInvalidScalarEvent(string[] lines) returns error? {
     check assertParsingError(lines, true);
 }
 
-function invalidBlockScalarEventDataGen() returns map<[string[]]> {
+function invalidScalarEventDataGen() returns map<[string[]]> {
     return {
+        "invalid character for double-quoted scalar": [["\"invalid\ncharacter\""]],
+        "invalid character for single-quoted scalar": [["'invalid\ncharacter'"]],
+        "invalid character for planar scalar": [["invalidcharacter"]],
         "invalid indentation for indentation-indicator": [["|3", " value"]],
         "leading lines contain less space": [["|", "  value", " value"]],
         "value after trailing comment": [["|+", " value", "# first comment", "value"]]

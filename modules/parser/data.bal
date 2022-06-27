@@ -123,7 +123,7 @@ function appendData(ParserState state, ParserOption option,
         if state.lastKeyLine == state.lineIndex && !state.lexerState.isFlowCollection() {
             return generateGrammarError(state, "Two block mapping keys cannot be defined in the same line");
         }
-        
+
         // In a block scalar, if there is a mapping key as in the same line as a mapping value, 
         // then that mapping value does not correspond to the mapping key. the mapping value forms a
         // new mapping pair which represents the explicit key.
@@ -145,23 +145,11 @@ function appendData(ParserState state, ParserOption option,
         else if option == EXPECT_MAP_VALUE {
             buffer = check constructEvent(state, {value: ()}, newNodeTagStructure);
         }
-        else if option == EXPECT_SEQUENCE_ENTRY || option == EXPECT_SEQUENCE_VALUE 
+        else if option == EXPECT_SEQUENCE_ENTRY || option == EXPECT_SEQUENCE_VALUE
             && state.lexerState.isFlowCollection() {
-                buffer = {startType: common:MAPPING, implicit: true};
+            buffer = {startType: common:MAPPING, implicit: true};
         }
     } else {
-        if option == EXPECT_MAP_KEY && !explicitKey {
-            return generateGrammarError(state, "Expected a key for the block mapping");
-        }
-
-        if explicitKey {
-            lexer:Indentation? peekedIndentation = state.tokenBuffer.indentation;
-            if peekedIndentation is lexer:Indentation && peekedIndentation.change == 1 
-                && state.tokenBuffer.token != lexer:MAPPING_KEY {
-                return generateGrammarError(state, "Invalid explicit key");
-            }
-        }
-
         // There is already tag properties defined and the value is not a key
         if definedProperties is TagStructure {
             if definedProperties.anchor != () && tagStructure.anchor != () {
@@ -169,6 +157,18 @@ function appendData(ParserState state, ParserOption option,
             }
             if definedProperties.tag != () && tagStructure.tag != () {
                 return generateGrammarError(state, "Only one tag is allowed for a node");
+            }
+        }
+
+        if option == EXPECT_MAP_KEY && !explicitKey {
+            return generateGrammarError(state, "Expected a key for the block mapping");
+        }
+
+        if explicitKey {
+            lexer:Indentation? peekedIndentation = state.tokenBuffer.indentation;
+            if peekedIndentation is lexer:Indentation && peekedIndentation.change == 1
+                && state.tokenBuffer.token != lexer:MAPPING_KEY {
+                return generateGrammarError(state, "Invalid explicit key");
             }
         }
     }

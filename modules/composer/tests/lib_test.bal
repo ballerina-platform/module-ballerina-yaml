@@ -41,11 +41,13 @@ function nativeDataStructureDataGen() returns map<[string|string[], json]> {
         "empty key after block scalar": [["key: |-", " literal", ":"], {"key": "literal", "": ()}],
         "empty key after flow sequence": [["key: [first, second]", ":"], {"key": ["first", "second"], "": ()}],
         "empty key after block sequence": [["key:", "- first", "- second", ":"], {"key": ["first", "second"], "": ()}],
-        "empty key after flow mapping": [["key: {key: value}", ":"], {"key": {"key": "value"}, "": ()}],
-        "empty key after block mapping": [["key:", " key: value", ":"], {"key": {"key": "value"}, "": ()}],
+        "empty key after flow mapping": [["first: {second: value}", ":"], {"first": {"second": "value"}, "": ()}],
+        "empty key after block mapping": [["first:", " second: value", ":"], {"first": {"second": "value"}, "": ()}],
+        "empty key after empty block mapping": [["first:", " second:", ":"], {"first": {"second": ()}, "": ()}],
         "anchoring the key after empty node": [["a: ", "&anchor b: *anchor"], {"a": (), "b": "b"}],
         "anchoring the key of nested value": [["a: ", "  &anchor b: *anchor"], {"a": {"b": "b"}}],
         "anchoring the empty node of a map": [["a: &anchor", "b: *anchor"], {"a": (), "b": ()}],
+        "anchoring before end map event": [["first:", "  second: &anchor1", "&anchor2 third:", "*anchor1 : *anchor2"], {"first": {"second": ()}, "third": (), "": "third"}],
         "single flow implicit map": ["[key: value]", [{"key": "value"}]],
         "nested flow implicit map": ["[outer: {nested: value}]", [{"outer": {"nested": "value"}}]],
         "multiple flow implicit maps": [["[first: value1,", "second: value2]"], [{"first": "value1"}, {"second": "value2"}]]
@@ -84,7 +86,21 @@ function invalidEventTreeDataGen() returns map<[string[]]> {
         "explicit key and mapping value without indent": [["? first", " second", " : value"]],
         "explicit key with indented key": [["? first", " second: "]],
         "explicit key without indent": [["? first", "second", ": value"]],
-        "multiline implicit key": [["first", "second", " : value"]]
+        "multiline implicit key": [["first", "second", " : value"]],
+        "an alias with anchor": [["&anchor *alias"]],
+        "an alias with anchor indented": [["key: &anchor1", "&anchor2 *alias :"]],
+        "an alias with tag": [["!tag *alias"]],
+        "an alias with tag indented": [["key: !tag1", "!tag2 *alias :"]],
+        "an alias with anchor and tag": [["!tag &anchor *alias"]],
+        "an alias with anchor and tag indented": [["key: !tag1", "&anchor !tag2 *alias :"]],
+        "two anchors for a node": [["&anchor1 &anchor2 value"]],
+        "two tags for a node": [["!tag1 !tag2 value"]],
+        "two anchors for a node indented": [["key: &anchor1", " &anchor2 value"]],
+        "two tags for a node indented": [["key: !tag1", " !tag2 value"]],
+        "block scalar node inside flow sequence": [["[|-", " block]"]],
+        "block scalar node inside flow mapping": [["{key: |-", " block}"]],
+        "block sequence inside flow sequence": [["[- sequence]"]],
+        "block sequence inside flow mapping": [["{key: - sequence}"]]
     };
 }
 

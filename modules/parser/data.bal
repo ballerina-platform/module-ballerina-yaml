@@ -44,7 +44,11 @@ function appendData(ParserState state, ParserOption option,
 
     state.updateLexerContext(lexer:LEXER_START);
 
-    map<json> contentValue = check content(state, peeked, option, state.explicitKey, tagStructure);
+    if state.lastKeyLine == state.lineIndex && !state.lexerState.isFlowCollection() && option == EXPECT_MAP_KEY {
+        return generateGrammarError(state, "Cannot have a scalar next to a block key-value pair");
+    }
+
+    map<json> contentValue = check content(state, peeked, state.explicitKey, tagStructure);
     boolean isAlias = contentValue.hasKey("alias");
 
     state.explicitKey = false;
@@ -215,29 +219,15 @@ function appendData(ParserState state, ParserOption option,
 #
 # + state - Current parser state  
 # + peeked - If the expected token is already in the state  
-# + option - Expected values inside a mapping collection  
-# + explicitKey - Whether the current node is an explicit key
+# + explicitKey - Whether the current node is an explicit key  
 # + tagStructure - Tag structure of the current node
 # + return - String if a scalar event. The respective collection if a start event. Else, returns an error.
-function content(ParserState state, boolean peeked, ParserOption option, boolean explicitKey,
-    TagStructure tagStructure = {}) returns map<json>|ParsingError {
+function content(ParserState state, boolean peeked, boolean explicitKey, TagStructure tagStructure) 
+    returns map<json>|ParsingError {
 
     if !peeked {
         check separate(state);
         check checkToken(state);
-    }
-
-    match state.currentToken.token {
-        lexer:SEPARATOR|lexer:MAPPING_VALUE => {
-            return {value: ()};
-        }
-        lexer:EOL|lexer:COMMENT|lexer:EMPTY_LINE => {
-            return {value: ()};
-        }
-    }
-
-    if state.lastKeyLine == state.lineIndex && !state.lexerState.isFlowCollection() && option == EXPECT_MAP_KEY {
-        return generateGrammarError(state, "Cannot have a scalar next to a block key-value pair");
     }
 
     // Check for flow and block nodes
@@ -305,43 +295,28 @@ function content(ParserState state, boolean peeked, ParserOption option, boolean
             if event is common:StartEvent && event.startType == common:MAPPING {
                 return {startType: common:MAPPING};
             }
-            if event is common:ScalarEvent {
-                state.eventBuffer.push(event);
+            if event is common:EndEvent {
+                state.eventBuffer.unshift(event);
                 return {value: ()};
             }
         }
-    }
-
-    // Check for empty nodes with explicit keys
-    if state.explicitKey {
-        match state.currentToken.token {
-            lexer:MAPPING_VALUE => {
-                return {value: ()};
-            }
-            lexer:SEPARATOR => {
+        lexer:MAPPING_END => {
+            if explicitKey {
                 state.eventBuffer.push({value: ()});
-                return {value: ()};
             }
-            lexer:MAPPING_END => {
-                state.eventBuffer.push({value: ()});
-                state.eventBuffer.push({endType: common:MAPPING});
-                return {value: ()};
-            }
-            lexer:EOL => { // Only the mapping key
-                state.eventBuffer.push({value: ()});
-                return {value: ()};
-            }
+            state.eventBuffer.push({endType: common:MAPPING});
+            return {value: ()};
         }
     }
 
-    return generateExpectError(state, "<data-node>", state.prevToken);
+    return {value: ()};
 }
 
 # Verifies the grammar production for separation between nodes.
 #
 # + state - Current parser state
 # + return - An error on invalid separation.
-function separate(ParserState state) returns ()|ParsingError {
+function separate(ParserState state) returns ParsingError? {
     state.updateLexerContext(lexer:LEXER_START);
     check checkToken(state, peek = true);
 
@@ -387,8 +362,6 @@ function separate(ParserState state) returns ()|ParsingError {
             }
         }
     }
-
-    return generateExpectError(state, [lexer:EOL, lexer:SEPARATION_IN_LINE], state.currentToken.token);
 }
 
 function checkEmptyKey(ParserState state) returns ParsingError? {

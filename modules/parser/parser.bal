@@ -141,6 +141,9 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
                         foreach common:Collection collectionItem in indentation.collection {
                             state.eventBuffer.push({endType: collectionItem});
                         }
+                        if option == EXPECT_MAP_VALUE {
+                            state.eventBuffer.push({value: ()});
+                        }
                         return state.eventBuffer.shift();
                     }
                 }

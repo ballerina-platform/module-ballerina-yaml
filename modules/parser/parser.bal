@@ -218,8 +218,7 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
         }
         lexer:LITERAL|lexer:FOLDED => {
             state.updateLexerContext(lexer:LEXER_LITERAL);
-            string value = check blockScalar(state, state.currentToken.token == lexer:FOLDED);
-            return {value};
+            return appendData(state, option, peeked = true);
         }
     }
 

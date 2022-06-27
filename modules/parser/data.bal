@@ -290,7 +290,9 @@ function content(ParserState state, boolean peeked, ParserOption option, boolean
             if state.lexerState.isFlowCollection() {
                 return generateGrammarError(state, "Cannot have a block node inside a flow node");
             }
-            return {value: check blockScalar(state, state.currentToken.token == lexer:FOLDED)};
+            string value = check blockScalar(state, state.currentToken.token == lexer:FOLDED);
+            check checkEmptyKey(state);
+            return {value};
         }
         lexer:ALIAS => {
             return {alias: state.currentToken.value};

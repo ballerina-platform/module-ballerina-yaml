@@ -64,9 +64,9 @@ function coreLineDataGen() returns map<[string, json]> {
         "valid hexadecimal": ["0xa1", 161],
         "invalid hexadecimal": ["0xg1", "0xg1"],
         "invalid negative hexadecimal": ["-0xa1", "-0xa1"],
-        "positive infinity": [".inf", 'float:Infinity],
-        "negative infinity": ["-.inf", -'float:Infinity],
-        "not a number": [".nan", 'float:NaN]
+        "positive infinity": [".inf", float:Infinity],
+        "negative infinity": ["-.inf", -float:Infinity],
+        "not a number": [".nan", float:NaN]
     };
 }
 

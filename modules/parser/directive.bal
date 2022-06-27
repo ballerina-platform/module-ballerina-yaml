@@ -54,7 +54,7 @@ function yamlDirective(ParserState state) returns ParsingError? {
     lexemeBuffer += state.currentToken.value;
 
     // The parser only works with versions that is compatible with the major version of the parser.
-    float yamlVersion = <float>(check common:processTypeCastingError('float:fromString(lexemeBuffer)));
+    float yamlVersion = <float>(check common:processTypeCastingError(float:fromString(lexemeBuffer)));
     if yamlVersion != 1.2 {
         if yamlVersion >= 2.0 || yamlVersion < 1.0 {
             return generateGrammarError(state, string `Incompatible version ${yamlVersion} for the 1.2 parser`);

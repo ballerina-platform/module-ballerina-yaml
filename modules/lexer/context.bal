@@ -468,7 +468,7 @@ function contextBlockHeader(LexerState state) returns LexerState|LexicalError {
     // Check for indentation indicators and adjust the current indent
     if matchPattern(state, patternDecimal, "0") {
         state.captureIndent = false;
-        state.addIndent += <int>(check common:processTypeCastingError('int:fromString(<string>state.peek()))) - 1;
+        state.addIndent += <int>(check common:processTypeCastingError(int:fromString(<string>state.peek()))) - 1;
         state.forward();
         return contextBlockHeader(state);
     }

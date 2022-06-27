@@ -5,11 +5,11 @@ function constructSimpleNull(json data) returns json|SchemaError =>
 
 function constructSimpleBool(json data) returns json|SchemaError =>
     constructWithRegex("true|false", data, "bool",
-    function(string s) returns json|SchemaError => common:processTypeCastingError('boolean:fromString(s)));
+    function(string s) returns json|SchemaError => common:processTypeCastingError(boolean:fromString(s)));
 
 function constructSimpleInteger(json data) returns json|SchemaError =>
     constructWithRegex("-?(0|[1-9][0-9]*)", data, "int",
-    function(string s) returns json|SchemaError => common:processTypeCastingError('int:fromString(s)));
+    function(string s) returns json|SchemaError => common:processTypeCastingError(int:fromString(s)));
 
 function constructSimpleFloat(json data) returns json|SchemaError =>
     constructWithRegex("-?(0|[1-9][0-9]*)(\\.[0-9]*)?([eE][-+]?[0-9]+)?", data, "float",
@@ -20,7 +20,7 @@ function constructNull(json data) returns json|SchemaError =>
 
 function constructBool(json data) returns json|SchemaError =>
     constructWithRegex("true|True|TRUE|false|False|FALSE", data, "bool",
-    function(string s) returns json|SchemaError => common:processTypeCastingError('boolean:fromString(s)));
+    function(string s) returns json|SchemaError => common:processTypeCastingError(boolean:fromString(s)));
 
 function constructInteger(json data) returns json|SchemaError {
     string value = data.toString();
@@ -37,7 +37,7 @@ function constructInteger(json data) returns json|SchemaError {
                 int power = 1;
                 int length = value.length() - 3;
                 foreach int i in 0 ... length {
-                    int digit = <int>(check common:processTypeCastingError('int:fromString(value[length + 2 - i])));
+                    int digit = <int>(check common:processTypeCastingError(int:fromString(value[length + 2 - i])));
                     if digit > 7 || digit < 1 {
                         return generateError(string `Invalid digit '${digit}' for the octal base`);
                     }
@@ -47,14 +47,14 @@ function constructInteger(json data) returns json|SchemaError {
                 return output;
             }
             "x" => { // Cast to a hexadecimal integer
-                return common:processTypeCastingError('int:fromHexString(value.substring((2))));
+                return common:processTypeCastingError(int:fromHexString(value.substring((2))));
             }
         }
     }
 
     // Cast to a decimal integer
     return constructWithRegex("[-+]?[0-9]+", data, "int",
-        function(string s) returns json|SchemaError => common:processTypeCastingError('int:fromString(s)));
+        function(string s) returns json|SchemaError => common:processTypeCastingError(int:fromString(s)));
 }
 
 function constructFloat(json data) returns json|SchemaError {
@@ -69,10 +69,10 @@ function constructFloat(json data) returns json|SchemaError {
         "." => {
             match value.substring(1) {
                 "nan"|"NAN"|"NaN" => { // Cast to not a number
-                    return 'float:NaN;
+                    return float:NaN;
                 }
                 "inf"|"Inf"|"INF" => { // Cast to infinity
-                    return 'float:Infinity;
+                    return float:Infinity;
                 }
             }
         }
@@ -80,7 +80,7 @@ function constructFloat(json data) returns json|SchemaError {
             // Cast to infinity
             if value.substring(2) == "inf" || value.substring(2) == "Inf" || value.substring(2) == "INF"
                 && value[1] == "." {
-                return value[0] == "-" ? -'float:Infinity : 'float:Infinity;
+                return value[0] == "-" ? -float:Infinity : float:Infinity;
             }
         }
     }
@@ -91,7 +91,7 @@ function constructFloat(json data) returns json|SchemaError {
 }
 
 function representFloat(json data) returns string {
-    if data == -'float:Infinity {
+    if data == -float:Infinity {
         return "-.inf";
     }
 

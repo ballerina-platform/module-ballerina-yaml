@@ -19,7 +19,7 @@ function constructEvent(ParserState state, map<json> m1, map<json>? m2 = ()) ret
 
     error|common:Event processedMap = returnMap.cloneWithType(common:Event);
 
-    return processedMap is common:Event ? processedMap : common:generateConversionError('error:message(processedMap));
+    return processedMap is common:Event ? processedMap : common:generateConversionError(error:message(processedMap));
 }
 
 # Trims the trailing whitespace of a string.

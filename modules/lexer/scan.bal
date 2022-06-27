@@ -64,15 +64,15 @@ function scanUnicodeEscapedCharacters(LexerState state, string escapedChar, int 
     }
 
     // Check if the lexeme can be converted to hexadecimal
-    int|error hexResult = 'int:fromHexString(unicodeDigits);
+    int|error hexResult = int:fromHexString(unicodeDigits);
     if hexResult is error {
-        return generateScanningError(state, 'error:message(hexResult));
+        return generateScanningError(state, error:message(hexResult));
     }
 
     // Check if there exists a unicode string for the hexadecimal value
-    string|error unicodeResult = 'string:fromCodePointInt(hexResult);
+    string|error unicodeResult = string:fromCodePointInt(hexResult);
     if unicodeResult is error {
-        return generateScanningError(state, 'error:message(unicodeResult));
+        return generateScanningError(state, error:message(unicodeResult));
     }
 
     state.lexeme += unicodeResult;

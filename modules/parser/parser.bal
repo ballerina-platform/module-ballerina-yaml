@@ -157,6 +157,9 @@ public function parse(ParserState state, ParserOption option = DEFAULT, Document
             return appendData(state, option);
         }
         lexer:SEQUENCE_ENTRY => {
+            if state.lexerState.isFlowCollection() {
+                return generateGrammarError(state, "Cannot have block sequence under flow collection");
+            }
             if state.expectBlockSequenceValue {
                 return generateGrammarError(state, "Cannot have nested sequence for a defined value");
             }

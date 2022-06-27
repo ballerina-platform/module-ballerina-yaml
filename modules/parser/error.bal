@@ -2,8 +2,7 @@ import yaml.common;
 import yaml.lexer;
 
 # Represents an error caused during the parsing.
-public type ParsingError GrammarError|lexer:LexicalError|
-    common:IndentationError|common:AliasingError|common:ConversionError;
+public type ParsingError GrammarError|lexer:LexicalError|common:AliasingError|common:ConversionError;
 
 # Represents an error caused for an invalid grammar production.
 public type GrammarError distinct error<common:ReadErrorDetails>;
@@ -61,14 +60,6 @@ function generateGrammarError(ParserState state, string message,
             actual = state.currentToken.token,
             expected = expected
         );
-
-function generateIndentationError(ParserState state, string message) returns common:IndentationError
-    => error(
-        message + ".",
-        line = state.getLineNumber(),
-        column = state.lexerState.index,
-        actual = state.currentToken.token
-    );
 
 function generateAliasingError(ParserState state, string message) returns common:AliasingError
     => error(

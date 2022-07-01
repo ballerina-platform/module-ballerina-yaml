@@ -18,7 +18,7 @@ public class ComposerState {
 
     # Flag is set if anchors can be redefined multiple times
     readonly & boolean allowAnchorRedefinition;
-    
+
     # Flag is set if same map keys are allowed in a mapping
     readonly & boolean allowMapEntryRedefinition;
 

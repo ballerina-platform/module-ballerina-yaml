@@ -104,7 +104,6 @@ function testInvalidCustomTag() returns error? {
         represent: function(json data) returns string => data.toString()
     };
 
-    
     ComposerState state = check obtainComposerState(["!rgb [256, 12, 32]"], tagSchema = tagSchema);
     json|error output = composeDocument(state);
 

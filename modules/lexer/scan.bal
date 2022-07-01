@@ -179,7 +179,7 @@ function scanPlanarChar(LexerState state) returns boolean|LexicalError {
         state.lexeme += whitespace + ":";
         return false;
     }
-    
+
     return generateInvalidCharacterError(state, PLANAR_CHAR);
 }
 

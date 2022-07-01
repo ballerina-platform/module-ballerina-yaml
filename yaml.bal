@@ -35,10 +35,11 @@ public function readFile(string filePath, *ReadConfig config) returns json|Error
 public function writeString(json yamlStructure, *WriteConfig config) returns string[]|Error
     => emitter:emit(
         events = check serializer:serialize({
-        tagSchema: generateTagHandlesMap(config.yamlTypes, config.schema),
-        blockLevel: config.blockLevel,
-        delimiter: config.useSingleQuotes ? "'" : "\"",
-        forceQuotes: config.forceQuotes},
+    tagSchema: generateTagHandlesMap(config.yamlTypes, config.schema),
+    blockLevel: config.blockLevel,
+    delimiter: config.useSingleQuotes ? "'" : "\"",
+    forceQuotes: config.forceQuotes
+},
         data = yamlStructure),
         indentationPolicy = config.indentationPolicy,
         isStream = config.isStream,

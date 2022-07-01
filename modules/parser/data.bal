@@ -222,7 +222,7 @@ function appendData(ParserState state, ParserOption option,
 # + explicitKey - Whether the current node is an explicit key  
 # + tagStructure - Tag structure of the current node
 # + return - String if a scalar event. The respective collection if a start event. Else, returns an error.
-function content(ParserState state, boolean peeked, boolean explicitKey, TagStructure tagStructure) 
+function content(ParserState state, boolean peeked, boolean explicitKey, TagStructure tagStructure)
     returns map<json>|ParsingError {
 
     if !peeked {

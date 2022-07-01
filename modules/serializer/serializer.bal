@@ -1,4 +1,3 @@
-import yaml.common;
 import yaml.schema;
 
 # Generates the event tree for the given Ballerina native data structure.
@@ -9,13 +8,11 @@ import yaml.schema;
 # + excludeTag - The tag to be excluded when obtaining the YAML type
 # + return - Event tree. Else, an error on failure.
 public function serialize(SerializerState state, json data, int depthLevel = 0, string? excludeTag = ())
-    returns common:Event[]|schema:SchemaError {
-
-    common:Event[] events = [];
-    string? tag = ();
-    schema:YAMLTypeConstructor? typeConstructor = ();
+    returns schema:SchemaError? {
 
     // Obtain the tag
+    string? tag = ();
+    schema:YAMLTypeConstructor? typeConstructor = ();
     schema:YAMLTypeConstructor currentTypeConstructor;
     string[] tagKeys = state.tagSchema.keys();
     foreach string key in tagKeys {
@@ -36,44 +33,28 @@ public function serialize(SerializerState state, json data, int depthLevel = 0, 
         if typeConstructor.kind == schema:SEQUENCE { // Convert sequence
             json[]|error sequence = typeConstructor.represent(data).ensureType();
             if sequence is error {
-                return generateInvalidRepresentError(schema:SEQUENCE, tag);
+                return generateInvalidRepresentError(tag, schema:SEQUENCE);
             }
-            return serializeSequence(state, events, sequence, tag, depthLevel);
+            check serializeSequence(state, sequence, tag, depthLevel);
         }
         if typeConstructor.kind == schema:MAPPING { // Convert mapping
             map<json>|error mapping = typeConstructor.represent(data).ensureType();
             if mapping is error {
-                return generateInvalidRepresentError(schema:MAPPING, tag);
+                return generateInvalidRepresentError(tag, schema:MAPPING);
             }
-            return serializeMapping(state, events, mapping, tag, depthLevel);
+            check serializeMapping(state, mapping, tag, depthLevel);
         }
         // Convert string
-        return serializeString(state, events, check typeConstructor.represent(data), tag);
+        serializeString(state, check typeConstructor.represent(data), tag);
     }
 
     // Serialize an event with a failsafe schema tag by default
     if data is json[] { // Convert sequence
-        return serializeSequence(state, events, data, string `${schema:defaultGlobalTagHandle}seq`, depthLevel);
+        check serializeSequence(state, data, string `${schema:defaultGlobalTagHandle}seq`, depthLevel);
     }
     if data is map<json> { // Convert mapping
-        return serializeMapping(state, events, data, string `${schema:defaultGlobalTagHandle}map`, depthLevel);
+        check serializeMapping(state, data, string `${schema:defaultGlobalTagHandle}map`, depthLevel);
     }
     // Convert string
-    return serializeString(state, events, data, string `${schema:defaultGlobalTagHandle}str`);
-
-}
-
-# Combines two event trees together
-#
-# + firstEventsList - First event tree  
-# + secondEventsList - Second event tree
-# + return - Combined event tree
-function combineArray(common:Event[] firstEventsList, common:Event[] secondEventsList) returns common:Event[] {
-    common:Event[] returnEventsList = firstEventsList.clone();
-
-    secondEventsList.forEach(function(common:Event event) {
-        returnEventsList.push(event);
-    });
-
-    return returnEventsList;
+    serializeString(state, data, string `${schema:defaultGlobalTagHandle}str`);
 }

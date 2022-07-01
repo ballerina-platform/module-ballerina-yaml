@@ -32,19 +32,22 @@ public function readFile(string filePath, *ReadConfig config) returns json|Error
 # + yamlStructure - Structure to be written to the file
 # + config - Configurations for writing a YAML file
 # + return - YAML content on success. Else, an error on failure
-public function writeString(json yamlStructure, *WriteConfig config) returns string[]|Error
-    => emitter:emit(
-        events = check serializer:serialize({
-    tagSchema: generateTagHandlesMap(config.yamlTypes, config.schema),
-    blockLevel: config.blockLevel,
-    delimiter: config.useSingleQuotes ? "'" : "\"",
-    forceQuotes: config.forceQuotes
-},
-        data = yamlStructure),
+public function writeString(json yamlStructure, *WriteConfig config) returns string[]|Error {
+    serializer:SerializerState serializerState = {
+        events: [],
+        tagSchema: generateTagHandlesMap(config.yamlTypes, config.schema),
+        blockLevel: config.blockLevel,
+        delimiter: config.useSingleQuotes ? "'" : "\"",
+        forceQuotes: config.forceQuotes
+    };
+    check serializer:serialize(serializerState, yamlStructure);
+    return emitter:emit(
+        events = serializerState.events,
         indentationPolicy = config.indentationPolicy,
         isStream = config.isStream,
         canonical = config.canonical
     );
+}
 
 # Writes the YAML structure to a file.
 #

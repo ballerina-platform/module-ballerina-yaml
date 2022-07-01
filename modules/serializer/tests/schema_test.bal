@@ -16,8 +16,8 @@ function (json data) returns boolean identifyRGB = schema:generateIdentityFuncti
 function (json data) returns boolean identifyShape = schema:generateIdentityFunction(Shape);
 map<function (json data) returns json|schema:SchemaError> representArr = {
     "str": function(json data) returns json|schema:SchemaError => data.toString(),
-    "seq": function(json data) returns json|schema:SchemaError => {rgb: data},
-    "map": function(json data) returns json|schema:SchemaError => [data]
+    "seq": function(json data) returns json|schema:SchemaError => [data],
+    "map": function(json data) returns json|schema:SchemaError => {rgb: data}
 };
 
 function constructShapeName(json data) returns json|schema:SchemaError {

@@ -11,7 +11,7 @@ string yamlStr = string `${schema:defaultGlobalTagHandle}str`;
     groups: ["serializer"]
 }
 function testGenerateSerializingEvent(json structure, common:Event[] assertingEvents) returns error? {
-    common:Event[] events = getSerializedEvents(structure);
+    common:Event[] events = check getSerializedEvents(structure);
     test:assertEquals(events, assertingEvents);
 }
 
@@ -33,7 +33,7 @@ function serializingEventDataGen() returns map<[json, common:Event[]]> {
     groups: ["serializer"]
 }
 function testTagInSerializedEvent(json structure, common:Event[] assertingEvents) returns error? {
-    common:Event[] events = getSerializedEvents(structure, tagSchema = schema:getCoreSchemaTags());
+    common:Event[] events = check getSerializedEvents(structure, tagSchema = schema:getCoreSchemaTags());
     test:assertEquals(events, assertingEvents);
 }
 
@@ -54,7 +54,7 @@ function keySerializeDataGen() returns map<[json, common:Event[]]> {
     groups: ["serializer"]
 }
 function testSwitchFlowStyleUponBlockLevel() returns error? {
-    common:Event[] events = getSerializedEvents([["value"]]);
+    common:Event[] events = check getSerializedEvents([["value"]]);
 
     test:assertFalse((<common:StartEvent>events[0]).flowStyle);
     test:assertTrue((<common:StartEvent>events[1]).flowStyle);
@@ -65,7 +65,7 @@ function testSwitchFlowStyleUponBlockLevel() returns error? {
     groups: ["serializer"]
 }
 function testQuotesForInvalidPlanarChar(string line) returns error? {
-    common:Event[] events = getSerializedEvents(line);
+    common:Event[] events = check getSerializedEvents(line);
     common:Event expectedEvent = {value: string `"${line}"`, tag: yamlStr};
     test:assertEquals(events[0], expectedEvent);
 }
@@ -84,7 +84,7 @@ function invalidPlanarDataGen() returns map<[string]> {
     groups: ["serializer"]
 }
 function testSingleQuotesOption() returns error? {
-    common:Event[] events = getSerializedEvents("? value", delimiter = "'");
+    common:Event[] events = check getSerializedEvents("? value", delimiter = "'");
 
     common:Event expectedEvent = {value: "'? value'", tag: yamlStr};
     test:assertEquals(events[0], expectedEvent);
@@ -94,7 +94,7 @@ function testSingleQuotesOption() returns error? {
     groups: ["serializer"]
 }
 function testEnforceQuotesOption() returns error? {
-    common:Event[] events = getSerializedEvents("value", forceQuotes = true);
+    common:Event[] events = check getSerializedEvents("value", forceQuotes = true);
 
     common:Event expectedEvent = {value: "\"value\"", tag: yamlStr};
     test:assertEquals(events[0], expectedEvent);

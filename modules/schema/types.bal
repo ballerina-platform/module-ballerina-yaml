@@ -22,6 +22,6 @@ public type YAMLTypeConstructor record {|
     FailSafeSchema kind;
     function (json data) returns json|SchemaError construct;
     function (json data) returns boolean identity;
-    function (json data) returns string represent;
+    function (json data) returns string|SchemaError represent;
 |};
 

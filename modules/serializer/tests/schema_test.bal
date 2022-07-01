@@ -51,11 +51,13 @@ function constructShape(json data) returns json|schema:SchemaError {
     dataProvider: customTagDataGen,
     groups: ["serializer"]
 }
-function testCustomTag(json testingInput, common:StartEvent|common:ScalarEvent expectedEvent, schema:YAMLTypeConstructor typeConstructor) {
+function testCustomTag(json testingInput, common:StartEvent|common:ScalarEvent expectedEvent, 
+    schema:YAMLTypeConstructor typeConstructor) returns error? {
+        
     map<schema:YAMLTypeConstructor> tagSchema = schema:getJsonSchemaTags();
     tagSchema[<string>expectedEvent.tag] = typeConstructor;
 
-    common:Event[] events = getSerializedEvents(testingInput, tagSchema = tagSchema);
+    common:Event[] events = check getSerializedEvents(testingInput, tagSchema = tagSchema);
     test:assertEquals(events[0], expectedEvent);
 }
 

@@ -1,5 +1,3 @@
-import yaml.schema;
-
 # Configurations for writing a YAML document.
 #
 # + indentationPolicy - Number of whitespace for an indentation  
@@ -47,8 +45,8 @@ public type YAMLType record {|
     string tag;
     typedesc<json> ballerinaType;
     FailSafeSchema kind;
-    function (json data) returns json|schema:SchemaError construct;
-    function (json data) returns string represent;
+    function (json data) returns json|SchemaError construct;
+    function (json data) returns string|SchemaError represent;
 |};
 
 # Represents the basic YAML types available in the Fail safe schema.

@@ -30,7 +30,7 @@ function constructInteger(json data) returns json|SchemaError {
     }
 
     // Process integers in different base
-    if value[0] == "0" {
+    if value[0] == "0" && value.length() > 1 {
         match value[1] {
             "o" => { // Cast to an octal integer
                 int output = 0;

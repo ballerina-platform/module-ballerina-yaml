@@ -1,18 +1,14 @@
 import yaml.common;
-import ballerina/regex;
 import yaml.schema;
-
-const string INVALID_PLANAR_PATTERN = "([\\w|\\s]*[\\-|\\?|:|] [\\w|\\s]*)|"
-    + "([\\w|\\s]* #[\\w|\\s]*)|"
-    + "([\\,|\\[|\\]|\\{|\\}|&\\*|!\\||\\>|\\'|\\\"|%|@|\\`][\\w|\\s]*)";
 
 # Generates the event tree for the given Ballerina native data structure.
 #
-# + state - Current serializing state
+# + state - Current serializing state  
 # + data - Ballerina native data structure  
-# + depthLevel - The current depth level
+# + depthLevel - The current depth level  
+# + excludeTag - The tag to be excluded when obtaining the YAML type
 # + return - Event tree. Else, an error on failure.
-public function serialize(SerializerState state, json data, int depthLevel = 0)
+public function serialize(SerializerState state, json data, int depthLevel = 0, string? excludeTag = ())
     returns common:Event[]|schema:SchemaError {
 
     common:Event[] events = [];
@@ -23,6 +19,9 @@ public function serialize(SerializerState state, json data, int depthLevel = 0)
     schema:YAMLTypeConstructor currentTypeConstructor;
     string[] tagKeys = state.tagSchema.keys();
     foreach string key in tagKeys {
+        if excludeTag is string && excludeTag == key {
+            continue;
+        }
         currentTypeConstructor = <schema:YAMLTypeConstructor>state.tagSchema[key];
 
         if currentTypeConstructor.identity(data) {
@@ -32,56 +31,36 @@ public function serialize(SerializerState state, json data, int depthLevel = 0)
         }
     }
 
-    // Convert sequence
-    if data is json[] {
-        if typeConstructor is schema:YAMLTypeConstructor {
-            events.push({tag, value: check typeConstructor.represent(data)});
-            return events;
-        } else {
-            tag = string `${schema:defaultGlobalTagHandle}seq`;
-
-            events.push({startType: common:SEQUENCE, flowStyle: state.blockLevel <= depthLevel, tag});
-
-            foreach json dataItem in data {
-                events = combineArray(events, check serialize(state, dataItem, depthLevel + 1));
+    // Serialize the event based on the custom YAML tag
+    if typeConstructor is schema:YAMLTypeConstructor && tag is string {
+        if typeConstructor.kind == schema:SEQUENCE { // Convert sequence
+            json[]|error sequence = typeConstructor.represent(data).ensureType();
+            if sequence is error {
+                return generateInvalidRepresentError(schema:SEQUENCE, tag);
             }
-
-            events.push({endType: common:SEQUENCE});
-            return events;
+            return serializeSequence(state, events, sequence, tag, depthLevel);
         }
-
+        if typeConstructor.kind == schema:MAPPING { // Convert mapping
+            map<json>|error mapping = typeConstructor.represent(data).ensureType();
+            if mapping is error {
+                return generateInvalidRepresentError(schema:MAPPING, tag);
+            }
+            return serializeMapping(state, events, mapping, tag, depthLevel);
+        }
+        // Convert string
+        return serializeString(state, events, check typeConstructor.represent(data), tag);
     }
 
-    // Convert mapping
-    if data is map<json> {
-        tag = typeConstructor == () ? string `${schema:defaultGlobalTagHandle}map` : tag;
-        events.push({startType: common:MAPPING, flowStyle: state.blockLevel <= depthLevel, tag});
-
-        string[] keys = data.keys();
-        foreach string key in keys {
-            events = combineArray(events, check serialize(state, key, depthLevel));
-            events = combineArray(events, check serialize(state, data[key], depthLevel + 1));
-        }
-
-        events.push({endType: common:MAPPING});
-        return events;
+    // Serialize an event with a failsafe schema tag by default
+    if data is json[] { // Convert sequence
+        return serializeSequence(state, events, data, string `${schema:defaultGlobalTagHandle}seq`, depthLevel);
     }
-
+    if data is map<json> { // Convert mapping
+        return serializeMapping(state, events, data, string `${schema:defaultGlobalTagHandle}map`, depthLevel);
+    }
     // Convert string
-    string value;
-    if typeConstructor is schema:YAMLTypeConstructor {
-        value = check typeConstructor.represent(data);
-    } else {
-        tag = string `${schema:defaultGlobalTagHandle}str`;
-        value = data.toString();
-    }
+    return serializeString(state, events, data, string `${schema:defaultGlobalTagHandle}str`);
 
-    events.push({
-        value: regex:matches(value, INVALID_PLANAR_PATTERN) || state.forceQuotes
-            ? string `${state.delimiter}${value}${state.delimiter}` : value,
-        tag
-    });
-    return events;
 }
 
 # Combines two event trees together

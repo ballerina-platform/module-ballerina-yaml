@@ -19,8 +19,8 @@ public function serialize(SerializerState state, json data, int depthLevel = 0, 
         if excludeTag is string && excludeTag == key {
             continue;
         }
-        currentTypeConstructor = <schema:YAMLTypeConstructor>state.tagSchema[key];
 
+        currentTypeConstructor = <schema:YAMLTypeConstructor>state.tagSchema[key];
         if currentTypeConstructor.identity(data) {
             tag = key;
             typeConstructor = currentTypeConstructor;
@@ -37,24 +37,22 @@ public function serialize(SerializerState state, json data, int depthLevel = 0, 
             }
             check serializeSequence(state, sequence, tag, depthLevel);
         }
-        if typeConstructor.kind == schema:MAPPING { // Convert mapping
+        else if typeConstructor.kind == schema:MAPPING { // Convert mapping
             map<json>|error mapping = typeConstructor.represent(data).ensureType();
             if mapping is error {
                 return generateInvalidRepresentError(tag, schema:MAPPING);
             }
             check serializeMapping(state, mapping, tag, depthLevel);
+        } else { // Convert string
+            serializeString(state, check typeConstructor.represent(data), tag);
         }
-        // Convert string
-        serializeString(state, check typeConstructor.represent(data), tag);
+    } else { // Serialize an event with a failsafe schema tag by default
+        if data is json[] { // Convert sequence
+            check serializeSequence(state, data, string `${schema:defaultGlobalTagHandle}seq`, depthLevel);
+        } else if data is map<json> { // Convert mapping
+            check serializeMapping(state, data, string `${schema:defaultGlobalTagHandle}map`, depthLevel);
+        } else { // Convert string
+            serializeString(state, data, string `${schema:defaultGlobalTagHandle}str`);
+        }
     }
-
-    // Serialize an event with a failsafe schema tag by default
-    if data is json[] { // Convert sequence
-        check serializeSequence(state, data, string `${schema:defaultGlobalTagHandle}seq`, depthLevel);
-    }
-    if data is map<json> { // Convert mapping
-        check serializeMapping(state, data, string `${schema:defaultGlobalTagHandle}map`, depthLevel);
-    }
-    // Convert string
-    serializeString(state, data, string `${schema:defaultGlobalTagHandle}str`);
 }

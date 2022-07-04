@@ -19,7 +19,6 @@ function testWritingSimpleEvent(common:Event[] events, string[] expectedOutput) 
 
 function simpleEventDataGen() returns map<[common:Event[], string[]]> {
     return {
-        "empty block sequence": [[{startType: common:SEQUENCE}], ["-"]],
         "empty flow sequence": [[{startType: common:SEQUENCE, flowStyle: true}, {endType: common:SEQUENCE}], ["[]"]],
         "empty flow mapping": [[{startType: common:MAPPING, flowStyle: true}, {endType: common:MAPPING}], ["{}"]],
         "single block sequence entry": [
@@ -185,6 +184,94 @@ function simpleEventDataGen() returns map<[common:Event[], string[]]> {
                 {endType: common:MAPPING}
             ],
             ["{parentKey: {key: value}}"]
+        ],
+        "empty key and value block mapping": [
+            [
+                {startType: common:MAPPING},
+                {value: ()},
+                {value: ()},
+                {endType: common:MAPPING}
+            ],
+            [": "]
+        ],
+        "empty key and value flow mapping": [
+            [
+                {startType: common:MAPPING, flowStyle: true},
+                {value: ()},
+                {value: ()},
+                {endType: common:MAPPING}
+            ],
+            ["{: }"]
+        ],
+        "empty key block mapping": [
+            [
+                {startType: common:MAPPING},
+                {value: ()},
+                {value: "value"},
+                {endType: common:MAPPING}
+            ],
+            [": value"]
+        ],
+        "empty key flow mapping": [
+            [
+                {startType: common:MAPPING, flowStyle: true},
+                {value: ()},
+                {value: "value"},
+                {endType: common:MAPPING}
+            ],
+            ["{: value}"]
+        ],
+        "empty value block mapping": [
+            [
+                {startType: common:MAPPING},
+                {value: "key"},
+                {value: ()},
+                {endType: common:MAPPING}
+            ],
+            ["key: "]
+        ],
+        "empty value flow mapping": [
+            [
+                {startType: common:MAPPING, flowStyle: true},
+                {value: "key"},
+                {value: ()},
+                {endType: common:MAPPING}
+            ],
+            ["{key: }"]
+        ],
+        "block mapping empty combination": [
+            [
+                {startType: common:MAPPING},
+                {value: ()},
+                {value: ()},
+                {value: "key"},
+                {value: ()},
+                {value: ()},
+                {value: "value"},
+                {endType: common:MAPPING}
+            ],
+            [": ", "key: ", ": value"]
+        ],
+        "flow mapping empty combination": [
+            [
+                {startType: common:MAPPING, flowStyle: true},
+                {value: ()},
+                {value: ()},
+                {value: "key"},
+                {value: ()},
+                {value: ()},
+                {value: "value"},
+                {endType: common:MAPPING}
+            ],
+            ["{: , key: , : value}"]
+        ],
+        "block sequence with null": [
+            [
+                {startType: common:SEQUENCE},
+                {value: ()},
+                {endType: common:SEQUENCE}
+            ],
+            ["- "]
         ],
         "write only custom tags": [
             [

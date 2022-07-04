@@ -10,7 +10,7 @@ string yamlInt = string `${schema:defaultGlobalTagHandle}int`;
     groups: ["emitter"]
 }
 function testWritingSimpleEvent(common:Event[] events, string[] expectedOutput) returns error? {
-    string[] output = check emit(events, 2, false, false);
+    string[] output = check getEmittedOutput(events);
     test:assertEquals(output, expectedOutput);
 }
 
@@ -183,6 +183,15 @@ function simpleEventDataGen() returns map<[common:Event[], string[]]> {
             ],
             ["{parentKey: {key: value}}"]
         ],
+        "write only custom tags": [
+            [
+                {startType: common:SEQUENCE},
+                {value: "custom value", tag: "!custom"},
+                {value: "string value", tag: yamlStr},
+                {endType: common:SEQUENCE}
+            ],
+            ["- !custom custom value", "- string value"]
+        ],
         "single value": [[{value: "value"}], ["value"]]
     };
 }
@@ -191,7 +200,7 @@ function simpleEventDataGen() returns map<[common:Event[], string[]]> {
     groups: ["emitter"]
 }
 function testMultipleRootEventsForOneDocument() returns error? {
-    string[]|EmittingError output = emit([{value: "first root"}, {value: "second root"}], 2, false, false);
+    string[]|EmittingError output = getEmittedOutput([{value: "first root"}, {value: "second root"}]);
     test:assertTrue(output is EmittingError);
 }
 
@@ -200,7 +209,7 @@ function testMultipleRootEventsForOneDocument() returns error? {
     groups: ["emitter"]
 }
 function testWritingInCanonical(common:Event[] events, string[] expectedOutput) returns error? {
-    string[] output = check emit(events, 2, true, false);
+    string[] output = check getEmittedOutput(events, canonical = true);
     test:assertEquals(output, expectedOutput);
 }
 
@@ -257,7 +266,7 @@ function canonicalDataGen() returns map<[common:Event[], string[]]> {
         "global tag scalar": [[{value: "1", tag: yamlInt}], ["!!int 1"]],
         "local tag scalar": [[{value: "1", tag: "!digit"}], ["!digit 1"]],
         "verbatim tag scalar": [[{value: "1", tag: "verbatim-tag"}], ["!<verbatim-tag> 1"]],
-        "no tag scalar": [[{value: "1"}], [" 1"]]
+        "no tag scalar": [[{value: "1"}], ["1"]]
     };
 }
 
@@ -265,7 +274,7 @@ function canonicalDataGen() returns map<[common:Event[], string[]]> {
     groups: ["emitter"]
 }
 function testWriteStream() returns error? {
-    string[] output = check emit([{value: "1", tag: yamlInt}, {value: "2", tag: yamlInt}], 2, false, true);
+    string[] output = check getEmittedOutput([{value: "1", tag: yamlInt}, {value: "2", tag: yamlInt}], isStream = true);
     test:assertEquals(output, ["1", "---", "2", "---"]);
 }
 
@@ -273,7 +282,7 @@ function testWriteStream() returns error? {
     dataProvider: invalidEventTreeDataGen
 }
 function test(common:Event[] inputEventTree) returns error? {
-    string[]|EmittingError output = emit(inputEventTree, 2, false, true);
+    string[]|EmittingError output = getEmittedOutput(inputEventTree);
     test:assertTrue(output is EmittingError);
 }
 
@@ -286,4 +295,12 @@ function invalidEventTreeDataGen() returns map<[common:Event[]]> {
         "not ending a flow style mapping": [[{startType: common:MAPPING, flowStyle: true}]],
         "ending a block style mapping with ]": [[{startType: common:MAPPING}, {endType: common:SEQUENCE}]]
     };
+}
+
+@test:Config {
+    groups: ["emitter"]
+}
+function testReduceCustomTagHandle() returns error? {
+    string[] output = check getEmittedOutput([{value: "value", tag: "org.custom.schema:scalar"}], {"!custom!": "org.custom.schema:"});
+    test:assertEquals(output, ["!custom!scalar value"]);
 }

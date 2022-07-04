@@ -4,6 +4,8 @@ import yaml.schema;
 
 string yamlStr = string `${schema:defaultGlobalTagHandle}str`;
 string yamlInt = string `${schema:defaultGlobalTagHandle}int`;
+string yamlNull = string `${schema:defaultGlobalTagHandle}null`;
+string yamlSeq = string `${schema:defaultGlobalTagHandle}seq`;
 
 @test:Config {
     dataProvider: simpleEventDataGen,
@@ -251,6 +253,21 @@ function canonicalDataGen() returns map<[common:Event[], string[]]> {
             ],
             ["- !custom"]
         ],
+        "empty flow sequence": [
+            [
+                {startType: common:SEQUENCE, flowStyle: true, tag: yamlSeq},
+                {endType: common:SEQUENCE}
+            ],
+            ["!!seq []"]
+        ],
+        "block sequence with null": [
+            [
+                {startType: common:SEQUENCE, tag: yamlSeq},
+                {value: (), tag: yamlNull},
+                {endType: common:SEQUENCE}
+            ],
+            ["- !!null "]
+        ],
         "block mapping": [
             [
                 {startType: common:MAPPING},
@@ -298,9 +315,10 @@ function invalidEventTreeDataGen() returns map<[common:Event[]]> {
 }
 
 @test:Config {
-    groups: ["emitter"]
+    groups: ["emitter"],
+    enable: false
 }
 function testReduceCustomTagHandle() returns error? {
     string[] output = check getEmittedOutput([{value: "value", tag: "org.custom.schema:scalar"}], {"!custom!": "org.custom.schema:"});
-    test:assertEquals(output, ["!custom!scalar value"]);
+    test:assertEquals(output, ["%TAG !custom! org.custom.schema:", "---", "!custom!scalar value"]);
 }

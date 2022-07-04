@@ -17,7 +17,7 @@ function testGenerateSerializingEvent(json structure, common:Event[] assertingEv
 
 function serializingEventDataGen() returns map<[json, common:Event[]]> {
     return {
-        "empty array": [[], [{startType: common:SEQUENCE, tag: yamlSeq}, {endType: common:SEQUENCE}]],
+        "empty array": [[], [{startType: common:SEQUENCE, tag: yamlSeq, flowStyle: true}, {endType: common:SEQUENCE}]],
         "single element array": [["value"], [{startType: common:SEQUENCE, tag: yamlSeq}, {value: "value", tag: yamlStr}, {endType: common:SEQUENCE}]],
         "multiple elements array": [["value1", "value2"], [{startType: common:SEQUENCE, tag: yamlSeq}, {value: "value1", tag: yamlStr}, {value: "value2", tag: yamlStr}, {endType: common:SEQUENCE}]],
         "nested array": [[["value"]], [{startType: common:SEQUENCE, tag: yamlSeq}, {startType: common:SEQUENCE, tag: yamlSeq, flowStyle: true}, {value: "value", tag: yamlStr}, {endType: common:SEQUENCE}, {endType: common:SEQUENCE}]],

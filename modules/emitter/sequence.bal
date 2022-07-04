@@ -8,6 +8,7 @@ import yaml.common;
 function writeFlowSequence(EmitterState state, string? tag) returns string|EmittingError {
     string line = writeNode(state, "[", tag);
     common:Event event = getEvent(state);
+    boolean firstValue = true;
 
     // Iterate until the end delimiter ']' is detected
     while true {
@@ -20,6 +21,10 @@ function writeFlowSequence(EmitterState state, string? tag) returns string|Emitt
                     return generateExpectedEndEventError(event.endType, common:SEQUENCE);
                 }
             }
+        }
+
+        if !firstValue {
+            line += ", ";
         }
 
         // Convert the scalar
@@ -39,12 +44,10 @@ function writeFlowSequence(EmitterState state, string? tag) returns string|Emitt
             }
         }
 
-        line += ", ";
         event = getEvent(state);
+        firstValue = false;
     }
 
-    // Trim the trailing separator
-    line = line.length() > 2 ? line.substring(0, line.length() - 2) : line;
     line += "]";
     return line;
 }

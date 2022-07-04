@@ -43,6 +43,7 @@ public function writeString(json yamlStructure, *WriteConfig config) returns str
     check serializer:serialize(serializerState, yamlStructure);
     return emitter:emit(
         events = serializerState.events,
+        customTagHandles = config.customTagHandles,
         indentationPolicy = config.indentationPolicy,
         isStream = config.isStream,
         canonical = config.canonical

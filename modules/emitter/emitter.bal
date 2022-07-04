@@ -2,12 +2,14 @@ import yaml.common;
 
 # Represents the variables of the Emitter state.
 #
-# + output - YAML content as an array of strings.  
+# + output - YAML content as an array of strings
+# + customTagHandles - Custom tag handles that can be included in the directive document
 # + indent - Total whitespace for a single indent  
-# + canonical - If set, the tag is written explicitly along with the value.
+# + canonical - If set, the tag is written explicitly along with the value
 # + events - Event tree to be converted
 type EmitterState record {|
     string[] output;
+    map<string> customTagHandles;
     readonly string indent;
     readonly boolean canonical;
     common:Event[] events;
@@ -16,11 +18,13 @@ type EmitterState record {|
 # Obtain the output string lines for a given event tree.
 #
 # + events - Event tree to be converted  
+# + customTagHandles - Custom tag handles that can be included in the directive document
 # + indentationPolicy - Number of spaces for an indent  
-# + canonical - If set, the tag is written explicitly along with the value.
-# + isStream - Whether the event tree is a stream  
-# + return - YAML string lines
+# + canonical - If set, the tag is written explicitly along with the value
+# + isStream - Whether the event tree is a stream
+# + return - Output YAML content as an array of strings.
 public function emit(common:Event[] events,
+    map<string> customTagHandles,
     int indentationPolicy,
     boolean canonical,
     boolean isStream) returns string[]|EmittingError {
@@ -33,6 +37,7 @@ public function emit(common:Event[] events,
 
     EmitterState state = {
         output: [],
+        customTagHandles,
         indent,
         canonical,
         events

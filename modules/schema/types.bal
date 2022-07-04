@@ -1,7 +1,7 @@
 public const string defaultLocalTagHandle = "!";
 public const string defaultGlobalTagHandle = "tag:yaml.org,2002:";
 
-public readonly & map<string> defaultTagHandles = {
+public final readonly & map<string> defaultTagHandles = {
     "!": defaultLocalTagHandle,
     "!!": defaultGlobalTagHandle
 };

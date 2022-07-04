@@ -6,6 +6,7 @@ string yamlStr = string `${schema:defaultGlobalTagHandle}str`;
 string yamlInt = string `${schema:defaultGlobalTagHandle}int`;
 string yamlNull = string `${schema:defaultGlobalTagHandle}null`;
 string yamlSeq = string `${schema:defaultGlobalTagHandle}seq`;
+string yamlMap = string `${schema:defaultGlobalTagHandle}map`;
 
 @test:Config {
     dataProvider: simpleEventDataGen,
@@ -226,6 +227,20 @@ function canonicalDataGen() returns map<[common:Event[], string[]]> {
             ],
             ["!custom [!!str a, !!int 1]"]
         ],
+        "empty flow sequence": [
+            [
+                {startType: common:SEQUENCE, flowStyle: true, tag: yamlSeq},
+                {endType: common:SEQUENCE}
+            ],
+            ["!!seq []"]
+        ],
+        "empty flow mapping": [
+            [
+                {startType: common:MAPPING, flowStyle: true, tag: yamlMap},
+                {endType: common:MAPPING}
+            ],
+            ["!!map {}"]
+        ],
         "flow mapping": [
             [
                 {startType: common:MAPPING, tag: "!custom", flowStyle: true},
@@ -252,13 +267,6 @@ function canonicalDataGen() returns map<[common:Event[], string[]]> {
                 {endType: common:SEQUENCE}
             ],
             ["- !custom"]
-        ],
-        "empty flow sequence": [
-            [
-                {startType: common:SEQUENCE, flowStyle: true, tag: yamlSeq},
-                {endType: common:SEQUENCE}
-            ],
-            ["!!seq []"]
         ],
         "block sequence with null": [
             [

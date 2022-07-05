@@ -95,7 +95,7 @@ function writeBlockMapping(EmitterState state, string whitespace, string? tag) r
         // Convert the scalar
         if event is common:ScalarEvent {
             line += writeNode(state, event.value, event.tag);
-            state.output.push(line);
+            state.addLine(line);
         }
 
         // Check for nested collections
@@ -103,17 +103,17 @@ function writeBlockMapping(EmitterState state, string whitespace, string? tag) r
             match event.startType {
                 common:SEQUENCE => {
                     if event.flowStyle { // Convert the nested sequence
-                        state.output.push(line + check writeFlowSequence(state, event.tag));
+                        state.addLine(line + check writeFlowSequence(state, event.tag));
                     } else {
-                        state.output.push(writeNode(state, line.substring(0, line.length() - 1), event.tag, true));
+                        state.addLine(writeNode(state, line.substring(0, line.length() - 1), event.tag, true));
                         check writeBlockSequence(state, whitespace, event.tag);
                     }
                 }
                 common:MAPPING => { // Convert the nested mapping
                     if event.flowStyle {
-                        state.output.push(line + check writeFlowMapping(state, event.tag));
+                        state.addLine(line + check writeFlowMapping(state, event.tag));
                     } else {
-                        state.output.push(writeNode(state, line.substring(0, line.length() - 1), event.tag, true));
+                        state.addLine(writeNode(state, line.substring(0, line.length() - 1), event.tag, true));
                         check writeBlockMapping(state, whitespace + state.indent, event.tag);
                     }
                 }

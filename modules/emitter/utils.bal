@@ -42,6 +42,7 @@ function writeNode(EmitterState state, string? value, string? tag, boolean tagAs
     foreach [string, string] tagEntry in state.customTagHandles.entries() {
         if tag.startsWith(tagEntry[1]) {
             customTag = tagEntry[0] + tag.substring(tagEntry[1].length());
+            state.addTagHandle(tagEntry[0]);
             break;
         }
     }

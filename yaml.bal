@@ -41,13 +41,14 @@ public function writeString(json yamlStructure, *WriteConfig config) returns str
         forceQuotes: config.forceQuotes
     };
     check serializer:serialize(serializerState, yamlStructure);
-    return emitter:emit(
+
+    emitter:EmitterState emitterState = new(
         events = serializerState.events,
         customTagHandles = config.customTagHandles,
         indentationPolicy = config.indentationPolicy,
-        isStream = config.isStream,
-        canonical = config.canonical
+        canonical = config.canonical  
     );
+    return emitter:emit(emitterState, isStream = config.isStream);
 }
 
 # Writes the YAML structure to a file.

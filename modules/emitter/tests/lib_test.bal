@@ -387,7 +387,7 @@ function canonicalDataGen() returns map<[common:Event[], string[]]> {
 }
 function testWriteStream() returns error? {
     string[] output = check getEmittedOutput([{value: "1", tag: yamlInt}, {value: "2", tag: yamlInt}], isStream = true);
-    test:assertEquals(output, ["1", "---", "2", "---"]);
+    test:assertEquals(output, ["---", "1", "---", "2"]);
 }
 
 @test:Config {
@@ -410,10 +410,68 @@ function invalidEventTreeDataGen() returns map<[common:Event[]]> {
 }
 
 @test:Config {
-    groups: ["emitter"],
-    enable: false
+    dataProvider: customTagHandleDataGen,
+    groups: ["emitter"]
 }
-function testReduceCustomTagHandle() returns error? {
-    string[] output = check getEmittedOutput([{value: "value", tag: "org.custom.schema:scalar"}], {"!custom!": "org.custom.schema:"});
-    test:assertEquals(output, ["%TAG !custom! org.custom.schema:", "---", "!custom!scalar value"]);
+function testReduceCustomTagHandle(common:Event[] inputEventTree, string[] expectedOutput,
+    boolean isStream) returns error? {
+    string[] output = check getEmittedOutput(inputEventTree,
+        customTagHandles = {"!custom!": "org.custom.schema:", "!named!": "org.yaml.named:"}, isStream = isStream);
+    test:assertEquals(output, expectedOutput);
+}
+
+function customTagHandleDataGen() returns map<[common:Event[], string[], boolean]> {
+    final string customTagDirective = "%TAG !custom! org.custom.schema:";
+    final string namedTagDirective = "%TAG !named! org.yaml.named:";
+    final string customNode = "!custom!scalar value";
+    final string namedNode = "!named!string object";
+    final common:Event customTagEvent = {value: "value", tag: "org.custom.schema:scalar"};
+    final common:Event namedTagEvent = {value: "object", tag: "org.yaml.named:string"};
+
+    return {
+        "single document": [
+            [customTagEvent],
+            [customTagDirective, "---", customNode, "..."],
+            false
+        ],
+        "tags in all document": [
+            [customTagEvent, namedTagEvent],
+            [customTagDirective, "---", customNode, "...", namedTagDirective, "---", namedNode, "..."],
+            true
+        ],
+        "exclude in some docs": [
+            [
+                {startType: common:SEQUENCE},
+                customTagEvent,
+                namedTagEvent,
+                {endType: common:SEQUENCE},
+                customTagEvent,
+                {value: ()},
+                {value: ()},
+                namedTagEvent
+            ],
+            [
+                customTagDirective,
+                namedTagDirective,
+                "---",
+                "- " + customNode,
+                "- " + namedNode,
+                "...",
+                customTagDirective,
+                "---",
+                customNode,
+                "...",
+                "---",
+                "",
+                "---",
+                "",
+                "...",
+                namedTagDirective,
+                "---",
+                namedNode,
+                "..."
+            ],
+            true
+        ]
+    };
 }

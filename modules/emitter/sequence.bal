@@ -68,7 +68,7 @@ function writeBlockSequence(EmitterState state, string whitespace, string? tag) 
             match event.endType {
                 common:SEQUENCE|common:STREAM => { // Terminate for these events
                     if emptySequence {
-                        state.output.push(whitespace + writeNode(state, "-", tag, true));
+                        state.addLine(whitespace + writeNode(state, "-", tag, true));
                     }
                     break;
                 }
@@ -80,7 +80,7 @@ function writeBlockSequence(EmitterState state, string whitespace, string? tag) 
 
         // Convert scalar event
         if event is common:ScalarEvent {
-            state.output.push(string `${whitespace}- ${writeNode(state, event.value, event.tag)}`);
+            state.addLine(string `${whitespace}- ${writeNode(state, event.value, event.tag)}`);
         }
 
         // Check for nested collections
@@ -88,17 +88,17 @@ function writeBlockSequence(EmitterState state, string whitespace, string? tag) 
             match event.startType {
                 common:SEQUENCE => { // Convert the nested sequence
                     if event.flowStyle {
-                        state.output.push(whitespace + "- " + check writeFlowSequence(state, event.tag));
+                        state.addLine(whitespace + "- " + check writeFlowSequence(state, event.tag));
                     } else {
-                        state.output.push(whitespace + writeNode(state, "-", event.tag, true));
+                        state.addLine(whitespace + writeNode(state, "-", event.tag, true));
                         check writeBlockSequence(state, whitespace + state.indent, event.tag);
                     }
                 }
                 common:MAPPING => { // Convert the nested mapping
                     if event.flowStyle {
-                        state.output.push(whitespace + "- " + check writeFlowMapping(state, event.tag));
+                        state.addLine(whitespace + "- " + check writeFlowMapping(state, event.tag));
                     } else {
-                        state.output.push(whitespace + "-");
+                        state.addLine(whitespace + "-");
                         check writeBlockMapping(state, whitespace + state.indent, event.tag);
                     }
                 }

@@ -1,61 +1,25 @@
 import yaml.common;
 
-# Represents the variables of the Emitter state.
-#
-# + output - YAML content as an array of strings
-# + customTagHandles - Custom tag handles that can be included in the directive document
-# + indent - Total whitespace for a single indent  
-# + canonical - If set, the tag is written explicitly along with the value
-# + events - Event tree to be converted
-type EmitterState record {|
-    string[] output;
-    map<string> customTagHandles;
-    readonly string indent;
-    readonly boolean canonical;
-    common:Event[] events;
-|};
-
 # Obtain the output string lines for a given event tree.
 #
-# + events - Event tree to be converted  
-# + customTagHandles - Custom tag handles that can be included in the directive document
-# + indentationPolicy - Number of spaces for an indent  
-# + canonical - If set, the tag is written explicitly along with the value
+# + state - Parameter Description  
 # + isStream - Whether the event tree is a stream
 # + return - Output YAML content as an array of strings.
-public function emit(common:Event[] events,
-    map<string> customTagHandles,
-    int indentationPolicy,
-    boolean canonical,
-    boolean isStream) returns string[]|EmittingError {
-
-    // Setup the total whitespace for an indentation
-    string indent = "";
-    foreach int i in 1 ... indentationPolicy {
-        indent += " ";
-    }
-
-    EmitterState state = {
-        output: [],
-        customTagHandles,
-        indent,
-        canonical,
-        events
-    };
-
+public function emit(EmitterState state, boolean isStream) returns string[]|EmittingError {
     if isStream { // Write YAML stream
+        string[] output = [];
         while state.events.length() > 0 {
             check write(state);
-            state.output.push("---");
+            state.getDocument(true).forEach(line => output.push(line));
         }
+        return output;
     } else { // Write a single YAML document
         check write(state);
         if state.events.length() > 0 {
             return generateEmittingError("There can only be one root event for a document", getEvent(state));
         }
+        return state.getDocument();
     }
-
-    return state.output;
 }
 
 # Convert a single YAML document to array of YAML strings
@@ -68,7 +32,7 @@ function write(EmitterState state) returns EmittingError? {
     // Convert sequence collection
     if event is common:StartEvent && event.startType == common:SEQUENCE {
         if event.flowStyle {
-            state.output.push(check writeFlowSequence(state, event.tag));
+            state.addLine(check writeFlowSequence(state, event.tag));
         } else {
             check writeBlockSequence(state, "", event.tag);
         }
@@ -78,7 +42,7 @@ function write(EmitterState state) returns EmittingError? {
     // Convert mapping collection
     if event is common:StartEvent && event.startType == common:MAPPING {
         if event.flowStyle {
-            state.output.push(check writeFlowMapping(state, event.tag));
+            state.addLine(check writeFlowMapping(state, event.tag));
         } else {
             check writeBlockMapping(state, "", event.tag);
         }
@@ -87,7 +51,7 @@ function write(EmitterState state) returns EmittingError? {
 
     // Convert scalar 
     if event is common:ScalarEvent {
-        state.output.push(writeNode(state, event.value, event.tag));
+        state.addLine(writeNode(state, event.value, event.tag));
         return;
     }
 }

@@ -39,7 +39,7 @@ function contextDoubleQuote(LexerState state) returns LexerState|LexicalError {
 
     // Terminating delimiter
     if state.peek() == "\"" {
-        return scanMappingValueKeyWithDelimiter(state, DOUBLE_QUOTE_DELIMITER);
+        return scanMappingValueKey(state, DOUBLE_QUOTE_DELIMITER);
     }
 
     // Regular double quoted characters
@@ -85,7 +85,7 @@ function contextSingleQuote(LexerState state) returns LexerState|LexicalError {
             state.index -= 1;
             return state.tokenize(SINGLE_QUOTE_CHAR);
         }
-        return scanMappingValueKeyWithDelimiter(state, SINGLE_QUOTE_DELIMITER);
+        return scanMappingValueKey(state, SINGLE_QUOTE_DELIMITER);
     }
 
     // Regular single quoted characters

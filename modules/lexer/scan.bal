@@ -376,15 +376,23 @@ function scanDigit(LexerState state) returns boolean|LexicalError {
 # + outputToken - Planar or anchor key
 # + process - Function to scan the lexeme
 # + return - Returns the tokenized state with correct YAML token
-function scanMappingValueKey(LexerState state, YAMLToken outputToken, function (LexerState state) returns boolean|LexicalError process) returns LexerState|LexicalError {
-    state.indentationBreak = false;
+function scanMappingValueKey(LexerState state, YAMLToken outputToken,
+    (function (LexerState state) returns boolean|LexicalError)? process = ()) returns LexerState|LexicalError {
 
-    LexicalError? err = assertIndent(state, 1);
+    state.indentationBreak = false;
     boolean enforceMapping = state.enforceMapping;
     state.enforceMapping = false;
 
-    state.updateStartIndex();
-    LexerState token = check iterate(state, process, outputToken);
+    LexerState token;
+    boolean notSufficientIndent;
+    if process == () {  // If the token is scanned, just produce the output
+        token = state.tokenize(outputToken);
+        notSufficientIndent = state.index < state.indentStartIndex;
+    } else {
+        notSufficientIndent = assertIndent(state, 1) is LexicalError;
+        state.updateStartIndex();
+        token = check iterate(state, process, outputToken);
+    }
 
     if state.isFlowCollection() {
         return token;
@@ -397,44 +405,7 @@ function scanMappingValueKey(LexerState state, YAMLToken outputToken, function (
         state.forward();
     }
 
-    if err is LexicalError { // Not sufficient indent to process as a value token
-        if state.peek() == ":" && !state.isFlowCollection() { // The token is a mapping key
-            token.indentation = check checkIndent(state, state.indentStartIndex);
-            return token;
-        }
-        return generateIndentationError(state, "Insufficient indentation for a scalar");
-    }
-    if state.peek() == ":" && !state.isFlowCollection() {
-        token.indentation = check checkIndent(state, state.indentStartIndex);
-        return token;
-    }
-    state.forward(-numWhitespace);
-    return enforceMapping ? generateIndentationError(state, "Insufficient indentation for a scalar") : token;
-}
-
-# Differentiate the single and double quoted keys against the key of a mapping.
-#
-# + state - Current lexer state
-# + outputToken - Single or double quoted keys
-# + return - Returns the tokenized state with correct YAML token
-function scanMappingValueKeyWithDelimiter(LexerState state, YAMLToken outputToken) returns LexerState|LexicalError {
-    state.indentationBreak = false;
-    LexerState token = state.tokenize(outputToken);
-    boolean enforceMapping = state.enforceMapping;
-    state.enforceMapping = false;
-
-    // Ignore whitespace until a character is found
-    int numWhitespace = 0;
-    while isWhitespace(state) {
-        numWhitespace += 1;
-        state.forward();
-    }
-
-    if state.isFlowCollection() {
-        return token;
-    }
-
-    if state.index < state.indentStartIndex { // Not sufficient indent to process as a value token
+    if notSufficientIndent { // Not sufficient indent to process as a value token
         if state.peek() == ":" && !state.isFlowCollection() { // The token is a mapping key
             token.indentation = check checkIndent(state, state.indentStartIndex);
             return token;

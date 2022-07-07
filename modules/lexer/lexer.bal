@@ -63,10 +63,6 @@ public function scan(LexerState state) returns LexerState|LexicalError {
         return state.tokenize(EOL);
     }
 
-    if matchPattern(state, patternLineBreak) {
-        return state.tokenize(LINE_BREAK);
-    }
-
     match state.context {
         LEXER_START => {
             return contextStart(state);

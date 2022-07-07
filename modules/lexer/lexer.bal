@@ -30,23 +30,14 @@ public function scan(LexerState state) returns LexerState|LexicalError {
         state.lexeme = state.lexemeBuffer;
         state.lexemeBuffer = "";
 
-        // Reaches the end-of-line and the primary tag is stored in the buffer
-        if state.peek() == () {
-            return state.tokenize(TAG);
-        }
-
-        // The complete primary tag is stored in the buffer
-        if matchPattern(state, patternWhitespace) {
-            state.forward(-1);
-            return state.tokenize(TAG);
-        }
-
-        // A first portion of the primary tag is stored in the buffer
-        if matchPattern(state, [patternUri, patternWord], ["!", patternFlowIndicator]) {
+        // If lexeme buffer contains only up to a hexadecimal value,
+        // then check for the remaining content of the primary tag.
+        if isTagChar(state) {
             return iterate(state, scanTagCharacter, TAG);
         }
 
-        return generateInvalidCharacterError(state, "primary tag");
+        state.forward(-1);
+        return state.tokenize(TAG);
     }
 
     // Generate EOL token at the last index
@@ -98,5 +89,4 @@ public function scan(LexerState state) returns LexerState|LexicalError {
             return generateScanningError(state, "Invalid context for the lexer");
         }
     }
-
 }

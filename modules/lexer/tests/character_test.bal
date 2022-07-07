@@ -77,3 +77,24 @@ function nodeTagDataGen() returns map<[string, string]> {
         "non-specific tag": ["!", "!"]
     };
 }
+
+@test:Config {
+    dataProvider: ambiguousTagDataGen
+}
+function testDetectingPrimaryOverNamed(string inputLine) returns error? {
+    LexerState state = setLexerString(inputLine);
+    check assertToken(state, TAG_HANDLE, lexeme = "!");
+    check assertToken(state, TAG, lexeme = "primary");
+}
+
+function ambiguousTagDataGen() returns map<[string]> {
+    return {
+        "flow indicator at end": ["!primary]"],
+        "whitespace at end": ["!primary "],
+        "hexadecimal at end": ["!primar%79"],
+        "hexadecimal at middle": ["!prim%61ry"],
+        "hexadecimal at start": ["!%70rim%61ry"],
+        "hexadecimal at multiple": ["!%70%72im%61r%79"],
+        "end of line": ["!primary"]
+    };
+}

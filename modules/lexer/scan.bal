@@ -220,7 +220,8 @@ function scanTagCharacter(LexerState state) returns boolean|LexicalError {
         return false;
     }
 
-    if matchPattern(state, patternWhitespace) {
+    // Terminate if a whitespace or a flow indicator is detected
+    if matchPattern(state, [patternWhitespace, patternFlowIndicator]) {
         return true;
     }
 
@@ -228,11 +229,6 @@ function scanTagCharacter(LexerState state) returns boolean|LexicalError {
     if state.peek() == "%" {
         check scanUnicodeEscapedCharacters(state, "%", 2);
         return false;
-    }
-
-    // Check for separator in flow style collections.
-    if state.peek() == "," {
-        return true;
     }
 
     return generateInvalidCharacterError(state, TAG);
@@ -277,7 +273,7 @@ function scanURICharacter(boolean isVerbatim = false) returns function (LexerSta
 function scanTagHandle(boolean differentiate = false) returns function (LexerState state) returns boolean|LexicalError {
     return function(LexerState state) returns boolean|LexicalError {
         // Scan the word of the name tag.
-        if matchPattern(state, patternWord) {
+        if matchPattern(state, [patternWord, patternUri], ["!", patternFlowIndicator]) {
             state.lexeme += <string>state.peek();
             // Store the complete primary tag if another '!' cannot be detected.
             if differentiate && state.peek(1) == () {
@@ -294,26 +290,17 @@ function scanTagHandle(boolean differentiate = false) returns function (LexerSta
             return true;
         }
 
-        // If the tag handle contains non-word character before '!', 
-        // Then the tag is primary
-        if differentiate && matchPattern(state, [patternUri, patternWord], patternFlowIndicator) {
-            state.lexemeBuffer = state.lexeme.substring(1) + <string>state.peek();
-            state.lexeme = "!";
-            return true;
-        }
-
-        // If the tag handle contains a hexadecimal escape,
-        // Then the tag is primary
-        if differentiate && state.peek() == "%" {
-            check scanUnicodeEscapedCharacters(state, "%", 2);
+        // Store the complete primary tag if a white space or a flow indicator is detected.
+        if differentiate && matchPattern(state, [patternFlowIndicator, patternWhitespace]) {
+            state.forward(-1);
             state.lexemeBuffer = state.lexeme.substring(1);
             state.lexeme = "!";
             return true;
         }
 
-        // Store the complete primary tag if a white space is detected
-        if differentiate && matchPattern(state, patternWhitespace) {
-            state.forward(-1);
+        // Store the complete primary tag if a hexadecimal escape is detected.
+        if differentiate && state.peek() == "%" {
+            check scanUnicodeEscapedCharacters(state, "%", 2);
             state.lexemeBuffer = state.lexeme.substring(1);
             state.lexeme = "!";
             return true;

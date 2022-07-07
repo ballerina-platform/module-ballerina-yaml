@@ -430,7 +430,7 @@ function contextTagNode(LexerState state) returns LexerState|LexicalError {
     }
 
     // Match the tag with the tag character pattern
-    if matchPattern(state, [patternUri, patternWord], ["!", patternFlowIndicator]) {
+    if isTagChar(state) {
         return iterate(state, scanTagCharacter, TAG);
     }
 

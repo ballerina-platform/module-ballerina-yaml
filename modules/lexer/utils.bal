@@ -100,6 +100,9 @@ function isWhitespace(LexerState state, int offset = 0) returns boolean
 function isTabInIndent(LexerState state, int upperLimit) returns boolean
     => state.indent > -1 && state.tabInWhitespace > -1 && state.tabInWhitespace <= upperLimit;
 
+function isTagChar(LexerState state) returns boolean 
+    => matchPattern(state, [patternUri, patternWord, "%"], ["!", patternFlowIndicator]);
+
 function isMarker(LexerState state, boolean directive) returns boolean {
     string directiveChar = directive ? "-" : ".";
     if state.peek(0) == directiveChar && state.peek(1) == directiveChar && state.peek(2) == directiveChar

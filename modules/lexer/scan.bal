@@ -60,7 +60,7 @@ function scanUnicodeEscapedCharacters(LexerState state, string escapedChar, int 
             unicodeDigits += <string>state.peek();
             continue;
         }
-        return generateInvalidCharacterError(state, "unicode hex escape");
+        return generateInvalidCharacterError(state, "<unicode-hex-escape>");
     }
 
     // Check if the lexeme can be converted to hexadecimal
@@ -72,7 +72,7 @@ function scanUnicodeEscapedCharacters(LexerState state, string escapedChar, int 
     // Check if there exists a unicode string for the hexadecimal value
     string|error unicodeResult = string:fromCodePointInt(hexResult);
     if unicodeResult is error {
-        return generateScanningError(state, error:message(unicodeResult));
+        return generateScanningError(state, string `Invalid hex escape value, '${unicodeDigits}'`);
     }
 
     state.lexeme += unicodeResult;
@@ -183,30 +183,23 @@ function scanPlanarChar(LexerState state) returns boolean|LexicalError {
     return generateInvalidCharacterError(state, PLANAR_CHAR);
 }
 
-# Process block scalar values.
+# Scan the lexeme for printable char.
 #
-# + state - Current lexer state
+# + allowWhitespace - Flag is set if whitespace is allowed as a printable char
 # + return - False to continue. True to terminate the token. An error on failure.
-function scanPrintableChar(LexerState state) returns boolean|LexicalError {
-    if matchPattern(state, patternPrintable, [patternBom, patternLineBreak]) {
-        state.lexeme += <string>state.peek();
-        return false;
-    }
+function scanPrintableChar(boolean allowWhitespace) returns function (LexerState state) returns boolean|LexicalError {
+    return function(LexerState state) returns boolean|LexicalError {
+        if matchPattern(state, allowWhitespace ? [patternLineBreak] : [patternWhitespace, patternLineBreak]) {
+            return true;
+        }
 
-    return true;
-}
+        if matchPattern(state, patternPrintable, [patternBom, patternLineBreak]) {
+            state.lexeme += <string>state.peek();
+            return false;
+        }
 
-# Process ns-char values
-#
-# + state - Current lexer state
-# + return - False to continue. True to terminate the token. An error on failure.
-function scanNoSpacePrintableChar(LexerState state) returns boolean|LexicalError {
-    if matchPattern(state, patternPrintable, [patternBom, patternLineBreak, patternWhitespace]) {
-        state.lexeme += <string>state.peek();
-        return false;
-    }
-
-    return true;
+        return generateInvalidCharacterError(state, "<printable-char>");
+    };
 }
 
 # Scan the lexeme for tag characters.
@@ -337,24 +330,6 @@ function scanWhitespace(LexerState state) returns boolean {
     return true;
 }
 
-function scanWS(LexerState state) returns string {
-    string whitespace = "";
-
-    while state.index < state.line.length() {
-        if state.peek() == " " {
-            whitespace += " ";
-        } else if state.peek() == "\t" {
-            state.updateFirstTabIndex();
-            whitespace += "\t";
-        } else {
-            break;
-        }
-        state.forward();
-    }
-
-    return whitespace;
-}
-
 # Check for the lexemes to crete an DECIMAL token.
 #
 # + state - Current lexer state
@@ -368,54 +343,4 @@ function scanDigit(LexerState state) returns boolean|LexicalError {
         return true;
     }
     return generateInvalidCharacterError(state, "Digit");
-}
-
-# Differentiate the planar and anchor keys against the key of a mapping.
-#
-# + state - Current lexer state
-# + outputToken - Planar or anchor key
-# + process - Function to scan the lexeme
-# + return - Returns the tokenized state with correct YAML token
-function scanMappingValueKey(LexerState state, YAMLToken outputToken,
-    (function (LexerState state) returns boolean|LexicalError)? process = ()) returns LexerState|LexicalError {
-
-    state.indentationBreak = false;
-    boolean enforceMapping = state.enforceMapping;
-    state.enforceMapping = false;
-
-    LexerState token;
-    boolean notSufficientIndent;
-    if process == () {  // If the token is scanned, just produce the output
-        token = state.tokenize(outputToken);
-        notSufficientIndent = state.index < state.indentStartIndex;
-    } else {
-        notSufficientIndent = assertIndent(state, 1) is LexicalError;
-        state.updateStartIndex();
-        token = check iterate(state, process, outputToken);
-    }
-
-    if state.isFlowCollection() {
-        return token;
-    }
-
-    // Ignore whitespace until a character is found
-    int numWhitespace = 0;
-    while isWhitespace(state) {
-        numWhitespace += 1;
-        state.forward();
-    }
-
-    if notSufficientIndent { // Not sufficient indent to process as a value token
-        if state.peek() == ":" && !state.isFlowCollection() { // The token is a mapping key
-            token.indentation = check checkIndent(state, state.indentStartIndex);
-            return token;
-        }
-        return generateIndentationError(state, "Insufficient indentation for a scalar");
-    }
-    if state.peek() == ":" && !state.isFlowCollection() {
-        token.indentation = check checkIndent(state, state.indentStartIndex);
-        return token;
-    }
-    state.forward(-numWhitespace);
-    return enforceMapping ? generateIndentationError(state, "Insufficient indentation for a scalar") : token;
 }

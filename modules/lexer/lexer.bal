@@ -64,8 +64,8 @@ public function scan(LexerState state) returns LexerState|LexicalError {
         LEXER_TAG_PREFIX => {
             return contextTagPrefix(state);
         }
-        LEXER_TAG_NODE => {
-            return contextTagNode(state);
+        LEXER_NODE_PROPERTY => {
+            return contextNodeProperty(state);
         }
         LEXER_DIRECTIVE => {
             return contextYamlDirective(state);

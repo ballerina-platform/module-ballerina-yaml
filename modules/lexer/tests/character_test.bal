@@ -4,8 +4,8 @@ import ballerina/test;
     dataProvider: indicatorDataGen,
     groups: ["character-productions", "lexer"]
 }
-function testIndicatorTokens(string lexeme, YAMLToken expectedToken) returns error? {
-    LexerState state = setLexerString(lexeme);
+function testIndicatorTokens(string inputLine, YAMLToken expectedToken) returns error? {
+    LexerState state = setLexerString(inputLine);
     check assertToken(state, expectedToken);
 }
 
@@ -27,10 +27,28 @@ function indicatorDataGen() returns map<[string, YAMLToken]> {
 }
 
 @test:Config {
+    dataProvider: validTokenDataGen,
+    groups: ["lexer"]
+}
+function testValidTokenInContext(string inputLine, YAMLToken expectedToken, Context context) returns error? {
+    LexerState state = setLexerString(inputLine, context = context);
+    check assertToken(state, expectedToken);
+}
+
+function validTokenDataGen() returns map<[string, YAMLToken, Context]> {
+    return {
+        "directive marker in double-quoted": ["---", DIRECTIVE_MARKER, LEXER_DOUBLE_QUOTE],
+        "document marker in double-quoted": ["...", DOCUMENT_MARKER, LEXER_DOUBLE_QUOTE],
+        "directive marker in single-quoted": ["---", DIRECTIVE_MARKER, LEXER_SINGLE_QUOTE],
+        "document marker in single-quoted": ["...", DOCUMENT_MARKER, LEXER_SINGLE_QUOTE]
+    };
+}
+
+@test:Config {
     groups: ["lexer"]
 }
 function testAnchorToken() returns error? {
-    LexerState state = setLexerString("&anchor value", LEXER_TAG_NODE);
+    LexerState state = setLexerString("&anchor value", LEXER_NODE_PROPERTY);
     check assertToken(state, ANCHOR, lexeme = "anchor");
 }
 
@@ -96,5 +114,23 @@ function ambiguousTagDataGen() returns map<[string]> {
         "hexadecimal at start": ["!%70rim%61ry"],
         "hexadecimal at multiple": ["!%70%72im%61r%79"],
         "end of line": ["!primary"]
+    };
+}
+
+@test:Config {
+    dataProvider: invalidLexemeDataGen,
+    groups: ["lexer"]
+}
+function testInvalidLexemeForToken(string inputLine, Context context) {
+    assertLexicalError(inputLine, context = context);
+}
+
+function invalidLexemeDataGen() returns map<[string, Context]> {
+    return {
+        "hex in named tag handle": ["!named%61!", LEXER_TAG_HANDLE],
+        "invalid reserve name": ["invalidcharacter", LEXER_RESERVED_DIRECTIVE],
+        "invalid uri char": ["invalidcharacter", LEXER_TAG_PREFIX],
+        "invalid unicode escape": ["invalid \\ud8000 hex", LEXER_DOUBLE_QUOTE],
+        "invalid tag char": ["[invalid", LEXER_NODE_PROPERTY]
     };
 }

@@ -5,7 +5,7 @@ function getEmittedOutput(common:Event[] events,
     int indentationPolicy = 2,
     boolean canonical = false,
     boolean isStream = false) returns string[]|EmittingError {
-    
-    EmitterState state = new(events, customTagHandles, indentationPolicy, canonical);
+
+    EmitterState state = new (events, customTagHandles, indentationPolicy, canonical);
     return emit(state, isStream);
 }

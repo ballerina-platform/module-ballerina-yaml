@@ -1,4 +1,5 @@
 import ballerina/test;
+import yaml.schema;
 import yaml.common;
 
 @test:Config {
@@ -12,7 +13,6 @@ function testBlockScalarEvent(string[] lines, string value) returns error? {
 function blockScalarEventDataGen() returns map<[string[], string]> {
     return {
         "correct indentation for indentation-indicator": [["|2", "  value"], " value\n"],
-        "ignore trailing comment": [["|-", " value", "# trailing comment", " #  trailing comment"], "value"],
         "capture indented comment": [["|-", " # comment", "# trailing comment"], "# comment"],
         "trailing-lines strip": [["|-", " value", "", " "], "value"],
         "trailing-lines clip": [["|", " value", "", " "], "value\n"],
@@ -27,7 +27,20 @@ function blockScalarEventDataGen() returns map<[string[], string]> {
         "spaced lines": [[">-", " first", "   second"], "first\n  second"],
         "different lines": [[">-", " first", " second", "", "  first", " second"], "first second\n\n first\nsecond"],
         "same lines": [[">-", " first", " second", "", " first", " second"], "first second\nfirst second"],
-        "indent imposed by first line": [[">-", "  first", "  second"], "first second"]
+        "indent imposed by first line": [[">-", "  first", "  second"], "first second"],
+        "ignore trailing comment": [
+            [
+                "|-",
+                " value",
+                "# trailing comment",
+                " #  trailing comment",
+                "",
+                " ",
+                "   ",
+                "    # trailing comment"
+            ],
+            "value"
+        ]
     };
 }
 
@@ -46,15 +59,25 @@ function testBlockScalarsInCollection(string[] lines, common:Event[] eventTree) 
 
 function blockScalarInCollection() returns map<[string[], common:Event[]]> {
     return {
-        "folded scalar as mapping value": [
+        "mapping value after literal": [
             ["key1: >-", " first", " second", "key2: third"],
             [{startType: common:MAPPING}, {value: "key1"}, {value: "first second"}, {value: "key2"}, {value: "third"}]
         ],
-        "folded scalar as sequence entry": [
+        "json mapping value after literal": [
+            ["key1: >-", " first", " second", "'key2': third"],
+            [
+                {startType: common:MAPPING},
+                {value: "key1"},
+                {value: "first second"},
+                {value: "key2", tag: string `${schema:defaultGlobalTagHandle}str`},
+                {value: "third"}
+            ]
+        ],
+        "sequence entry after literal": [
             ["- >-", " first", " second", "- third"],
             [{startType: common:SEQUENCE}, {value: "first second"}, {value: "third"}]
         ],
-        "folded scalar after trailing comment": [
+        "sequence entry after trailing comment": [
             ["- >-", " first", "# trailing comment", "- third"],
             [{startType: common:SEQUENCE}, {value: "first"}, {value: "third"}]
         ]
@@ -76,6 +99,7 @@ function invalidScalarEventDataGen() returns map<[string[]]> {
         "invalid character for planar scalar": [["invalidcharacter"]],
         "invalid indentation for indentation-indicator": [["|3", " value"]],
         "leading lines contain less space": [["|", "  value", " value"]],
-        "value after trailing comment": [["|+", " value", "# first comment", "value"]]
+        "value after trailing comment": [["|+", " value", "# first comment", "value"]],
+        "value after trailing comment with indent": [["|+", " value", "# first comment", " value"]]
     };
 }

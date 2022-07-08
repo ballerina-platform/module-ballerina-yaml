@@ -5,7 +5,7 @@ import yaml.common;
     groups: ["directives", "parser"]
 }
 function testAccurateYAMLDirective() returns error? {
-    ParserState state = check new (["%YAML 1.3", "---"]);
+    ParserState state = check new (["%YAML 1.3 #comment", "---"]);
     _ = check parse(state, docType = ANY_DOCUMENT);
     test:assertEquals(state.yamlVersion, 1.3);
 }
@@ -63,15 +63,9 @@ function invalidDirectiveDataGen() returns map<[string]> {
     return {
         "additional dot": ["%YAML 1.2.1"],
         "no space": ["%YAML1.2"],
-        "single digit": ["%YAML 1"]
+        "single digit": ["%YAML 1"],
+        "string for version": ["%YAML one.two"]
     };
-}
-
-@test:Config {
-    groups: ["parser"]
-}
-function testTagDuplicates() returns error? {
-    check assertParsingError(["%TAG !a! firstPrefix ", "%TAG !a! secondPrefix "]);
 }
 
 @test:Config {
@@ -93,10 +87,23 @@ function tagHandlesDataGen() returns map<[string, string, string]> {
 }
 
 @test:Config {
+    dataProvider: invalidTagDirectiveDataGen,
     groups: ["parser"]
 }
-function testInvalidContentInDirectiveDocument() returns error? {
-    check assertParsingError(["%TAG ! local", "anything that is not %"]);
+function testInvalidTagDirective(string[] inputLines) returns error? {
+    check assertParsingError(inputLines);
+}
+
+function invalidTagDirectiveDataGen() returns map<[string[]]> {
+    return {
+        "duplicate of tags": [["%TAG !a! firstPrefix ", "%TAG !a! secondPrefix "]],
+        "invalid content": [["%TAG ! local", "anything that is not %"]],
+        "invalid tag handle": [["%TAG invalid local"]],
+        "primary tag at eol": [["%TAG !"]],
+        "invalid starting char for tag prefix": [["%TAG ! [invalid"]],
+        "no tag handle": [["%TAG "]],
+        "no tag prefix": [["%TAG !a!"]]
+    };
 }
 
 @test:Config {
@@ -130,8 +137,8 @@ function testValidReservedDirective(string line, string reservedDirective) retur
 
 function reservedDirectiveDataGen() returns map<[string, string]> {
     return {
-        "Only directive name": ["%RESERVED ", "RESERVED"],
-        "One directive parameter": ["%RESERVED parameter ", "RESERVED parameter"],
+        "only directive name": ["%RESERVED ", "RESERVED"],
+        "one directive parameter": ["%RESERVED parameter ", "RESERVED parameter"],
         "two directive parameters": ["%RESERVED first second", "RESERVED first second"]
     };
 }

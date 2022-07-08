@@ -89,6 +89,56 @@ function checkIndent(LexerState state, int? mapIndex = ()) returns Indentation|L
     return generateIndentationError(state, "Invalid indentation");
 }
 
+# Differentiate the planar and anchor keys against the key of a mapping.
+#
+# + state - Current lexer state
+# + outputToken - Planar or anchor key
+# + process - Function to scan the lexeme
+# + return - Returns the tokenized state with correct YAML token
+function checkMappingValueIndent(LexerState state, YAMLToken outputToken,
+    (function (LexerState state) returns boolean|LexicalError)? process = ()) returns LexerState|LexicalError {
+
+    state.indentationBreak = false;
+    boolean enforceMapping = state.enforceMapping;
+    state.enforceMapping = false;
+
+    LexerState token;
+    boolean notSufficientIndent;
+    if process == () { // If the token is scanned, just produce the output
+        token = state.tokenize(outputToken);
+        notSufficientIndent = state.index < state.indentStartIndex;
+    } else {
+        notSufficientIndent = assertIndent(state, 1) is LexicalError;
+        state.updateStartIndex();
+        token = check iterate(state, process, outputToken);
+    }
+
+    if state.isFlowCollection() {
+        return token;
+    }
+
+    // Ignore whitespace until a character is found
+    int numWhitespace = 0;
+    while isWhitespace(state) {
+        numWhitespace += 1;
+        state.forward();
+    }
+
+    if notSufficientIndent { // Not sufficient indent to process as a value token
+        if state.peek() == ":" && !state.isFlowCollection() { // The token is a mapping key
+            token.indentation = check checkIndent(state, state.indentStartIndex);
+            return token;
+        }
+        return generateIndentationError(state, "Insufficient indentation for a scalar");
+    }
+    if state.peek() == ":" && !state.isFlowCollection() {
+        token.indentation = check checkIndent(state, state.indentStartIndex);
+        return token;
+    }
+    state.forward(-numWhitespace);
+    return enforceMapping ? generateIndentationError(state, "Insufficient indentation for a scalar") : token;
+}
+
 # Check if the current index has sufficient indent.
 #
 # + state - Current lexer state  

@@ -14,7 +14,7 @@ function nodeTag(ParserState state) returns [string?, string?]|ParsingError|lexe
             check checkToken(state);
             tagHandle = state.currentToken.value;
 
-            state.updateLexerContext(lexer:LEXER_TAG_NODE);
+            state.updateLexerContext(lexer:LEXER_NODE_PROPERTY);
             check checkToken(state, lexer:TAG);
             tagPrefix = state.currentToken.value;
             check separate(state);
@@ -48,7 +48,7 @@ function nodeComplete(ParserState state, ParserOption option, TagStructure? defi
             string tagHandle = state.currentToken.value;
 
             // Obtain the tagPrefix associated with the tag handle
-            state.updateLexerContext(lexer:LEXER_TAG_NODE);
+            state.updateLexerContext(lexer:LEXER_NODE_PROPERTY);
             check checkToken(state, lexer:TAG);
             string tagPrefix = state.currentToken.value;
             tagStructure.tag = check generateCompleteTagName(state, tagHandle, tagPrefix);

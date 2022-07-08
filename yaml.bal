@@ -42,11 +42,11 @@ public function writeString(json yamlStructure, *WriteConfig config) returns str
     };
     check serializer:serialize(serializerState, yamlStructure);
 
-    emitter:EmitterState emitterState = new(
+    emitter:EmitterState emitterState = new (
         events = serializerState.events,
         customTagHandles = config.customTagHandles,
         indentationPolicy = config.indentationPolicy,
-        canonical = config.canonical  
+        canonical = config.canonical
     );
     return emitter:emit(emitterState, isStream = config.isStream);
 }

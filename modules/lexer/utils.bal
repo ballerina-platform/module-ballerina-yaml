@@ -78,14 +78,8 @@ function checkPattern(string:Char currentChar, patternParamterType pattern) retu
 # + expectedCharacters - Expected characters at the current index  
 # + index - Index of the character. If null, takes the lexer's 
 # + return - True if the assertion is true. Else, an lexical error
-function checkCharacter(LexerState state, string|string[] expectedCharacters, int? index = ()) returns boolean {
-    if expectedCharacters is string {
-        return expectedCharacters == state.line[index == () ? state.index : index];
-    } else if expectedCharacters.indexOf(state.line[index == () ? state.index : index]) == () {
-        return false;
-    }
-    return true;
-}
+function checkCharacters(LexerState state, string[] expectedCharacters, int? index = ()) returns boolean
+    => expectedCharacters.indexOf(state.line[index == () ? state.index : index]) is int;
 
 # Returns true if the current character is planar safe.
 #
@@ -100,7 +94,7 @@ function isWhitespace(LexerState state, int offset = 0) returns boolean
 function isTabInIndent(LexerState state, int upperLimit) returns boolean
     => state.indent > -1 && state.tabInWhitespace > -1 && state.tabInWhitespace <= upperLimit;
 
-function isTagChar(LexerState state) returns boolean 
+function isTagChar(LexerState state) returns boolean
     => matchPattern(state, [patternUri, patternWord, "%"], ["!", patternFlowIndicator]);
 
 function isMarker(LexerState state, boolean directive) returns boolean {
@@ -113,10 +107,28 @@ function isMarker(LexerState state, boolean directive) returns boolean {
     return false;
 }
 
-function discernTagPropertyFromPlanar(LexerState state, int offset = 0) returns boolean
-    => (!state.allowTokensAsPlanar || state.index < state.indent + 1 + offset);
+function isComment(LexerState state) returns boolean
+    => state.peek() == "#" && (isWhitespace(state, -1) || state.peek(-1) == ());
 
 function discernPlanarFromIndicator(LexerState state) returns boolean
     => matchPattern(state, [patternPrintable], state.isFlowCollection()
             ? [patternLineBreak, patternBom, patternWhitespace, patternFlowIndicator]
             : [patternLineBreak, patternBom, patternWhitespace], 1);
+
+function getWhitespace(LexerState state) returns string {
+    string whitespace = "";
+
+    while state.index < state.line.length() {
+        if state.peek() == " " {
+            whitespace += " ";
+        } else if state.peek() == "\t" {
+            state.updateFirstTabIndex();
+            whitespace += "\t";
+        } else {
+            break;
+        }
+        state.forward();
+    }
+
+    return whitespace;
+}

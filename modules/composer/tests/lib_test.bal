@@ -163,3 +163,25 @@ function testAllowRedefinitionOfMapEntires() returns error? {
 
     test:assertEquals(output.key, "second");
 }
+
+@test:Config {
+    dataProvider: ambiguousPlanarDataGen,
+    groups: ["composer"]
+}
+function testAmbiguousPlanar(string ambiguousLine) returns error? {
+    ComposerState state = check obtainComposerState(["planar: first line", " " + ambiguousLine]);
+    json output = check composeDocument(state);
+
+    test:assertEquals(output.planar, "first line " + ambiguousLine);
+}
+
+function ambiguousPlanarDataGen() returns map<[string]> {
+    return {
+        "primary tag": ["!primary"],
+        "non-specific tag": ["!"],
+        "secondary tag": ["!!int"],
+        "named tag": ["!named!tag"],
+        "anchor": ["&anchor"],
+        "sequence entry": ["- sequence"]
+    };
+}

@@ -1,0 +1,43 @@
+{
+	"Lexer Error Assestion Test": {
+		"scope": "ballerina",
+		"prefix": "testLexerError",
+		"body": [
+			"@test:Config {}",
+			"function test$1() {",
+			"\tassertLexicalError(\"$2\");",
+			"}"
+		],
+		"description": "Write a ballerina test case"
+	},
+	"Lexical Token Assestion Test": {
+		"scope": "ballerina",
+		"prefix": "testLexicalToken",
+		"body": [
+			"@test:Config {}",
+			"function test$1() returns error? {",
+			"\tLexer lexer = setLexerString(\"$2\");",
+			"\tcheck assertToken(lexer, $3);",
+			"}"
+		],
+		"description": "Write a ballerina test case"
+	},
+	"Create a test case with data generation function": {
+		"prefix": "testDataGen",
+		"body": [
+			"@test:Config {",
+			"    dataProvider: $1DataGen",
+			"}",
+			"function test$2($3) returns error? {",
+			"    $4",
+			"}",
+			"",
+			"function $1DataGen() returns map<[$5]> {",
+			"    return {",
+			"        \"$6\": [$7]",
+			"    };",
+			"}"
+		],
+		"description": "Create a test case with data generation function"
+	}
+}

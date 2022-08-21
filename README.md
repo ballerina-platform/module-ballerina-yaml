@@ -1,16 +1,10 @@
 # Ballerina YAML Parser
 
-![Build](https://github.com/nipunayf/module-ballerina-yaml/actions/workflows/ci.yml/badge.svg)
+![Build](https://github.com/ballerina-platform/module-ballerina-yaml/actions/workflows/ci.yml/badge.svg)
 
-`Ballerina YAML Parser` converts a given YAML file to a Ballerina data structure, and vice-versa. 
+Ballerina YAML parser provides APIs to convert a YAML configuration file to `json`, and vice-versa. The module supports both the functions of read and write either a single YAML document or a YAML stream.
 
-Initially, import the `nipunayf/yaml` into your Ballerina project.
-
-```ballerina
-import nipunayf/yaml;
-```
-
-The module supports both the functions of read and write either a single YAML document or a YAML stream.
+Since the parser is following LL(1) grammar, it follows a non-recursive predictive parsing algorithm which operates in a linear time complexity.
 
 ## Compatibility
 
@@ -27,14 +21,16 @@ The read function allows the user to obtain either a YAML document or an array o
 
 ```ballerina
 // Parsing a YAML document
-json|error yamlDoc = read("path/to/file.yml", {});
+json|yaml:Error yamlDoc = yaml:readFile("path/to/file.yml");
 
 // Parsing a YAML stream
-json[]|error yamlDocs = read("path/to/file.yml", {}, true);
+json|yaml:Error yamlDocs = yaml:readFile("path/to/file.yml", isStream = true);
 
 // Parsing a YAML string 
-json|error yamlLine = readString("outer: {inner: value}", {});
+json|yaml:Error yamlLine = yaml:readString("outer: {inner: value}");
 ```
+
+The user can either set the `allowAnchorRedefinition` or `allowMapEntryRedefinition` to let the parser overwrite anchors and map entry keys respectively.
 
 ### Writing a YAML File
 
@@ -42,13 +38,16 @@ The user can write either a document or a stream using this function.
 
 ```ballerina
 // Writing a YAML document
-check write("path/to/file.yaml", yamlContent, {});
+check yaml:writeFile("path/to/file.yaml", yamlContent);
 
 // Writing a YAML stream
-check write("path/to/file.yaml", yamlContent, {}, true);
+check yaml:writeFile("path/to/file.yaml", yamlContent, isStream = true);
+
+// Writing a YAML string
+json|yaml:Error jsonOutput = yaml:writeString("outer: {inner: value}");
 ```
 
-By default, the parser attempts to write the YAML scalars in planar style. However, there are some scalars that cause ambiguity against a few control symbols in YAML. In this case, the parser will add `"` quotes to remove the vagueness. Further, if the `forceQuotes` flag is set, then all the scalars will be quoted. Additionally, the delimiter can be changed to `'` by enabling the `useSingleQuotes` flag.
+By default, the parser attempts to write the YAML scalars in planar style. However, there are some scalars that cause ambiguity against a few control symbols in YAML. In this case to remove the vagueness, the parser will either add  `"` quotes or `'` quotes based on the `useSingleQuotes` flag is set. Further, if the `forceQuotes` flag is set, then all the scalars will be quoted. 
 
 The following options can be set to further format the output YAML file.
 
@@ -68,7 +67,7 @@ The `Fail Safe Schema` is the most basic schema supported by any YAML document. 
 | !!seq    | `ballerina.lang.array`  |
 | !!map    | `ballerina.lang.map`    |
 
-In addition to the `Fail Safe Schema` the `JSON Schema` defines the following tags to enable basic JSON support. The `Core Schema` is an extension of the `JSON Schema` that supports the same tags as the latter with more human-readable notations.
+In addition to the `Fail Safe Schema`, the `JSON Schema` defines the following tags to enable basic JSON support. The `Core Schema` is an extension of the `JSON Schema` that supports the same tags with more human-readable notations.
 
 | YAML Tag | Ballerina Data Type      |
 | -------- | ------------------------ |
@@ -82,12 +81,12 @@ In addition to the `Fail Safe Schema` the `JSON Schema` defines the following ta
 A custom tag support can be added to the YAML parser by writing a record of the type `YAMLType`. All the custom YAML tags must be provided as an array to the `yamlTypes` property in the config. The following code segment demonstrates an example of adding a custom tag to the parser.
 
 ```ballerina
-import nipunayf/yaml;
+import ballerina/yaml;
 
 type RGB [int, int, int];
 
-# Validation function to check before constructing the RGB
-function constructRGB(json data) returns json|yaml:TypeError {
+// Validation function to check before constructing the RGB
+function constructRGB(json data) returns json|yaml:SchemaError {
     RGB|error value = data.cloneWithType();
 
     if value is error {
@@ -103,8 +102,7 @@ function constructRGB(json data) returns json|yaml:TypeError {
     return value;
 }
 
-
-public function main() returns error?{
+public function main() returns error? {
     yaml:YAMLType rgbType = {
         tag: "!rgb",
         ballerinaType: RGB,
@@ -116,7 +114,7 @@ public function main() returns error?{
     RGB color = [256, 12, 32];
     json balStruct = {color};
 
-    check write("rgb.yml", balStruct, {canonical: true, yamlTypes: [rgbType]});
+    check yaml:writeFile("rgb.yml", balStruct, canonical = true, yamlTypes = [rgbType]);
 }
 ```
 

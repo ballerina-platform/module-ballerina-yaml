@@ -1,12 +1,10 @@
 [package]
-license=["Apache-2.0"]
-keywords=["YAML", "Parser"]
-org="nipunayf"
+org="ballerina"
 name="yaml"
+version="1.0.0"
+authors=["Ballerina"]
+keywords=["yaml", "parser"]
+repository="https://github.com/ballerina-platform/module-ballerina-yaml"
 icon = "icon.png"
-distribution = "2201.0.0"
-repository="https://github.com/nipunayf/ballerina-yaml"
-authors=["Nipuna Fernando"]
-
-[build-options]
-observabilityIncluded = true
+license=["Apache-2.0"]
+distribution = "2201.2.0"

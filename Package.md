@@ -1,6 +1,4 @@
-# Ballerina YAML Parser
-
-![Build](https://github.com/ballerina-platform/module-ballerina-yaml/actions/workflows/ci.yml/badge.svg)
+## Overview
 
 Ballerina YAML parser provides APIs to convert a YAML configuration file to `json`, and vice-versa. The module supports both the functions of read and write either a single YAML document or a YAML stream.
 

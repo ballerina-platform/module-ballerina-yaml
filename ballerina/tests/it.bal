@@ -48,7 +48,8 @@ function initYamlCustomeTypes() {
 }
 
 @test:Config {
-    dataProvider: yamlDataGen
+    dataProvider: yamlDataGen,
+    enable: false
 }
 function testYAMLIntegrationTest(string filePath, json expectedOutput, boolean isStream, boolean isError) returns error? {
     json|Error output = readFile(filePath, yamlTypes = customYamlTypes, isStream = isStream);

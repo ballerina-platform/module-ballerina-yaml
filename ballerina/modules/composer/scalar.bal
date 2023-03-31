@@ -121,15 +121,19 @@ function castData(ComposerState state, json data,
         if kind != typeConstructor.kind {
             return generateExpectedKindError(state, kind, typeConstructor.kind, tag);
         }
-
-        return typeConstructor.construct(data);
+        var construct = typeConstructor.construct;
+        
+        return construct(data);
     }
 
     // Iterate all the tag schema
     string[] yamlKeys = state.tagSchema.keys();
     foreach string yamlKey in yamlKeys {
         schema:YAMLTypeConstructor typeConstructor = state.tagSchema.get(yamlKey);
-        json|schema:SchemaError result = typeConstructor.construct(data);
+        
+        var construct = typeConstructor.construct;
+
+        json|schema:SchemaError result = construct(data);
 
         if result is schema:SchemaError || kind != typeConstructor.kind {
             continue;

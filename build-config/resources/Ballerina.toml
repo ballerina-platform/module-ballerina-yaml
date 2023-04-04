@@ -7,4 +7,4 @@ keywords = ["pseudo-yaml"]
 repository = "https://github.com/ballerina-platform/module-ballerina-yaml"
 icon = "icon.png"
 license = ["Apache-2.0"]
-distribution = "2201.0.4"
+distribution = "2201.5.0"

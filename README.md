@@ -1,125 +1,93 @@
-# Ballerina YAML Parser
+Ballerina Yaml Library
+===================
 
-![Build](https://github.com/ballerina-platform/module-ballerina-yaml/actions/workflows/ci.yml/badge.svg)
+[![Build](https://github.com/ballerina-platform/module-ballerina-yaml/actions/workflows/build-timestamped-master.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerina-yaml/actions/workflows/build-timestamped-master.yml)
+[![codecov](https://codecov.io/gh/ballerina-platform/module-ballerina-yaml/branch/main/graph/badge.svg)](https://codecov.io/gh/ballerina-platform/module-ballerina-yaml)
+[![Trivy](https://github.com/ballerina-platform/module-ballerina-yaml/actions/workflows/trivy-scan.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerina-yaml/actions/workflows/trivy-scan.yml)
+[![GraalVM Check](https://github.com/ballerina-platform/module-ballerina-yaml/actions/workflows/build-with-bal-test-native.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerina-yaml/actions/workflows/build-with-bal-test-native.yml)
+[![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerina-yaml.svg)](https://github.com/ballerina-platform/module-ballerina-yaml/commits/main)
+[![Github issues](https://img.shields.io/github/issues/ballerina-platform/ballerina-standard-library/module/yaml.svg?label=Open%20Issues)](https://github.com/ballerina-platform/ballerina-standard-library/labels/module%2Frandom)
+[![codecov](https://codecov.io/gh/ballerina-platform/module-ballerina-yaml/branch/main/graph/badge.svg)](https://codecov.io/gh/ballerina-platform/module-ballerina-yaml)
 
-Ballerina YAML parser provides APIs to convert a YAML configuration file to `json`, and vice-versa. The module supports both the functions of read and write either a single YAML document or a YAML stream.
+This library provides APIs to convert a YAML configuration file to json, and vice-versa.
 
 Since the parser is following LL(1) grammar, it follows a non-recursive predictive parsing algorithm which operates in a linear time complexity.
 
-## Compatibility
+## Issues and projects
 
-| Language  | Version                        |
-| --------- | ------------------------------ |
-| Ballerina | Ballerina 2201.0.0 (Swan Lake) |
-| YAML      | 1.2.2                          |
+The **Issues** and **Projects** tabs are disabled for this repository as this is part of the Ballerina Standard Library. To report bugs, request new features, start new discussions, view project boards, etc., go to the Ballerina Standard Library [parent repository](https://github.com/ballerina-platform/ballerina-standard-library).
 
-The parser follows the grammar rules particularized in the [YAML specification 1.2.2](https://yaml.org/spec/1.2.2/).
+This repository contains only the source code of the package.
 
-### Parsing a YAML File
+## Build from the source
 
-The read function allows the user to obtain either a YAML document or an array of YAML stream if the `isStream` flag is set.
+### Set up the prerequisites
 
-```ballerina
-// Parsing a YAML document
-json|yaml:Error yamlDoc = yaml:readFile("path/to/file.yml");
+1. Download and install Java SE Development Kit (JDK) version 11 (from one of the following locations).
+    * [Oracle](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html)
 
-// Parsing a YAML stream
-json|yaml:Error yamlDocs = yaml:readFile("path/to/file.yml", isStream = true);
+    * [OpenJDK](https://adoptium.net/)
 
-// Parsing a YAML string 
-json|yaml:Error yamlLine = yaml:readString("outer: {inner: value}");
-```
+      > **Note:** Set the JAVA_HOME environment variable to the path name of the directory into which you installed JDK.
 
-The user can either set the `allowAnchorRedefinition` or `allowMapEntryRedefinition` to let the parser overwrite anchors and map entry keys respectively.
+2. Export your Github Personal access token with the read package permissions as follows.
 
-### Writing a YAML File
+              export packageUser=<Username>
+              export packagePAT=<Personal access token>
 
-The user can write either a document or a stream using this function.
+### Build the source
 
-```ballerina
-// Writing a YAML document
-check yaml:writeFile("path/to/file.yaml", yamlContent);
+Execute the commands below to build from source.
 
-// Writing a YAML stream
-check yaml:writeFile("path/to/file.yaml", yamlContent, isStream = true);
+1. To build the library:
+   ```    
+   ./gradlew clean build
+   ```
 
-// Writing a YAML string
-json|yaml:Error jsonOutput = yaml:writeString("outer: {inner: value}");
-```
+2. To run the integration tests:
+   ```
+   ./gradlew clean test
+   ```
+3. To build the module without the tests:
+   ```
+   ./gradlew clean build -x test
+   ```
+4. To debug module implementation:
+   ```
+   ./gradlew clean build -Pdebug=<port>
+   ./gradlew clean test -Pdebug=<port>
+   ```
+5. To debug the module with Ballerina language:
+   ```
+   ./gradlew clean build -PbalJavaDebug=<port>
+   ./gradlew clean test -PbalJavaDebug=<port>
+   ```
+6. Publish ZIP artifact to the local `.m2` repository:
+   ```
+   ./gradlew clean build publishToMavenLocal
+   ```
+7. Publish the generated artifacts to the local Ballerina central repository:
+   ```
+   ./gradlew clean build -PpublishToLocalCentral=true
+   ```
+8. Publish the generated artifacts to the Ballerina central repository:
+   ```
+   ./gradlew clean build -PpublishToCentral=true
+   ```
 
-By default, the parser attempts to write the YAML scalars in planar style. However, there are some scalars that cause ambiguity against a few control symbols in YAML. In this case to remove the vagueness, the parser will either add  `"` quotes or `'` quotes based on the `useSingleQuotes` flag is set. Further, if the `forceQuotes` flag is set, then all the scalars will be quoted. 
+## Contribute to Ballerina
 
-The following options can be set to further format the output YAML file.
+As an open source project, Ballerina welcomes contributions from the community.
 
-| Option                  | Default | Description                                                                                         |
-| ----------------------- | ------- | --------------------------------------------------------------------------------------------------- |
-| `int indentationPolicy` | `2`     | The number of whitespaces considered to a indent.                                                   |
-| `int blockLevel`        | `1`     | The maximum depth level for the block-style collections before the flow-style collections are used. |
-| `boolean canonical`     | `false` | If the flag is set, the parser will write the tag along with the node.                              |
+For more information, go to the [contribution guidelines](https://github.com/ballerina-platform/ballerina-lang/blob/master/CONTRIBUTING.md).
 
-## YAML Schema and Supported Data Types
+## Code of conduct
 
-The `Fail Safe Schema` is the most basic schema supported by any YAML document. The corresponding Ballerina data types are listed as shown below.
+All contributors are encouraged to read the [Ballerina Code of Conduct](https://ballerina.io/code-of-conduct).
 
-| YAML Tag | Ballerina Data Type     |
-| -------- | ----------------------- |
-| !!str    | `ballerina.lang.string` |
-| !!seq    | `ballerina.lang.array`  |
-| !!map    | `ballerina.lang.map`    |
+## Useful links
 
-In addition to the `Fail Safe Schema`, the `JSON Schema` defines the following tags to enable basic JSON support. The `Core Schema` is an extension of the `JSON Schema` that supports the same tags with more human-readable notations.
-
-| YAML Tag | Ballerina Data Type      |
-| -------- | ------------------------ |
-| !!null   | `()`                     |
-| !!bool   | `ballerina.lang.boolean` |
-| !!int    | `ballerina.lang.int`     |
-| !!float  | `ballerina.lang.float`   |
-
-## Custom YAML Types
-
-A custom tag support can be added to the YAML parser by writing a record of the type `YAMLType`. All the custom YAML tags must be provided as an array to the `yamlTypes` property in the config. The following code segment demonstrates an example of adding a custom tag to the parser.
-
-```ballerina
-import ballerina/yaml;
-
-type RGB [int, int, int];
-
-// Validation function to check before constructing the RGB
-function constructRGB(json data) returns json|yaml:SchemaError {
-    RGB|error value = data.cloneWithType();
-
-    if value is error {
-        return error("Invalid shape for RGB");
-    }
-
-    foreach int index in value {
-        if index > 255 || index < 0 {
-            return error("One RGB value must be between 0-255");
-        }
-    }
-
-    return value;
-}
-
-public function main() returns error? {
-    yaml:YAMLType rgbType = {
-        tag: "!rgb",
-        ballerinaType: RGB,
-        kind: yaml:SEQUENCE,
-        construct: constructRGB,
-        represent: function(json data) returns string => data.toString()
-    };
-
-    RGB color = [256, 12, 32];
-    json balStruct = {color};
-
-    check yaml:writeFile("rgb.yml", balStruct, canonical = true, yamlTypes = [rgbType]);
-}
-```
-
-The parser considers these custom tags before the default tags when resolving. Thus, the output tag is `!rgb` rather than `!seq`.
-
-```yaml
-!!str color: !rgb [!!int 256, !!int 12, !!int 32]
-```
+* Chat live with us via our [Discord server](https://discord.gg/ballerinalang).
+* Post all technical questions on Stack Overflow with the [#ballerina](https://stackoverflow.com/questions/tagged/ballerina) tag.
+* For more information go to the [`yaml` library](https://lib.ballerina.io/ballerina/yaml/latest).
+* For example demonstrations of the usage, go to [Ballerina By Examples](https://ballerina.io/swan-lake/learn/by-example/).

@@ -20,7 +20,8 @@ import ballerina/test;
     groups: ["api"]
 }
 function testReadTOMLString() returns error? {
-    string input = string `outer:
+    string input = string 
+       `outer:
           inner: {outer: inner}
         seq:
           - - [[nested, sequence]]

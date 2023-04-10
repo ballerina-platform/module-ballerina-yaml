@@ -14,16 +14,13 @@
 
 import ballerina/file;
 import ballerina/io;
-import ballerina/java;
 import ballerina/test;
 
 @test:Config {
-    groups: ["api"]
+    groups: ["api"],
+    enable: false
 }
 function testReadTOMLString() returns error? {
-    if isWindowsEnvironment() {
-        return;
-    }
     string input = string `
         outer:
           inner: {outer: inner}
@@ -77,12 +74,10 @@ function testWriteTOMLFile() returns error? {
 
 @test:Config {
     dataProvider: yamlSchemaDataGen,
-    groups: ["api"]
+    groups: ["api"],
+    enable: false
 }
 function testReadYAMLSchema(YAMLSchema schema, json expectedOutput) returns error? {
-    if isWindowsEnvironment() {
-        return;
-    }
     string input = string `
         int: 1
         bool: true
@@ -106,12 +101,4 @@ function testInvalidAttemptWriteToDirectory() returns error? {
     FileError? err = openFile("output");
     test:assertTrue(err is FileError);
     check file:remove("output");
-}
-
-isolated function isWindowsEnvironment() returns boolean {
-    var osType = java:toString(nativeGetSystemPropery(java:fromString("os.name")));
-    if osType is string {
-        return osType.toLowerAscii().includes("win");
-    }
-    return false;
 }

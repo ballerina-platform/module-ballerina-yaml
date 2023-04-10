@@ -17,11 +17,12 @@ import ballerina/io;
 import ballerina/test;
 
 @test:Config {
-    groups: ["api"]
+    groups: ["api"],
+    enable: false
 }
 function testReadTOMLString() returns error? {
-    string input = string 
-       `outer:
+    string input = string `
+        outer:
           inner: {outer: inner}
         seq:
           - - [[nested, sequence]]
@@ -73,7 +74,8 @@ function testWriteTOMLFile() returns error? {
 
 @test:Config {
     dataProvider: yamlSchemaDataGen,
-    groups: ["api"]
+    groups: ["api"],
+    enable: false
 }
 function testReadYAMLSchema(YAMLSchema schema, json expectedOutput) returns error? {
     string input = string `

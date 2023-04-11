@@ -17,7 +17,7 @@ final readonly & map<string> escapedCharMap = {
     "a": "\u{07}",
     "b": "\u{08}",
     "t": "\t",
-    "n": "\n",
+    "n": "\r\n",
     "v": "\u{0b}",
     "f": "\u{0c}",
     "r": "\r",

@@ -6,7 +6,7 @@ Ballerina Yaml Library
 [![Trivy](https://github.com/ballerina-platform/module-ballerina-yaml/actions/workflows/trivy-scan.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerina-yaml/actions/workflows/trivy-scan.yml)
 [![GraalVM Check](https://github.com/ballerina-platform/module-ballerina-yaml/actions/workflows/build-with-bal-test-native.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerina-yaml/actions/workflows/build-with-bal-test-native.yml)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerina-yaml.svg)](https://github.com/ballerina-platform/module-ballerina-yaml/commits/main)
-[![Github issues](https://img.shields.io/github/issues/ballerina-platform/ballerina-standard-library/module/yaml.svg?label=Open%20Issues)](https://github.com/ballerina-platform/ballerina-standard-library/labels/module%2Frandom)
+[![Github issues](https://img.shields.io/github/issues/ballerina-platform/ballerina-standard-library/module/yaml.svg?label=Open%20Issues)](https://github.com/ballerina-platform/ballerina-standard-library/labels/module%2Fyaml)
 [![codecov](https://codecov.io/gh/ballerina-platform/module-ballerina-yaml/branch/main/graph/badge.svg)](https://codecov.io/gh/ballerina-platform/module-ballerina-yaml)
 
 This library provides APIs to convert a YAML configuration file to json, and vice-versa.

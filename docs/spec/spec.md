@@ -1,7 +1,7 @@
 # Specification: Ballerina Yaml Library
 
-_Owners_: @daneshk @MadhukaHarith92  
-_Reviewers_: @daneshk  
+_Owners_: @shafreenAnfar @MadhukaHarith92  
+_Reviewers_: @shafreenAnfar  
 _Created_: 2023/04/04  
 _Updated_: 2023/04/04  
 _Edition_: Swan Lake

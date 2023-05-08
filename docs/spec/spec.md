@@ -7,9 +7,9 @@ _Updated_: 2023/04/04
 _Edition_: Swan Lake
 
 ## Introduction
-This is the specification for the Yaml standard library of [Ballerina language](https://ballerina.io/), which provides APIs to convert a YAML configuration file to json, and vice-versa. The module supports both the functions of read and write either a single YAML document or a YAML stream.
+This is the specification for the Yaml standard library of [Ballerina language](https://ballerina.io/), which provides APIs to convert a YAML configuration file to JSON, and vice-versa. The module supports both the functions of reading and writing either a single YAML document or a YAML stream.
 
-The Yaml library specification has evolved and may continue to evolve in the future. The released versions of the specification can be found under the relevant Github tag.
+The Yaml library specification has evolved and may continue to evolve in the future. The released versions of the specification can be found under the relevant GitHub tag.
 
 If you have any feedback or suggestions about the library, start a discussion via a [GitHub issue](https://github.com/ballerina-platform/ballerina-standard-library/issues) or in the [Discord server](https://discord.gg/ballerinalang). Based on the outcome of the discussion, the specification and implementation can be updated. Community feedback is always welcome. Any accepted proposal, which affects the specification is stored under `/docs/proposals`. Proposals under discussion can be found with the label `type/proposal` in GitHub.
 
@@ -27,7 +27,7 @@ The conforming implementation of the specification is released and included in t
 ## 1. Overview
 This specification elaborates on the functions available in the Yaml library.
 
-Since the parser is following LL(1) grammar, it follows a non-recursive predictive parsing algorithm which operates in a linear time complexity.
+Since the parser is following LL(1) grammar, it follows a non-recursive predictive parsing algorithm that operates in a linear time complexity.
 
 ## 2. Compatibility
 
@@ -40,7 +40,7 @@ The parser follows the grammar rules particularized in the [YAML specification 1
 
 ## 3. Parsing a YAML File
 
-The read function allows the user to obtain either a YAML document or an array of YAML stream if the `isStream` flag is set.
+The read function allows the user to obtain either a YAML document or an array of YAML streams if the `isStream` flag is set.
 
 ```ballerina
 // Parsing a YAML document
@@ -90,7 +90,7 @@ The `Fail Safe Schema` is the most basic schema supported by any YAML document. 
 | !!seq    | `ballerina.lang.array`  |
 | !!map    | `ballerina.lang.map`    |
 
-In addition to the `Fail Safe Schema`, the `JSON Schema` defines the following tags to enable basic JSON support. The `Core Schema` is an extension of the `JSON Schema` that supports the same tags with more human-readable notations.
+In addition to the `Fail-Safe Schema`, the `JSON Schema` defines the following tags to enable basic JSON support. The `Core Schema` is an extension of the `JSON Schema` that supports the same tags with more human-readable notations.
 
 | YAML Tag | Ballerina Data Type      |
 | -------- | ------------------------ |

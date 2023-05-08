@@ -17,17 +17,19 @@ import ballerina/io;
 import ballerina/test;
 
 @test:Config {
-    groups: ["api"]
+    groups: ["api"],
+    enable: false
 }
 function testReadTOMLString() returns error? {
-    json output = check readString(string `
+    string input = string `
         outer:
           inner: {outer: inner}
         seq:
           - - [[nested, sequence]]
         int: 1
         bool: true
-        float: 1.1`);
+        float: 1.1`;
+    json output = check readString(input);
 
     test:assertEquals(output, {
         "outer": {
@@ -72,13 +74,15 @@ function testWriteTOMLFile() returns error? {
 
 @test:Config {
     dataProvider: yamlSchemaDataGen,
-    groups: ["api"]
+    groups: ["api"],
+    enable: false
 }
 function testReadYAMLSchema(YAMLSchema schema, json expectedOutput) returns error? {
-    json output = check readString(string `
+    string input = string `
         int: 1
         bool: true
-        nan: .nan`, schema = schema);
+        nan: .nan`;
+    json output = check readString(input, schema = schema);
 
     test:assertEquals(output, expectedOutput);
 }

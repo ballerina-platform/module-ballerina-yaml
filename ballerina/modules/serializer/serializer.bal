@@ -35,7 +35,10 @@ public function serialize(SerializerState state, json data, int depthLevel = 0, 
         }
 
         currentTypeConstructor = <schema:YAMLTypeConstructor>state.tagSchema[key];
-        if currentTypeConstructor.identity(data) {
+
+        var identity = currentTypeConstructor.identity;
+
+        if identity(data) {
             tag = key;
             typeConstructor = currentTypeConstructor;
             break;
@@ -45,20 +48,23 @@ public function serialize(SerializerState state, json data, int depthLevel = 0, 
     // Serialize the event based on the custom YAML tag
     if typeConstructor is schema:YAMLTypeConstructor && tag is string {
         if typeConstructor.kind == schema:SEQUENCE { // Convert sequence
-            json[]|error sequence = typeConstructor.represent(data).ensureType();
+            var represent = typeConstructor.represent;
+            json[]|error sequence = represent(data).ensureType();
             if sequence is error {
                 return generateInvalidRepresentError(tag, schema:SEQUENCE);
             }
             check serializeSequence(state, sequence, tag, depthLevel);
         }
         else if typeConstructor.kind == schema:MAPPING { // Convert mapping
-            map<json>|error mapping = typeConstructor.represent(data).ensureType();
+            var represent = typeConstructor.represent;
+            map<json>|error mapping = represent(data).ensureType();
             if mapping is error {
                 return generateInvalidRepresentError(tag, schema:MAPPING);
             }
             check serializeMapping(state, mapping, tag, depthLevel);
         } else { // Convert string
-            serializeString(state, check typeConstructor.represent(data), tag);
+            var represent = typeConstructor.represent;
+            serializeString(state, check represent(data), tag);
         }
     } else { // Serialize an event with a failsafe schema tag by default
         if data is json[] { // Convert sequence

@@ -24,7 +24,7 @@ import ballerina/regex;
 function constructWithRegex(string regexPattern,
     json data,
     string typeName,
-    function (string data) returns json|SchemaError construct) returns json|SchemaError {
+    function (string) returns json|SchemaError construct) returns json|SchemaError {
 
     if regex:matches(data.toString(), regexPattern) {
         return construct(data.toString());

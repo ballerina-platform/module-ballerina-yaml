@@ -23,11 +23,11 @@ public type EmittingError distinct error<common:WriteErrorDetails>;
 # + actualEvent - Obtained invalid event
 # + expectedEvent - Next expected event of the stream
 # + return - Formatted error message
-function generateExpectedEndEventError(string actualEvent, string expectedEvent) returns EmittingError =>
+isolated function generateExpectedEndEventError(string actualEvent, string expectedEvent) returns EmittingError =>
     generateEmittingError(common:generateExpectedEndEventErrorMessage(actualEvent, expectedEvent),
         actualEvent, expectedEvent);
 
-function generateEmittingError(string message, json actualValue, json? expectedValue = ())
+isolated function generateEmittingError(string message, json actualValue, json? expectedValue = ())
     returns EmittingError =>
         error(
             message,

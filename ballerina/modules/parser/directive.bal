@@ -21,7 +21,7 @@ import yaml.lexer;
 #
 # + state - Current parser state
 # + return - An error on mismatch.
-function tagDirective(ParserState state) returns ParsingError? {
+isolated function tagDirective(ParserState state) returns ParsingError? {
     // Expect a separate in line
     check checkToken(state, lexer:SEPARATION_IN_LINE);
 
@@ -49,7 +49,7 @@ function tagDirective(ParserState state) returns ParsingError? {
 #
 # + state - Current parser state
 # + return - An error on mismatch.
-function yamlDirective(ParserState state) returns ParsingError? {
+isolated function yamlDirective(ParserState state) returns ParsingError? {
     // Returns an error if the document version is already defined.
     if state.yamlVersion != () {
         return generateDuplicateError(state, "%YAML");
@@ -83,7 +83,7 @@ function yamlDirective(ParserState state) returns ParsingError? {
 #
 # + state - Current parser state
 # + return - An error on mismatch.
-function reservedDirective(ParserState state) returns ParsingError? {
+isolated function reservedDirective(ParserState state) returns ParsingError? {
     string reservedDirective = state.currentToken.value;
     state.updateLexerContext(lexer:LEXER_RESERVED_DIRECTIVE);
 

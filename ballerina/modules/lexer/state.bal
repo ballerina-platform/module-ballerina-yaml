@@ -84,7 +84,7 @@ public class LexerState {
     #
     # + k - Number of characters to peek. Default = 0
     # + return - Character at the peek if not null  
-    function peek(int k = 0) returns string? {
+    isolated function peek(int k = 0) returns string? {
         if self.index + k >= self.line.length() || self.index + k < 0 {
             return ();
         }
@@ -94,13 +94,13 @@ public class LexerState {
     # Increment the index of the column by k indexes
     #
     # + k - Number of indexes to forward. Default = 1
-    function forward(int k = 1) {
+    isolated function forward(int k = 1) {
         if self.index + k <= self.line.length() {
             self.index += k;
         }
     }
 
-    function updateStartIndex(YAMLToken? token = ()) {
+    isolated function updateStartIndex(YAMLToken? token = ()) {
         if token != () {
             self.tokensForMappingValue.push(token);
         }
@@ -109,7 +109,7 @@ public class LexerState {
         }
     }
 
-    function updateFirstTabIndex() {
+    isolated function updateFirstTabIndex() {
         if self.index < self.tabInWhitespace || self.tabInWhitespace < 0 {
             self.tabInWhitespace = self.index;
         }
@@ -119,7 +119,7 @@ public class LexerState {
     #
     # + token - YAML token
     # + return - Generated lexical token  
-    function tokenize(YAMLToken token) returns LexerState {
+    isolated function tokenize(YAMLToken token) returns LexerState {
         self.forward();
         self.token = token;
         return self;
@@ -128,7 +128,7 @@ public class LexerState {
     # Obtain the lexer token
     #
     # + return - Lexer token
-    public function getToken() returns Token {
+    public isolated function getToken() returns Token {
         YAMLToken tokenBuffer = self.token;
         self.token = DUMMY;
         string lexemeBuffer = self.lexeme;
@@ -142,7 +142,7 @@ public class LexerState {
         };
     }
 
-    public function setLine(string line, int lineNumber) {
+    public isolated function setLine(string line, int lineNumber) {
         self.index = 0;
         self.line = line;
         self.lineNumber = lineNumber;
@@ -155,7 +155,7 @@ public class LexerState {
     }
 
     # Reset the current lexer state
-    public function resetState() {
+    public isolated function resetState() {
         self.addIndent = 1;
         self.captureIndent = false;
         self.enforceMapping = false;
@@ -166,7 +166,7 @@ public class LexerState {
         self.context = LEXER_START;
     }
 
-    public function isFlowCollection() returns boolean => self.numOpenedFlowCollections > 0;
+    public isolated function isFlowCollection() returns boolean => self.numOpenedFlowCollections > 0;
 
-    public function isEndOfStream() returns boolean => self.index >= self.line.length();
+    public isolated function isEndOfStream() returns boolean => self.index >= self.line.length();
 }

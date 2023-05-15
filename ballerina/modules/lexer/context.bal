@@ -32,7 +32,7 @@ public enum Context {
 #
 # + state - Current lexer state.
 # + return - Tokenized double quoted scalar
-function contextDoubleQuote(LexerState state) returns LexerState|LexicalError {
+isolated function contextDoubleQuote(LexerState state) returns LexerState|LexicalError {
     if isMarker(state, true) {
         return state.tokenize(DIRECTIVE_MARKER);
     }
@@ -64,7 +64,7 @@ function contextDoubleQuote(LexerState state) returns LexerState|LexicalError {
 #
 # + state - Current lexer state.
 # + return - Tokenized single quoted scalar
-function contextSingleQuote(LexerState state) returns LexerState|LexicalError {
+isolated function contextSingleQuote(LexerState state) returns LexerState|LexicalError {
     if isMarker(state, true) {
         return state.tokenize(DIRECTIVE_MARKER);
     }
@@ -106,7 +106,7 @@ function contextSingleQuote(LexerState state) returns LexerState|LexicalError {
 #
 # + state - Current lexer state.
 # + return - Tokenized YAML version directive
-function contextYamlDirective(LexerState state) returns LexerState|LexicalError {
+isolated function contextYamlDirective(LexerState state) returns LexerState|LexicalError {
     // Check for decimal digits
     if matchPattern(state, patternDecimal) {
         return iterate(state, scanDigit, DECIMAL);
@@ -129,7 +129,7 @@ function contextYamlDirective(LexerState state) returns LexerState|LexicalError 
 #
 # + state - Current lexer state.
 # + return - Tokenized token
-function contextStart(LexerState state) returns LexerState|LexicalError {
+isolated function contextStart(LexerState state) returns LexerState|LexicalError {
     boolean isFirstChar = state.index == 0;
     boolean startsWithWhitespace = false;
 
@@ -338,7 +338,7 @@ function contextStart(LexerState state) returns LexerState|LexicalError {
 #
 # + state - Current lexer state.
 # + return - Tokenized YAML tag handle directive
-function contextTagHandle(LexerState state) returns LexerState|LexicalError {
+isolated function contextTagHandle(LexerState state) returns LexerState|LexicalError {
     // Check fo primary, secondary, and named tag handles
     if state.peek() == "!" {
         match state.peek(1) {
@@ -374,7 +374,7 @@ function contextTagHandle(LexerState state) returns LexerState|LexicalError {
 #
 # + state - Current lexer state.
 # + return - Tokenized YAML tag prefix directive
-function contextTagPrefix(LexerState state) returns LexerState|LexicalError {
+isolated function contextTagPrefix(LexerState state) returns LexerState|LexicalError {
     // Match the global tag prefix or local tag prefix
     if matchPattern(state, [patternUri, patternWord, "%"], patternFlowIndicator) {
         return iterate(state, scanURICharacter(), TAG_PREFIX);
@@ -392,7 +392,7 @@ function contextTagPrefix(LexerState state) returns LexerState|LexicalError {
 #
 # + state - Current lexer state.
 # + return - Tokenized tag node properties
-function contextNodeProperty(LexerState state) returns LexerState|LexicalError {
+isolated function contextNodeProperty(LexerState state) returns LexerState|LexicalError {
     // Scan the anchor node
     if state.peek() == "&" {
         state.forward();
@@ -416,7 +416,7 @@ function contextNodeProperty(LexerState state) returns LexerState|LexicalError {
 #
 # + state - Current lexer state.
 # + return - Tokenized block header
-function contextBlockHeader(LexerState state) returns LexerState|LexicalError {
+isolated function contextBlockHeader(LexerState state) returns LexerState|LexicalError {
     // Ignore whitespace
     if state.peek() == " " {
         _ = check iterate(state, scanWhitespace, SEPARATION_IN_LINE);
@@ -454,7 +454,7 @@ function contextBlockHeader(LexerState state) returns LexerState|LexicalError {
 #
 # + state - Current lexer state.
 # + return - Tokenized block scalar
-function contextBlockScalar(LexerState state) returns LexerState|LexicalError {
+isolated function contextBlockScalar(LexerState state) returns LexerState|LexicalError {
 
     // Check if the line has sufficient indent to be process as a block scalar.
     boolean hasSufficientIndent = true;
@@ -557,7 +557,7 @@ function contextBlockScalar(LexerState state) returns LexerState|LexicalError {
 #
 # + state - Current lexer state
 # + return - Tokenized YAML reserved directive
-function contextReservedDirective(LexerState state) returns LexicalError|LexerState {
+isolated function contextReservedDirective(LexerState state) returns LexicalError|LexerState {
     // Ignore comments
     if isComment(state) {
         state.forward(-1);

@@ -19,12 +19,14 @@ import yaml.common;
 # + state - Parameter Description  
 # + isStream - Whether the event tree is a stream
 # + return - Output YAML content as an array of strings.
-public function emit(EmitterState state, boolean isStream) returns string[]|EmittingError {
+public isolated function emit(EmitterState state, boolean isStream) returns string[]|EmittingError {
     if isStream { // Write YAML stream
         string[] output = [];
         while state.events.length() > 0 {
             check write(state);
-            state.getDocument(true).forEach(line => output.push(line));
+            foreach var line in state.getDocument(true) {
+                output.push(line);
+            }
         }
         return output;
     } else { // Write a single YAML document
@@ -40,7 +42,7 @@ public function emit(EmitterState state, boolean isStream) returns string[]|Emit
 #
 # + state - Current emitter state
 # + return - An error on failure
-function write(EmitterState state) returns EmittingError? {
+isolated function write(EmitterState state) returns EmittingError? {
     common:Event event = getEvent(state);
 
     // Convert sequence collection

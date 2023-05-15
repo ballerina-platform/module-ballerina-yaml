@@ -43,7 +43,7 @@ function representAsString(json data) returns string =>
 #
 # + typeDesc - Type to be asserted with the given data
 # + return - Function to validate the data
-public function generateIdentityFunction(typedesc<json> typeDesc) returns function (json data) returns boolean {
+public isolated function generateIdentityFunction(typedesc<json> typeDesc) returns function (json data) returns boolean {
     return function(json data) returns boolean {
         json|error output = data.ensureType(typeDesc);
         return output == data;

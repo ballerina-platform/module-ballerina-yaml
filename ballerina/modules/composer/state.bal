@@ -36,7 +36,7 @@ public class ComposerState {
     # Flag is set if same map keys are allowed in a mapping
     readonly & boolean allowMapEntryRedefinition;
 
-    public function init(string[] lines, map<schema:YAMLTypeConstructor> tagSchema,
+    public isolated function init(string[] lines, map<schema:YAMLTypeConstructor> tagSchema,
         boolean allowAnchorRedefinition, boolean allowMapEntryRedefinition) returns parser:ParsingError? {
 
         self.parserState = check new (lines);

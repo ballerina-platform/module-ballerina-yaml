@@ -22,13 +22,13 @@ import yaml.schema;
 # + m1 - The first map structure
 # + m2 - The second map structure
 # + return - The constructed event after combined.
-function constructEvent(ParserState state, map<json> m1, map<json>? m2 = ()) returns common:Event|ParsingError {
+isolated function constructEvent(ParserState state, map<json> m1, map<json>? m2 = ()) returns common:Event|ParsingError {
     map<json> returnMap = m1.clone();
 
     if m2 != () {
-        m2.keys().forEach(function(string key) {
+        foreach string key in m2.keys() {
             returnMap[key] = m2[key];
-        });
+        }
     }
 
     error|common:Event processedMap = returnMap.cloneWithType(common:Event);
@@ -41,7 +41,7 @@ function constructEvent(ParserState state, map<json> m1, map<json>? m2 = ()) ret
 # + value - String to be trimmed  
 # + lastEscapedChar - Last escaped whitespace to be preserved
 # + return - Trimmed string
-function trimTailWhitespace(string value, int? lastEscapedChar = ()) returns string {
+isolated function trimTailWhitespace(string value, int? lastEscapedChar = ()) returns string {
     int i = value.length() - 1;
 
     if i < 0 {
@@ -66,7 +66,7 @@ function trimTailWhitespace(string value, int? lastEscapedChar = ()) returns str
 # + expectedTokens - Predicted token or tokens  
 # + peek - Stores the token in the buffer
 # + return - Parsing error if not found
-function checkToken(ParserState state, lexer:YAMLToken|lexer:YAMLToken[] expectedTokens = lexer:DUMMY, boolean peek = false) returns (ParsingError)? {
+isolated function checkToken(ParserState state, lexer:YAMLToken|lexer:YAMLToken[] expectedTokens = lexer:DUMMY, boolean peek = false) returns (ParsingError)? {
     lexer:Token token;
 
     // Obtain a token form the lexer if there is none in the buffer.
@@ -103,7 +103,7 @@ function checkToken(ParserState state, lexer:YAMLToken|lexer:YAMLToken[] expecte
 # + state - Current parser state  
 # + isSingleLine - If the scalar only spanned for one line.
 # + return - An error on invalid key.
-function verifyKey(ParserState state, boolean isSingleLine) returns ParsingError|() {
+isolated function verifyKey(ParserState state, boolean isSingleLine) returns ParsingError|() {
     // Explicit keys can span multiple lines. 
     if state.explicitKey {
         return;
@@ -123,7 +123,7 @@ function verifyKey(ParserState state, boolean isSingleLine) returns ParsingError
 # + tagHandle - Tag handle of the event  
 # + tagPrefix - Tag prefix of the event
 # + return - The complete tag name of the event
-function generateCompleteTagName(ParserState state, string tagHandle, string tagPrefix) returns string|ParsingError {
+isolated function generateCompleteTagName(ParserState state, string tagHandle, string tagPrefix) returns string|ParsingError {
     string tagHandleName;
 
     // Check if the tag handle is defined in the custom tags.

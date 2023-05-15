@@ -35,7 +35,7 @@ public class EmitterState {
     # Event tree to be converted
     common:Event[] events;
 
-    public function init(common:Event[] events, map<string> customTagHandles,
+    public isolated function init(common:Event[] events, map<string> customTagHandles,
         int indentationPolicy, boolean canonical) {
 
         self.events = events;
@@ -52,21 +52,22 @@ public class EmitterState {
         self.indent = indent;
     }
 
-    function addLine(string line) => self.document.push(line);
+    isolated function addLine(string line) => self.document.push(line);
 
-    function addTagHandle(string tagHandle) {
+    isolated function addTagHandle(string tagHandle) {
         if self.documentTags.indexOf(tagHandle) == () {
             self.documentTags.push(tagHandle);
         }
     }
 
-    function getDocument(boolean isStream = false) returns string[] {
+    isolated function getDocument(boolean isStream = false) returns string[] {
         string[] output = self.document.clone();
 
         if self.documentTags.length() > 0 {
             output.unshift("---");
-            self.documentTags.sort(array:DESCENDING).forEach(tagHandle =>
-                output.unshift(string `%TAG ${tagHandle} ${self.customTagHandles.get(tagHandle)}`));
+            foreach var tagHandle in self.documentTags.sort(array:DESCENDING) {
+                output.unshift(string `%TAG ${tagHandle} ${self.customTagHandles.get(tagHandle)}`);
+            }    
             if self.lastBareDoc {
                 output.unshift("...");
                 self.lastBareDoc = false;

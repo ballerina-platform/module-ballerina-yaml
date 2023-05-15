@@ -22,7 +22,7 @@ import yaml.composer;
 # + yamlString - YAML content
 # + config - Configuration for reading a YAML file
 # + return - YAML map object on success. Else, returns an error
-public function readString(string yamlString, *ReadConfig config) returns json|Error {
+public isolated function readString(string yamlString, *ReadConfig config) returns json|Error {
     composer:ComposerState composerState = check new ([yamlString],
         generateTagHandlesMap(config.yamlTypes, config.schema), config.allowAnchorRedefinition,
         config.allowMapEntryRedefinition);
@@ -34,7 +34,7 @@ public function readString(string yamlString, *ReadConfig config) returns json|E
 # + filePath - Path to the YAML file
 # + config - Configuration for reading a YAML file
 # + return - YAML map object on success. Else, returns an error
-public function readFile(string filePath, *ReadConfig config) returns json|Error {
+public isolated function readFile(string filePath, *ReadConfig config) returns json|Error {
     string[] lines = check io:fileReadLines(filePath);
     composer:ComposerState composerState = check new (lines, generateTagHandlesMap(config.yamlTypes, config.schema),
         config.allowAnchorRedefinition, config.allowMapEntryRedefinition);
@@ -46,7 +46,7 @@ public function readFile(string filePath, *ReadConfig config) returns json|Error
 # + yamlStructure - Structure to be written to the file
 # + config - Configurations for writing a YAML file
 # + return - YAML content on success. Else, an error on failure
-public function writeString(json yamlStructure, *WriteConfig config) returns string[]|Error {
+public isolated function writeString(json yamlStructure, *WriteConfig config) returns string[]|Error {
     serializer:SerializerState serializerState = {
         events: [],
         tagSchema: generateTagHandlesMap(config.yamlTypes, config.schema),
@@ -71,7 +71,7 @@ public function writeString(json yamlStructure, *WriteConfig config) returns str
 # + yamlStructure - Structure to be written to the file
 # + config - Configurations for writing a YAML file
 # + return - An error on failure
-public function writeFile(string filePath, json yamlStructure, *WriteConfig config) returns Error? {
+public isolated function writeFile(string filePath, json yamlStructure, *WriteConfig config) returns Error? {
     check openFile(filePath);
     string[] output = check writeString(yamlStructure, config);
     check io:fileWriteLines(filePath, output);

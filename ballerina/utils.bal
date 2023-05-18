@@ -36,7 +36,7 @@ isolated function openFile(string fileName) returns FileError? {
 # + yamlTypes - List of custom YAML types
 # + yamlSchema - YAML schema for the current request
 # + return - List of all the YAML tags
-isolated function generateTagHandlesMap(YAMLType[] yamlTypes, YAMLSchema yamlSchema) returns map<schema:YAMLTypeConstructor> {
+isolated function generateTagHandlesMap(YamlType[] yamlTypes, YAMLSchema yamlSchema) returns map<schema:YAMLTypeConstructor> {
     map<schema:YAMLTypeConstructor> tagHandles = {};
 
     // Obtain the default tag handles.

@@ -30,7 +30,7 @@ public type WriteConfig record {|
     boolean useSingleQuotes = false;
     boolean forceQuotes = false;
     YAMLSchema schema = CORE_SCHEMA;
-    YAMLType[] yamlTypes = [];
+    YamlType[] yamlTypes = [];
     map<string> customTagHandles = {};
     boolean isStream = false;
 |};
@@ -44,7 +44,7 @@ public type WriteConfig record {|
 # + allowMapEntryRedefinition - Flag is set if same map keys are allowed in a mapping
 public type ReadConfig record {|
     YAMLSchema schema = CORE_SCHEMA;
-    YAMLType[] yamlTypes = [];
+    YamlType[] yamlTypes = [];
     boolean isStream = false;
     boolean allowAnchorRedefinition = true;
     boolean allowMapEntryRedefinition = false;
@@ -57,7 +57,7 @@ public type ReadConfig record {|
 # + kind - Fail safe schema type
 # + construct - Function to generate the Ballerina data structure.  
 # + represent - Function to convert the Ballerina data structure to YAML.
-public type YAMLType record {|
+public type YamlType record {|
     string tag;
     typedesc<json> ballerinaType;
     FailSafeSchema kind;

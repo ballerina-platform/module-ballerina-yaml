@@ -14,7 +14,7 @@
 
 import ballerina/test;
 
-YAMLType[] customYamlTypes = [];
+YamlType[] customYamlTypes = [];
 map<FailSafeSchema> customTags = {
     "!": STRING,
     "!foo": STRING,

@@ -62,7 +62,7 @@ public class ParserState {
 
     common:Event[] eventBuffer = [];
 
-    public function init(string[] lines) returns ParsingError? {
+    public isolated function init(string[] lines) returns ParsingError? {
         self.lines = lines;
         self.numLines = lines.length();
         ParsingError? err = self.initLexer();
@@ -71,19 +71,19 @@ public class ParserState {
         }
     }
 
-    function updateLexerContext(lexer:Context context) {
+    isolated function updateLexerContext(lexer:Context context) {
         self.lexerState.context = context;
     }
 
-    public function getLineNumber() returns int => self.lexerState.lineNumber + 1;
+    public isolated function getLineNumber() returns int => self.lexerState.lineNumber + 1;
 
-    public function getIndex() returns int => self.lexerState.index;
+    public isolated function getIndex() returns int => self.lexerState.index;
 
     # Initialize the lexer with the attributes of a new line.
     #
     # + message - Error message to display when if the initialization fails 
     # + return - An error if it fails to initialize  
-    function initLexer(string message = "Unexpected end of stream") returns ParsingError? {
+    isolated function initLexer(string message = "Unexpected end of stream") returns ParsingError? {
         self.lineIndex += 1;
         string line;
         if self.lexerState.isNewLine {

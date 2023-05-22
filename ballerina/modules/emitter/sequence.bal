@@ -19,7 +19,7 @@ import yaml.common;
 # + state - Current emitter state
 # + tag - Tag of the start event if exists
 # + return - YAML string of the flow sequence.
-function writeFlowSequence(EmitterState state, string? tag) returns string|EmittingError {
+isolated function writeFlowSequence(EmitterState state, string? tag) returns string|EmittingError {
     string line = writeNode(state, "[", tag);
     common:Event event = getEvent(state);
     boolean firstValue = true;
@@ -72,7 +72,7 @@ function writeFlowSequence(EmitterState state, string? tag) returns string|Emitt
 # + whitespace - Whitespace at the start of it
 # + tag - Tag of the start event if exists
 # + return - YAML string of the block sequence.
-function writeBlockSequence(EmitterState state, string whitespace, string? tag) returns EmittingError? {
+isolated function writeBlockSequence(EmitterState state, string whitespace, string? tag) returns EmittingError? {
     common:Event event = getEvent(state);
     boolean emptySequence = true;
 

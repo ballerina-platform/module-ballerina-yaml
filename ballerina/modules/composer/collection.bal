@@ -22,7 +22,7 @@ import yaml.schema;
 # + state - Current composer state
 # + flowStyle - If a collection is flow sequence
 # + return - Constructed Ballerina array on success
-function composeSequence(ComposerState state, boolean flowStyle) returns json[]|lexer:LexicalError|parser:ParsingError|ComposingError|schema:SchemaError {
+isolated function composeSequence(ComposerState state, boolean flowStyle) returns json[]|lexer:LexicalError|parser:ParsingError|ComposingError|schema:SchemaError {
     json[] sequence = [];
     common:Event event = check checkEvent(state, parser:EXPECT_SEQUENCE_VALUE);
 
@@ -65,7 +65,7 @@ function composeSequence(ComposerState state, boolean flowStyle) returns json[]|
 # + flowStyle - If a collection is flow mapping  
 # + implicitMapping - Flag is set if there can only be one key-value pair
 # + return - Constructed Ballerina array on success
-function composeMapping(ComposerState state, boolean flowStyle, boolean implicitMapping) returns map<json>|lexer:LexicalError|parser:ParsingError|ComposingError|schema:SchemaError {
+isolated function composeMapping(ComposerState state, boolean flowStyle, boolean implicitMapping) returns map<json>|lexer:LexicalError|parser:ParsingError|ComposingError|schema:SchemaError {
     map<json> structure = {};
     common:Event event = check checkEvent(state, parser:EXPECT_MAP_KEY);
 

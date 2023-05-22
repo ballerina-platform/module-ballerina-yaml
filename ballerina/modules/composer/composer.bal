@@ -20,7 +20,7 @@ import yaml.common;
 # + state - Initiated composer state  
 # + eventParam - Passed root event if already fetched
 # + return - Ballerina data structure on success
-public function composeDocument(ComposerState state, common:Event? eventParam = ()) returns json|ComposingError {
+public isolated function composeDocument(ComposerState state, common:Event? eventParam = ()) returns json|ComposingError {
     // Obtain the root event
     common:Event event = eventParam is () ? check checkEvent(state, docType = parser:ANY_DOCUMENT) : eventParam;
 
@@ -48,7 +48,7 @@ public function composeDocument(ComposerState state, common:Event? eventParam = 
 #
 # + state - Initiated composer state  
 # + return - Native Ballerina data structure on success
-public function composeStream(ComposerState state) returns json[]|ComposingError {
+public isolated function composeStream(ComposerState state) returns json[]|ComposingError {
     json[] output = [];
     common:Event event = check checkEvent(state, docType = parser:ANY_DOCUMENT);
 

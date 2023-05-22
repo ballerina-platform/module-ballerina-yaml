@@ -28,12 +28,12 @@ public type GrammarError distinct error<common:ReadErrorDetails>;
 # + expectedTokens - Expected tokens for the grammar production  
 # + beforeToken - Token before the current one
 # + return - Formatted error message
-function generateExpectError(ParserState state,
+isolated function generateExpectError(ParserState state,
     lexer:YAMLToken|lexer:YAMLToken[]|string expectedTokens, lexer:YAMLToken beforeToken) returns ParsingError {
 
     string expectedTokensMessage;
     if expectedTokens is lexer:YAMLToken[] { // If multiple tokens
-        string tempMessage = expectedTokens.reduce(function(string message, lexer:YAMLToken token) returns string {
+        string tempMessage = expectedTokens.reduce(isolated function(string message, lexer:YAMLToken token) returns string {
             return message + " '" + token + "' or";
         }, "");
         expectedTokensMessage = tempMessage.substring(0, tempMessage.length() - 3);
@@ -53,7 +53,7 @@ function generateExpectError(ParserState state,
 # + value - Any value name. Commonly used to indicate keys.  
 # + valueType - Possible types - key, table, value
 # + return - Formatted error message
-function generateDuplicateError(ParserState state, string value, string valueType = "key") returns GrammarError
+isolated function generateDuplicateError(ParserState state, string value, string valueType = "key") returns GrammarError
     => generateGrammarError(state, string `Duplicate ${valueType} exists for '${value}'`);
 
 # Generate an error message based on the template,
@@ -62,10 +62,10 @@ function generateDuplicateError(ParserState state, string value, string valueTyp
 # + state - Current parser state
 # + production - Production at which the invalid token appear
 # + return - Formatted error message
-function generateInvalidTokenError(ParserState state, string production) returns GrammarError
+isolated function generateInvalidTokenError(ParserState state, string production) returns GrammarError
     => generateGrammarError(state, string `Invalid token '${state.currentToken.token}' inside the ${production}`, context = production);
 
-function generateGrammarError(ParserState state, string message,
+isolated function generateGrammarError(ParserState state, string message,
     json? expected = (), json? context = ()) returns GrammarError
         => error(
             message + ".",
@@ -75,7 +75,7 @@ function generateGrammarError(ParserState state, string message,
             expected = expected
         );
 
-function generateAliasingError(ParserState state, string message) returns common:AliasingError
+isolated function generateAliasingError(ParserState state, string message) returns common:AliasingError
     => error(
         message + ".",
         line = state.getLineNumber(),

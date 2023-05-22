@@ -19,7 +19,7 @@ import yaml.schema;
 #
 # + state - Current emitter state
 # + return - The topmost event from the current tree.
-function getEvent(EmitterState state) returns common:Event {
+isolated function getEvent(EmitterState state) returns common:Event {
     if state.events.length() < 1 {
         return {endType: common:STREAM};
     }
@@ -33,7 +33,7 @@ function getEvent(EmitterState state) returns common:Event {
 # + tag - Tag of the node
 # + tagAsSuffix - If set, the tag is written after the value
 # + return - YAML string representing the node
-function writeNode(EmitterState state, string? value, string? tag, boolean tagAsSuffix = false) returns string {
+isolated function writeNode(EmitterState state, string? value, string? tag, boolean tagAsSuffix = false) returns string {
     if tag == () {
         return value.toString();
     }
@@ -71,5 +71,5 @@ function writeNode(EmitterState state, string? value, string? tag, boolean tagAs
 # + tag - Tag of the node  
 # + value - Value of the node to be written
 # + return - String with tag appended to the value
-function appendTagToValue(boolean tagAsSuffix, string tag, string? value) returns string
+isolated function appendTagToValue(boolean tagAsSuffix, string tag, string? value) returns string
     => tagAsSuffix ? value.toString() + " " + tag : tag + " " + value.toString();

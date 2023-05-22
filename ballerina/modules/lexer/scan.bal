@@ -201,7 +201,7 @@ function scanPlanarChar(LexerState state) returns boolean|LexicalError {
 #
 # + allowWhitespace - Flag is set if whitespace is allowed as a printable char
 # + return - False to continue. True to terminate the token. An error on failure.
-function scanPrintableChar(boolean allowWhitespace) returns function (LexerState state) returns boolean|LexicalError {
+isolated function scanPrintableChar(boolean allowWhitespace) returns function (LexerState state) returns boolean|LexicalError {
     return function(LexerState state) returns boolean|LexicalError {
         if matchPattern(state, allowWhitespace ? [patternLineBreak] : [patternWhitespace, patternLineBreak]) {
             return true;
@@ -245,7 +245,7 @@ function scanTagCharacter(LexerState state) returns boolean|LexicalError {
 #
 # + isVerbatim - If set, terminates when ">" is detected.
 # + return - Generates a function to scan the URI characters.
-function scanURICharacter(boolean isVerbatim = false) returns function (LexerState state) returns boolean|LexicalError {
+isolated function scanURICharacter(boolean isVerbatim = false) returns function (LexerState state) returns boolean|LexicalError {
     return function(LexerState state) returns boolean|LexicalError {
         // Check for URI characters
         if matchPattern(state, [patternUri, patternWord]) {
@@ -277,7 +277,7 @@ function scanURICharacter(boolean isVerbatim = false) returns function (LexerSta
 #
 # + differentiate - If set, the function handles to differentiate between named and primary tags.
 # + return - Generates a function to scan the lexeme of a named or primary tag handle.
-function scanTagHandle(boolean differentiate = false) returns function (LexerState state) returns boolean|LexicalError {
+isolated function scanTagHandle(boolean differentiate = false) returns function (LexerState state) returns boolean|LexicalError {
     return function(LexerState state) returns boolean|LexicalError {
         // Scan the word of the name tag.
         if matchPattern(state, [patternWord, patternUri], ["!", patternFlowIndicator]) {

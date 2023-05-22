@@ -19,7 +19,7 @@ import yaml.common;
 # + state - Current emitter state
 # + tag - Tag of the start event if exists
 # + return - YAML string of the flow mapping.
-function writeFlowMapping(EmitterState state, string? tag) returns string|EmittingError {
+isolated function writeFlowMapping(EmitterState state, string? tag) returns string|EmittingError {
     string line = writeNode(state, "{", tag);
     common:Event event = getEvent(state);
     boolean firstValue = true;
@@ -80,7 +80,7 @@ function writeFlowMapping(EmitterState state, string? tag) returns string|Emitti
 # + whitespace - Whitespace at the start of it  
 # + tag - Tag of the start event if exists
 # + return - YAML string of the block mapping.
-function writeBlockMapping(EmitterState state, string whitespace, string? tag) returns EmittingError? {
+isolated function writeBlockMapping(EmitterState state, string whitespace, string? tag) returns EmittingError? {
     common:Event event = getEvent(state);
     string line;
 

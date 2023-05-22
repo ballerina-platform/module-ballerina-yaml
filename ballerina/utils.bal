@@ -19,7 +19,7 @@ import ballerina/file;
 #
 # + fileName - Path to the file
 # + return - An error on failure
-function openFile(string fileName) returns FileError? {
+isolated function openFile(string fileName) returns FileError? {
     // Check if the given fileName is not directory
     if check file:test(fileName, file:IS_DIR) {
         return error("Cannot write to a directory");
@@ -36,7 +36,7 @@ function openFile(string fileName) returns FileError? {
 # + yamlTypes - List of custom YAML types
 # + yamlSchema - YAML schema for the current request
 # + return - List of all the YAML tags
-function generateTagHandlesMap(YAMLType[] yamlTypes, YAMLSchema yamlSchema) returns map<schema:YAMLTypeConstructor> {
+isolated function generateTagHandlesMap(YamlType[] yamlTypes, YAMLSchema yamlSchema) returns map<schema:YAMLTypeConstructor> {
     map<schema:YAMLTypeConstructor> tagHandles = {};
 
     // Obtain the default tag handles.
@@ -50,14 +50,14 @@ function generateTagHandlesMap(YAMLType[] yamlTypes, YAMLSchema yamlSchema) retu
     }
 
     // Add the custom tags to the tag handles.
-    yamlTypes.forEach(function(YAMLType yamlType) {
+    foreach var yamlType in yamlTypes {
         tagHandles[yamlType.tag] = {
             kind: yamlType.kind,
             construct: yamlType.construct,
             identity: schema:generateIdentityFunction(yamlType.ballerinaType),
             represent: yamlType.represent
         };
-    });
+    }
 
     return tagHandles;
 }

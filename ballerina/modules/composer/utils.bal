@@ -22,7 +22,7 @@ import yaml.lexer;
 # + option - Expected parser option  
 # + docType - Expected YAML document
 # + return - Next event on success
-function checkEvent(ComposerState state, parser:ParserOption option = parser:DEFAULT,
+isolated function checkEvent(ComposerState state, parser:ParserOption option = parser:DEFAULT,
     parser:DocumentType docType = parser:BARE_DOCUMENT) returns common:Event|lexer:LexicalError|parser:ParsingError {
 
     // Return the terminated document event until the function stack is exited. 

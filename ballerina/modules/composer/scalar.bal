@@ -22,7 +22,7 @@ import yaml.lexer;
 # + state - Current composer state
 # + event - Node event to be composed
 # + return - Native Ballerina data on success
-function composeNode(ComposerState state, common:Event event) returns json|lexer:LexicalError|parser:ParsingError|ComposingError|schema:SchemaError {
+isolated function composeNode(ComposerState state, common:Event event) returns json|lexer:LexicalError|parser:ParsingError|ComposingError|schema:SchemaError {
     json output;
 
     // Check for aliases
@@ -73,7 +73,7 @@ function composeNode(ComposerState state, common:Event event) returns json|lexer
 # + event - The event representing the alias name 
 # + assignedValue - Anchored value to to the alias
 # + return - An error on failure
-function checkAnchor(ComposerState state, common:StartEvent|common:ScalarEvent event, json assignedValue) returns ComposingError? {
+isolated function checkAnchor(ComposerState state, common:StartEvent|common:ScalarEvent event, json assignedValue) returns ComposingError? {
     if event.anchor != () {
         if state.anchorBuffer.hasKey(<string>event.anchor) && !state.allowAnchorRedefinition {
             return generateAliasingError(state, string `Duplicate anchor definition of '${<string>event.anchor}'`, event);
@@ -89,7 +89,7 @@ function checkAnchor(ComposerState state, common:StartEvent|common:ScalarEvent e
 # + kind - Fail safe schema type
 # + tag - Tag of the data if exists
 # + return - Constructed ballerina data
-function castData(ComposerState state, json data,
+isolated function castData(ComposerState state, json data,
     schema:FailSafeSchema kind, string? tag) returns json|ComposingError|schema:SchemaError {
     // Check for explicit keys 
     if tag != () {

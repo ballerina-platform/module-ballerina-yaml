@@ -21,7 +21,7 @@ import yaml.schema;
 # + depthLevel - The current depth level  
 # + excludeTag - The tag to be excluded when obtaining the YAML type
 # + return - Event tree. Else, an error on failure.
-public function serialize(SerializerState state, json data, int depthLevel = 0, string? excludeTag = ())
+public isolated function serialize(SerializerState state, json data, int depthLevel = 0, string? excludeTag = ())
     returns schema:SchemaError? {
 
     // Obtain the tag

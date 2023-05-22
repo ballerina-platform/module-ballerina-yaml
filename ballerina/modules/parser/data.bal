@@ -29,7 +29,7 @@ type TagStructure record {|
 # + peeked - If the expected token is already in the state  
 # + definedProperties - Tag properties defined by the previous node
 # + return - The constructed scalar or start event on success.
-function appendData(ParserState state, ParserOption option,
+isolated function appendData(ParserState state, ParserOption option,
     TagStructure tagStructure = {}, boolean peeked = false, TagStructure? definedProperties = ())
     returns common:Event|ParsingError {
 
@@ -236,7 +236,7 @@ function appendData(ParserState state, ParserOption option,
 # + explicitKey - Whether the current node is an explicit key  
 # + tagStructure - Tag structure of the current node
 # + return - String if a scalar event. The respective collection if a start event. Else, returns an error.
-function content(ParserState state, boolean peeked, boolean explicitKey, TagStructure tagStructure)
+isolated function content(ParserState state, boolean peeked, boolean explicitKey, TagStructure tagStructure)
     returns map<json>|ParsingError {
 
     if !peeked {
@@ -330,7 +330,7 @@ function content(ParserState state, boolean peeked, boolean explicitKey, TagStru
 #
 # + state - Current parser state
 # + return - An error on invalid separation.
-function separate(ParserState state) returns ParsingError? {
+isolated function separate(ParserState state) returns ParsingError? {
     state.updateLexerContext(lexer:LEXER_START);
     check checkToken(state, peek = true);
 
@@ -378,7 +378,7 @@ function separate(ParserState state) returns ParsingError? {
     }
 }
 
-function checkEmptyKey(ParserState state) returns ParsingError? {
+isolated function checkEmptyKey(ParserState state) returns ParsingError? {
     check separate(state);
     check checkToken(state, peek = true);
 

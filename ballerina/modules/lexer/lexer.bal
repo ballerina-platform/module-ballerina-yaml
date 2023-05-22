@@ -37,7 +37,7 @@ final readonly & map<string> escapedCharMap = {
 #
 # + state - Current lexer state
 # + return - If success, returns a token, else returns a Lexical Error
-public function scan(LexerState state) returns LexerState|LexicalError {
+public isolated function scan(LexerState state) returns LexerState|LexicalError {
 
     // Check the lexeme buffer for the lexeme stored by the primary tag
     if state.lexemeBuffer.length() > 0 {

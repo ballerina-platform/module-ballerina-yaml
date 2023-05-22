@@ -15,7 +15,7 @@
 import yaml.lexer;
 import yaml.common;
 
-function nodeTag(ParserState state) returns [string?, string?]|ParsingError|lexer:LexicalError {
+isolated function nodeTag(ParserState state) returns [string?, string?]|ParsingError|lexer:LexicalError {
     string? tagPrefix = ();
     string? tagHandle = ();
     match state.tokenBuffer.token {
@@ -37,7 +37,7 @@ function nodeTag(ParserState state) returns [string?, string?]|ParsingError|lexe
     return [tagHandle, tagPrefix];
 }
 
-function nodeAnchor(ParserState state) returns string?|ParsingError {
+isolated function nodeAnchor(ParserState state) returns string?|ParsingError {
     string? anchor = ();
     if state.tokenBuffer.token == lexer:ANCHOR {
         check checkToken(state);
@@ -53,7 +53,7 @@ function nodeAnchor(ParserState state) returns string?|ParsingError {
 # + option - Expected values inside a mapping collection  
 # + definedProperties - Tag properties defined by the previous node
 # + return - Constructed node with the properties and the value.
-function nodeComplete(ParserState state, ParserOption option, TagStructure? definedProperties = ()) returns common:Event|ParsingError {
+isolated function nodeComplete(ParserState state, ParserOption option, TagStructure? definedProperties = ()) returns common:Event|ParsingError {
     TagStructure tagStructure = {};
     state.tagPropertiesInLine = true;
 

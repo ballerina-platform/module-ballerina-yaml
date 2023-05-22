@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-public function getJsonSchemaTags() returns map<YAMLTypeConstructor> {
+public isolated function getJsonSchemaTags() returns map<YAMLTypeConstructor> {
     return {
         "tag:yaml.org,2002:null": {
             kind: STRING,
@@ -41,7 +41,7 @@ public function getJsonSchemaTags() returns map<YAMLTypeConstructor> {
     };
 }
 
-public function getCoreSchemaTags() returns map<YAMLTypeConstructor> {
+public isolated function getCoreSchemaTags() returns map<YAMLTypeConstructor> {
     return {
         "tag:yaml.org,2002:null": {
             kind: STRING,

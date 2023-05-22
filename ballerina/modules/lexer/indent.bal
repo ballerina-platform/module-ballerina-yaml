@@ -30,7 +30,7 @@ type Indent record {|
 # + state - Current lexer state  
 # + mapIndex - If the current token is a mapping key, then the starting index of it.
 # + return - Change of indentation. Else, an indentation error on failure
-function checkIndent(LexerState state, int? mapIndex = ()) returns Indentation|LexicalError {
+isolated function checkIndent(LexerState state, int? mapIndex = ()) returns Indentation|LexicalError {
     int startIndex = mapIndex == () ? state.index - 1 : mapIndex;
     if mapIndex != () {
         state.keyDefinedForLine = true;
@@ -109,7 +109,7 @@ function checkIndent(LexerState state, int? mapIndex = ()) returns Indentation|L
 # + outputToken - Planar or anchor key
 # + process - Function to scan the lexeme
 # + return - Returns the tokenized state with correct YAML token
-function checkMappingValueIndent(LexerState state, YAMLToken outputToken,
+isolated function checkMappingValueIndent(LexerState state, YAMLToken outputToken,
     (function (LexerState) returns boolean|LexicalError)? process = ()) returns LexerState|LexicalError {
 
     state.indentationBreak = false;
@@ -159,7 +159,7 @@ function checkMappingValueIndent(LexerState state, YAMLToken outputToken,
 # + offset - Additional whitespace after the parent indent  
 # + captureIndentationBreak - Flag is set if the token is allowed as prefix to a mapping key name
 # + return - An error if the indent is not sufficient
-function assertIndent(LexerState state, int offset = 0, boolean captureIndentationBreak = false) returns LexicalError? {
+isolated function assertIndent(LexerState state, int offset = 0, boolean captureIndentationBreak = false) returns LexicalError? {
     if state.index < state.indent + offset {
         if captureIndentationBreak {
             state.indentationBreak = true;
@@ -169,5 +169,5 @@ function assertIndent(LexerState state, int offset = 0, boolean captureIndentati
     }
 }
 
-function generateIndentationRecord(LexerState state, IndentChange change, common:Collection[] collection)
+isolated function generateIndentationRecord(LexerState state, IndentChange change, common:Collection[] collection)
     returns Indentation => {change, collection, tokens: state.tokensForMappingValue.clone()};

@@ -31,7 +31,7 @@ public type ComposeError distinct error<common:ReadErrorDetails>;
 # + actualEvent - Obtained invalid event
 # + expectedEvent - Next expected event of the stream
 # + return - Formatted error message
-function generateExpectedEndEventError(ComposerState state,
+isolated function generateExpectedEndEventError(ComposerState state,
     string actualEvent, string expectedEvent) returns ComposeError =>
         generateComposeError(state, common:generateExpectedEndEventErrorMessage(actualEvent, expectedEvent),
             actualEvent, expectedEvent);
@@ -44,14 +44,14 @@ function generateExpectedEndEventError(ComposerState state,
 # + expectedKind - Expected core schema kind of the data
 # + tag - Tag of the data
 # + return - Formatted error message
-function generateExpectedKindError(ComposerState state, string actualKind, string expectedKind, string tag)
+isolated function generateExpectedKindError(ComposerState state, string actualKind, string expectedKind, string tag)
     returns ComposeError => generateComposeError(
         state,
         string `Expected '${expectedKind}' kind for the '${tag}' tag but found '${actualKind}'`,
         actualKind,
         expectedKind);
 
-function generateAliasingError(ComposerState state, string message, common:Event actualEvent)
+isolated function generateAliasingError(ComposerState state, string message, common:Event actualEvent)
     returns common:AliasingError =>
         error(
             message,
@@ -60,7 +60,7 @@ function generateAliasingError(ComposerState state, string message, common:Event
             actual = actualEvent
         );
 
-function generateComposeError(ComposerState state, string message, json actualEvent, json? expectedEvent = ()) returns ComposeError =>
+isolated function generateComposeError(ComposerState state, string message, json actualEvent, json? expectedEvent = ()) returns ComposeError =>
     error(
         message,
         line = state.parserState.getLineNumber(),

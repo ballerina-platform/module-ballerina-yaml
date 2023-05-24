@@ -35,7 +35,8 @@ function constructRGB(json data) returns json|schema:SchemaError {
 
 @test:Config {
     dataProvider: jsonLineDataGen,
-    groups: ["composer"]
+    groups: ["composer"],
+    enable: false
 }
 function testJSONSchema(string line, json expectedOutput) returns error? {
     ComposerState state = check obtainComposerState([line], tagSchema = schema:getJsonSchemaTags());

@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import ballerina/regex;
-
 # Validate the construction of the Ballerina data via a regex pattern.
 #
 # + regexPattern - Regex pattern used for validation
@@ -26,7 +24,7 @@ function constructWithRegex(string regexPattern,
     string typeName,
     function (string) returns json|SchemaError construct) returns json|SchemaError {
 
-    if regex:matches(data.toString(), regexPattern) {
+    if re `${regexPattern}`.isFullMatch(data.toString()) {
         return construct(data.toString());
     }
     return generateError(string `Cannot cast '${data.toJsonString()}' to '${typeName}'`);

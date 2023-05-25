@@ -14,16 +14,15 @@
 
 import yaml.common;
 import yaml.schema;
-import ballerina/regex;
 
 const string INVALID_PLANAR_PATTERN = "([\\w|\\s]*[\\-|\\?|:|] [\\w|\\s]*)|"
     + "([\\w|\\s]* #[\\w|\\s]*)|"
-    + "([\\,|\\[|\\]|\\{|\\}|&\\*|!\\||\\>|\\'|\\\"|%|@|\\`][\\w|\\s]*)";
+    + "([,|\\[|\\]|\\{|\\}|&\\*|!\\||>|'|\"|%|@|`][\\w|\\s]*)";
 
 isolated function serializeString(SerializerState state, json data, string tag) {
     string value = data.toString();
     state.events.push({
-        value: regex:matches(value, INVALID_PLANAR_PATTERN) || state.forceQuotes
+        value: re `${INVALID_PLANAR_PATTERN}`.isFullMatch(value) || state.forceQuotes
                 ? string `${state.delimiter}${value}${state.delimiter}` : value,
         tag
     });

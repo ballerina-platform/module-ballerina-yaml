@@ -14,7 +14,6 @@
 
 import yaml.common;
 import yaml.schema;
-import ballerina/lang.regexp;
 
 const string INVALID_PLANAR_PATTERN = "([\\w|\\s]*[\\-|\\?|:|] [\\w|\\s]*)|"
     + "([\\w|\\s]* #[\\w|\\s]*)|"
@@ -23,7 +22,7 @@ const string INVALID_PLANAR_PATTERN = "([\\w|\\s]*[\\-|\\?|:|] [\\w|\\s]*)|"
 isolated function serializeString(SerializerState state, json data, string tag) {
     string value = data.toString();
     state.events.push({
-        value: re `${INVALID_PLANAR_PATTERN}`.find(value) is regexp:Span || state.forceQuotes
+        value: re `${INVALID_PLANAR_PATTERN}`.isFullMatch(value) || state.forceQuotes
                 ? string `${state.delimiter}${value}${state.delimiter}` : value,
         tag
     });

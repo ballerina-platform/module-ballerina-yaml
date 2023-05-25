@@ -24,7 +24,7 @@ function constructWithRegex(string regexPattern,
     string typeName,
     function (string) returns json|SchemaError construct) returns json|SchemaError {
 
-    if data.toString().matches(re `${regexPattern}`) {
+    if re `${regexPattern}`.isFullMatch(data.toString()) {
         return construct(data.toString());
     }
     return generateError(string `Cannot cast '${data.toJsonString()}' to '${typeName}'`);

@@ -72,8 +72,7 @@ function constructShape(json data) returns json|schema:SchemaError {
 
 @test:Config {
     dataProvider: customTagDataGen,
-    groups: ["serializer"],
-    enable: false
+    groups: ["serializer"]
 }
 function testCustomTag(json testingInput, common:StartEvent|common:ScalarEvent expectedEvent,
     schema:YAMLTypeConstructor typeConstructor) returns error? {

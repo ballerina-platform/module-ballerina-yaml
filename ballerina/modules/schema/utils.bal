@@ -19,12 +19,12 @@
 # + typeName - Type name to be displayed in the error message.
 # + construct - Function to construct the Ballerina data structure.
 # + return - Constructed Ballerina data structure.
-function constructWithRegex(string regexPattern,
+function constructWithRegex(string:RegExp regexPattern,
     json data,
     string typeName,
     function (string) returns json|SchemaError construct) returns json|SchemaError {
 
-    if re `${regexPattern}`.isFullMatch(data.toString()) {
+    if regexPattern.isFullMatch(data.toString()) {
         return construct(data.toString());
     }
     return generateError(string `Cannot cast '${data.toJsonString()}' to '${typeName}'`);

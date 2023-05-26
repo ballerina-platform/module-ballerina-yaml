@@ -15,25 +15,25 @@
 import yaml.common;
 
 function constructSimpleNull(json data) returns json|SchemaError =>
-    constructWithRegex("null", data, "null", function(string s) returns json|SchemaError => ());
+    constructWithRegex(re `null`, data, "null", function(string s) returns json|SchemaError => ());
 
 function constructSimpleBool(json data) returns json|SchemaError =>
-    constructWithRegex("true|false", data, "bool",
+    constructWithRegex(re `true|false`, data, "bool",
     function(string s) returns json|SchemaError => common:processTypeCastingError(boolean:fromString(s)));
 
 function constructSimpleInteger(json data) returns json|SchemaError =>
-    constructWithRegex("-?(0|[1-9][0-9]*)", data, "int",
+    constructWithRegex(re `-?(0|[1-9][0-9]*)`, data, "int",
     function(string s) returns json|SchemaError => common:processTypeCastingError(int:fromString(s)));
 
 function constructSimpleFloat(json data) returns json|SchemaError =>
-    constructWithRegex("-?(0|[1-9][0-9]*)(\\.[0-9]*)?([eE][-+]?[0-9]+)?", data, "float",
+    constructWithRegex(re `-?(0|[1-9][0-9]*)(\.[0-9]*)?([eE][-+]?[0-9]+)?`, data, "float",
     function(string s) returns json|SchemaError => common:processTypeCastingError('decimal:fromString(s)));
 
 function constructNull(json data) returns json|SchemaError =>
-    constructWithRegex("null|Null|NULL|~", data, "null", function(string s) returns json|SchemaError => ());
+    constructWithRegex(re `null|Null|NULL|~`, data, "null", function(string s) returns json|SchemaError => ());
 
 function constructBool(json data) returns json|SchemaError =>
-    constructWithRegex("true|True|TRUE|false|False|FALSE", data, "bool",
+    constructWithRegex(re `true|True|TRUE|false|False|FALSE`, data, "bool",
     function(string s) returns json|SchemaError => common:processTypeCastingError(boolean:fromString(s)));
 
 function constructInteger(json data) returns json|SchemaError {
@@ -67,7 +67,7 @@ function constructInteger(json data) returns json|SchemaError {
     }
 
     // Cast to a decimal integer
-    return constructWithRegex("[-+]?[0-9]+", data, "int",
+    return constructWithRegex(re `[-+]?[0-9]+`, data, "int",
         function(string s) returns json|SchemaError => common:processTypeCastingError(int:fromString(s)));
 }
 
@@ -100,7 +100,7 @@ function constructFloat(json data) returns json|SchemaError {
     }
 
     // Cast to float numbers
-    return constructWithRegex("[-+]?(\\.[0-9]+|[0-9]+(\\.[0-9]*)?)([eE][-+]?[0-9]+)?", data, "float",
+    return constructWithRegex(re `[-+]?(\.[0-9]+|[0-9]+(\.[0-9]*)?)([eE][-+]?[0-9]+)?`, data, "float",
         function(string s) returns json|SchemaError => common:processTypeCastingError('decimal:fromString(s)));
 }
 

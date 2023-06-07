@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-type patternParamterType string|function (string:Char char) returns boolean;
+type patternParamterType string|isolated function (string:Char char) returns boolean;
 
-function patternPrintable(string:Char char) returns boolean {
+isolated function patternPrintable(string:Char char) returns boolean {
     int codePoint = char.toCodePointInt();
 
     return (codePoint >= 32 && codePoint <= 126)
@@ -24,29 +24,29 @@ function patternPrintable(string:Char char) returns boolean {
         || codePoint is 9|10|13|133;
 }
 
-function patternJson(string:Char char) returns boolean {
+isolated function patternJson(string:Char char) returns boolean {
     int codePoint = char.toCodePointInt();
 
     return (codePoint >= 32 && codePoint <= 1114111)
         || codePoint == 9;
 }
 
-function patternBom(string:Char char) returns boolean
+isolated function patternBom(string:Char char) returns boolean
     => char.toCodePointInt() == 65279;
 
-function patternLineBreak(string:Char char) returns boolean
+isolated function patternLineBreak(string:Char char) returns boolean
     => char.toCodePointInt() is 10|13;
 
-function patternWhitespace(string:Char char) returns boolean
+isolated function patternWhitespace(string:Char char) returns boolean
     => char is " "|"\t";
 
-function patternDecimal(string:Char char) returns boolean
+isolated function patternDecimal(string:Char char) returns boolean
     => char is "0"|"1"|"2"|"3"|"4"|"5"|"6"|"7"|"8"|"9";
 
-function patternHexadecimal(string:Char char) returns boolean
+isolated function patternHexadecimal(string:Char char) returns boolean
     => char is "0"|"1"|"2"|"3"|"4"|"5"|"6"|"7"|"8"|"9"|"A"|"B"|"C"|"D"|"E"|"F"|"a"|"b"|"c"|"d"|"e"|"f";
 
-function patternWord(string:Char char) returns boolean {
+isolated function patternWord(string:Char char) returns boolean {
     int codePoint = char.toCodePointInt();
 
     return (codePoint >= 97 && codePoint <= 122)
@@ -55,11 +55,11 @@ function patternWord(string:Char char) returns boolean {
         || char == "-";
 }
 
-function patternFlowIndicator(string:Char char) returns boolean
+isolated function patternFlowIndicator(string:Char char) returns boolean
     => char is ","|"["|"]"|"{"|"}";
 
-function patternIndicator(string:Char char) returns boolean
+isolated function patternIndicator(string:Char char) returns boolean
     => char is "-"|"?"|":"|","|"["|"]"|"{"|"}"|"#"|"&"|"*"|"!"|"|"|">"|"'"|"\""|"%"|"@"|"`";
 
-function patternUri(string:Char char) returns boolean
+isolated function patternUri(string:Char char) returns boolean
     => char is "#"|";"|"/"|"?"|":"|"@"|"&"|"="|"+"|"$"|","|"_"|"."|"!"|"~"|"*"|"'"|"("|")"|"["|"]";

@@ -19,7 +19,7 @@
 # + typeName - Type name to be displayed in the error message.
 # + construct - Function to construct the Ballerina data structure.
 # + return - Constructed Ballerina data structure.
-function constructWithRegex(string:RegExp regexPattern,
+isolated function constructWithRegex(string:RegExp regexPattern,
     json data,
     string typeName,
     function (string) returns json|SchemaError construct) returns json|SchemaError {
@@ -34,15 +34,15 @@ function constructWithRegex(string:RegExp regexPattern,
 #
 # + data - Data to represent
 # + return - String value for the json data.
-function representAsString(json data) returns string =>
+isolated function representAsString(json data) returns string =>
     data.toString();
 
 # Generate a function that confirms the type of the data.
 #
 # + typeDesc - Type to be asserted with the given data
 # + return - Function to validate the data
-public isolated function generateIdentityFunction(typedesc<json> typeDesc) returns function (json data) returns boolean {
-    return function(json data) returns boolean {
+public isolated function generateIdentityFunction(typedesc<json> typeDesc) returns isolated function (json data) returns boolean {
+    return isolated function(json data) returns boolean {
         json|error output = data.ensureType(typeDesc);
         return output == data;
     };

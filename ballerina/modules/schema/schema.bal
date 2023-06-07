@@ -17,7 +17,7 @@ public isolated function getJsonSchemaTags() returns map<YAMLTypeConstructor> {
         "tag:yaml.org,2002:null": {
             kind: STRING,
             construct: constructSimpleNull,
-            identity: function(json j) returns boolean => j is (),
+            identity: isolated function(json j) returns boolean => j is (),
             represent: representAsString
         },
         "tag:yaml.org,2002:bool": {
@@ -46,7 +46,7 @@ public isolated function getCoreSchemaTags() returns map<YAMLTypeConstructor> {
         "tag:yaml.org,2002:null": {
             kind: STRING,
             construct: constructNull,
-            identity: function(json j) returns boolean => j is (),
+            identity: isolated function(json j) returns boolean => j is (),
             represent: representAsString
         },
         "tag:yaml.org,2002:bool": {

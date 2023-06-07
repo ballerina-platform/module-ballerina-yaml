@@ -110,7 +110,7 @@ isolated function checkIndent(LexerState state, int? mapIndex = ()) returns Inde
 # + process - Function to scan the lexeme
 # + return - Returns the tokenized state with correct YAML token
 isolated function checkMappingValueIndent(LexerState state, YAMLToken outputToken,
-    (function (LexerState) returns boolean|LexicalError)? process = ()) returns LexerState|LexicalError {
+    (isolated function (LexerState) returns boolean|LexicalError)? process = ()) returns LexerState|LexicalError {
 
     state.indentationBreak = false;
     boolean enforceMapping = state.enforceMapping;

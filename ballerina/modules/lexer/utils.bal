@@ -21,7 +21,7 @@
 # + message - Message to display if the end delimiter is not shown  
 # + include - True when the last char belongs to the token
 # + return - Lexical Error if available
-isolated function iterate(LexerState state, function (LexerState) returns boolean|LexicalError process,
+isolated function iterate(LexerState state, isolated function (LexerState) returns boolean|LexicalError process,
                             YAMLToken successToken,
                             boolean include = false,
                             string message = "") returns LexerState|LexicalError {

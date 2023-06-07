@@ -25,9 +25,9 @@ type Shape record {|
     RGB color;
 |};
 
-isolated function (json data) returns boolean identifyShapeName = schema:generateIdentityFunction(ShapeName);
-isolated function (json data) returns boolean identifyRGB = schema:generateIdentityFunction(RGB);
-isolated function (json data) returns boolean identifyShape = schema:generateIdentityFunction(Shape);
+(isolated function (json data) returns boolean) identifyShapeName = schema:generateIdentityFunction(ShapeName);
+(isolated function (json data) returns boolean) identifyRGB = schema:generateIdentityFunction(RGB);
+(isolated function (json data) returns boolean) identifyShape = schema:generateIdentityFunction(Shape);
 map<isolated function (json data) returns json|schema:SchemaError> representArr = {
     "str": isolated function(json data) returns json|schema:SchemaError => data.toString(),
     "seq": isolated function(json data) returns json|schema:SchemaError => [data],

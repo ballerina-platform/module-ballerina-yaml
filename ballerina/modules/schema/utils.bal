@@ -22,7 +22,7 @@
 isolated function constructWithRegex(string:RegExp regexPattern,
     json data,
     string typeName,
-    function (string) returns json|SchemaError construct) returns json|SchemaError {
+    isolated function (string) returns json|SchemaError construct) returns json|SchemaError {
 
     if regexPattern.isFullMatch(data.toString()) {
         return construct(data.toString());

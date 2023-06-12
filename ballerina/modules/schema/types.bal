@@ -34,8 +34,8 @@ public enum FailSafeSchema {
 # + represent - Function to convert the Ballerina data structure to YAML.
 public type YAMLTypeConstructor record {|
     FailSafeSchema kind;
-    function (json data) returns json|SchemaError construct;
-    function (json data) returns boolean identity;
-    function (json data) returns json|SchemaError represent;
+    isolated function (json data) returns json|SchemaError construct;
+    isolated function (json data) returns boolean identity;
+    isolated function (json data) returns json|SchemaError represent;
 |};
 

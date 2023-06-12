@@ -17,7 +17,7 @@
 #
 # + state - Current lexer state
 # + return - An error on failure
-function scanEscapedCharacter(LexerState state) returns LexicalError? {
+isolated function scanEscapedCharacter(LexerState state) returns LexicalError? {
     string currentChar;
 
     // Process double escape character
@@ -58,7 +58,7 @@ function scanEscapedCharacter(LexerState state) returns LexicalError? {
 # + escapedChar - Escaped character before the digits. Only used to present in the error message.
 # + length - Number of digits
 # + return - An error on failure
-function scanUnicodeEscapedCharacters(LexerState state, string escapedChar, int length) returns LexicalError? {
+isolated function scanUnicodeEscapedCharacters(LexerState state, string escapedChar, int length) returns LexicalError? {
 
     // Check if the required digits do not overflow the current line.
     if state.line.length() <= length + state.index {
@@ -96,7 +96,7 @@ function scanUnicodeEscapedCharacters(LexerState state, string escapedChar, int 
 #
 # + state - Current lexer state
 # + return - False to continue. True to terminate the token. An error on failure.
-function scanDoubleQuoteChar(LexerState state) returns boolean|LexicalError {
+isolated function scanDoubleQuoteChar(LexerState state) returns boolean|LexicalError {
     // Process nb-json characters
     if matchPattern(state, patternJson, ["\\", "\""]) {
         state.lexeme += <string>state.peek();
@@ -123,7 +123,7 @@ function scanDoubleQuoteChar(LexerState state) returns boolean|LexicalError {
 #
 # + state - Current lexer state
 # + return - False to continue. True to terminate the token. An error on failure.
-function scanSingleQuotedChar(LexerState state) returns boolean|LexicalError {
+isolated function scanSingleQuotedChar(LexerState state) returns boolean|LexicalError {
     // Process nb-json characters
     if matchPattern(state, patternJson, "'") {
         state.lexeme += <string>state.peek();
@@ -147,7 +147,7 @@ function scanSingleQuotedChar(LexerState state) returns boolean|LexicalError {
 #
 # + state - Current lexer state
 # + return - False to continue. True to terminate the token. An error on failure.
-function scanPlanarChar(LexerState state) returns boolean|LexicalError {
+isolated function scanPlanarChar(LexerState state) returns boolean|LexicalError {
     // Store the whitespace before a ns-planar char
     string whitespace = "";
     int numWhitespace = 0;
@@ -201,8 +201,8 @@ function scanPlanarChar(LexerState state) returns boolean|LexicalError {
 #
 # + allowWhitespace - Flag is set if whitespace is allowed as a printable char
 # + return - False to continue. True to terminate the token. An error on failure.
-isolated function scanPrintableChar(boolean allowWhitespace) returns function (LexerState state) returns boolean|LexicalError {
-    return function(LexerState state) returns boolean|LexicalError {
+isolated function scanPrintableChar(boolean allowWhitespace) returns isolated function (LexerState state) returns boolean|LexicalError {
+    return isolated function(LexerState state) returns boolean|LexicalError {
         if matchPattern(state, allowWhitespace ? [patternLineBreak] : [patternWhitespace, patternLineBreak]) {
             return true;
         }
@@ -220,7 +220,7 @@ isolated function scanPrintableChar(boolean allowWhitespace) returns function (L
 #
 # + state - Current lexer state
 # + return - False to continue. True to terminate the token. An error on failure.
-function scanTagCharacter(LexerState state) returns boolean|LexicalError {
+isolated function scanTagCharacter(LexerState state) returns boolean|LexicalError {
     // Check for URI character
     if matchPattern(state, [patternUri, patternWord], ["!", patternFlowIndicator]) {
         state.lexeme += <string>state.peek();
@@ -245,8 +245,8 @@ function scanTagCharacter(LexerState state) returns boolean|LexicalError {
 #
 # + isVerbatim - If set, terminates when ">" is detected.
 # + return - Generates a function to scan the URI characters.
-isolated function scanURICharacter(boolean isVerbatim = false) returns function (LexerState state) returns boolean|LexicalError {
-    return function(LexerState state) returns boolean|LexicalError {
+isolated function scanURICharacter(boolean isVerbatim = false) returns isolated function (LexerState state) returns boolean|LexicalError {
+    return isolated function(LexerState state) returns boolean|LexicalError {
         // Check for URI characters
         if matchPattern(state, [patternUri, patternWord]) {
             state.lexeme += <string>state.peek();
@@ -277,8 +277,8 @@ isolated function scanURICharacter(boolean isVerbatim = false) returns function 
 #
 # + differentiate - If set, the function handles to differentiate between named and primary tags.
 # + return - Generates a function to scan the lexeme of a named or primary tag handle.
-isolated function scanTagHandle(boolean differentiate = false) returns function (LexerState state) returns boolean|LexicalError {
-    return function(LexerState state) returns boolean|LexicalError {
+isolated function scanTagHandle(boolean differentiate = false) returns isolated function (LexerState state) returns boolean|LexicalError {
+    return isolated function(LexerState state) returns boolean|LexicalError {
         // Scan the word of the name tag.
         if matchPattern(state, [patternWord, patternUri], ["!", patternFlowIndicator]) {
             state.lexeme += <string>state.peek();
@@ -321,7 +321,7 @@ isolated function scanTagHandle(boolean differentiate = false) returns function 
 #
 # + state - Current lexer state
 # + return - False to continue. True to terminate the token. An error on failure.
-function scanAnchorName(LexerState state) returns boolean|LexicalError {
+isolated function scanAnchorName(LexerState state) returns boolean|LexicalError {
     if matchPattern(state, [patternPrintable], [patternLineBreak, patternBom, patternFlowIndicator, patternWhitespace]) {
         state.lexeme += <string>state.peek();
         return false;
@@ -333,7 +333,7 @@ function scanAnchorName(LexerState state) returns boolean|LexicalError {
 #
 # + state - Current lexer state
 # + return - False to continue. True to terminate the token.
-function scanWhitespace(LexerState state) returns boolean {
+isolated function scanWhitespace(LexerState state) returns boolean {
     if state.peek() == " " {
         return false;
     }
@@ -348,7 +348,7 @@ function scanWhitespace(LexerState state) returns boolean {
 #
 # + state - Current lexer state
 # + return - Generates a function which checks the lexemes for the given number system.
-function scanDigit(LexerState state) returns boolean|LexicalError {
+isolated function scanDigit(LexerState state) returns boolean|LexicalError {
     if matchPattern(state, patternDecimal) {
         state.lexeme += <string>state.peek();
         return false;

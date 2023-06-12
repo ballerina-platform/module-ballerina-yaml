@@ -41,8 +41,8 @@ function initYamlCustomeTypes() {
             tag: entry[0],
             ballerinaType: string,
             kind: entry[1],
-            construct: function(json data) returns json => data,
-            represent: function(json data) returns string => data.toString()
+            construct: isolated function(json data) returns json => data,
+            represent: isolated function(json data) returns string => data.toString()
         });
     });
 }

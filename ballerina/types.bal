@@ -61,8 +61,8 @@ public type YamlType record {|
     string tag;
     typedesc<json> ballerinaType;
     FailSafeSchema kind;
-    function (json data) returns json|SchemaError construct;
-    function (json data) returns string|SchemaError represent;
+    isolated function (json data) returns json|SchemaError construct;
+    isolated function (json data) returns string|SchemaError represent;
 |};
 
 # Represents the basic YAML types available in the Fail safe schema.

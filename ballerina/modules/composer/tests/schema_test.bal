@@ -17,7 +17,7 @@ import yaml.schema;
 
 type RGB [int, int, int];
 
-function constructRGB(json data) returns json|schema:SchemaError {
+isolated function constructRGB(json data) returns json|schema:SchemaError {
     RGB|error value = data.cloneWithType();
 
     if value is error {
@@ -92,11 +92,11 @@ function testCustomTag() returns error? {
     tagSchema["!rgb"] = {
         kind: schema:SEQUENCE,
         construct: constructRGB,
-        identity: function(json data) returns boolean {
+        identity: isolated function(json data) returns boolean {
             RGB|error output = data.cloneWithType();
             return output is RGB;
         },
-        represent: function(json data) returns string => data.toString()
+        represent: isolated function(json data) returns string => data.toString()
     };
 
     ComposerState state = check obtainComposerState(["!rgb [123, 12, 32]"], tagSchema = tagSchema);
@@ -115,7 +115,7 @@ function testInvalidCustomTag() returns error? {
         kind: schema:SEQUENCE,
         construct: constructRGB,
         identity: schema:generateIdentityFunction(RGB),
-        represent: function(json data) returns string => data.toString()
+        represent: isolated function(json data) returns string => data.toString()
     };
 
     ComposerState state = check obtainComposerState(["!rgb [256, 12, 32]"], tagSchema = tagSchema);

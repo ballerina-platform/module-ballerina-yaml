@@ -25,16 +25,16 @@ type Shape record {|
     RGB color;
 |};
 
-function (json data) returns boolean identifyShapeName = schema:generateIdentityFunction(ShapeName);
-function (json data) returns boolean identifyRGB = schema:generateIdentityFunction(RGB);
-function (json data) returns boolean identifyShape = schema:generateIdentityFunction(Shape);
-map<function (json data) returns json|schema:SchemaError> representArr = {
-    "str": function(json data) returns json|schema:SchemaError => data.toString(),
-    "seq": function(json data) returns json|schema:SchemaError => [data],
-    "map": function(json data) returns json|schema:SchemaError => {rgb: data}
+(isolated function (json data) returns boolean) identifyShapeName = schema:generateIdentityFunction(ShapeName);
+(isolated function (json data) returns boolean) identifyRGB = schema:generateIdentityFunction(RGB);
+(isolated function (json data) returns boolean) identifyShape = schema:generateIdentityFunction(Shape);
+map<isolated function (json data) returns json|schema:SchemaError> representArr = {
+    "str": isolated function(json data) returns json|schema:SchemaError => data.toString(),
+    "seq": isolated function(json data) returns json|schema:SchemaError => [data],
+    "map": isolated function(json data) returns json|schema:SchemaError => {rgb: data}
 };
 
-function constructShapeName(json data) returns json|schema:SchemaError {
+isolated function constructShapeName(json data) returns json|schema:SchemaError {
     ShapeName|error value = data.cloneWithType();
 
     if value is error {
@@ -44,7 +44,7 @@ function constructShapeName(json data) returns json|schema:SchemaError {
     return value;
 }
 
-function constructRGB(json data) returns json|schema:SchemaError {
+isolated function constructRGB(json data) returns json|schema:SchemaError {
     RGB|error value = data.cloneWithType();
 
     if value is error {
@@ -60,7 +60,7 @@ function constructRGB(json data) returns json|schema:SchemaError {
     return value;
 }
 
-function constructShape(json data) returns json|schema:SchemaError {
+isolated function constructShape(json data) returns json|schema:SchemaError {
     Shape|error value = data.cloneWithType();
 
     if value is error {
@@ -93,7 +93,7 @@ function customTagDataGen() returns map<[json, common:StartEvent|common:ScalarEv
                 kind: schema:STRING,
                 construct: constructShapeName,
                 identity: identifyShapeName,
-                represent: function(json data) returns json => data.toString()
+                represent: isolated function(json data) returns json => data.toString()
             }
         ],
         "ballerina string to yaml sequence": [
@@ -103,7 +103,7 @@ function customTagDataGen() returns map<[json, common:StartEvent|common:ScalarEv
                 kind: schema:SEQUENCE,
                 construct: constructShapeName,
                 identity: identifyShapeName,
-                represent: function(json data) returns json => [data]
+                represent: isolated function(json data) returns json => [data]
             }
         ],
         "ballerina string to yaml mapping": [
@@ -113,7 +113,7 @@ function customTagDataGen() returns map<[json, common:StartEvent|common:ScalarEv
                 kind: schema:MAPPING,
                 construct: constructShapeName,
                 identity: identifyShapeName,
-                represent: function(json data) returns json => {shapeName: data}
+                represent: isolated function(json data) returns json => {shapeName: data}
             }
         ],
         "ballerina sequence to yaml string": [
@@ -123,7 +123,7 @@ function customTagDataGen() returns map<[json, common:StartEvent|common:ScalarEv
                 kind: schema:STRING,
                 construct: constructRGB,
                 identity: identifyRGB,
-                represent: function(json j) returns json|schema:SchemaError {
+                represent: isolated function(json j) returns json|schema:SchemaError {
                     RGB|error rgb = j.ensureType();
                     if rgb is error {
                         return error(rgb.message());
@@ -139,7 +139,7 @@ function customTagDataGen() returns map<[json, common:StartEvent|common:ScalarEv
                 kind: schema:SEQUENCE,
                 construct: constructRGB,
                 identity: identifyRGB,
-                represent: function(json data) returns json => data
+                represent: isolated function(json data) returns json => data
             }
         ],
         "ballerina sequence to yaml mapping": [
@@ -149,7 +149,7 @@ function customTagDataGen() returns map<[json, common:StartEvent|common:ScalarEv
                 kind: schema:MAPPING,
                 construct: constructRGB,
                 identity: identifyRGB,
-                represent: function(json data) returns json => {rgb: data}
+                represent: isolated function(json data) returns json => {rgb: data}
             }
         ],
         "ballerina mapping to yaml string": [
@@ -159,7 +159,7 @@ function customTagDataGen() returns map<[json, common:StartEvent|common:ScalarEv
                 kind: schema:STRING,
                 construct: constructShape,
                 identity: identifyShape,
-                represent: function(json j) returns json|schema:SchemaError {
+                represent: isolated function(json j) returns json|schema:SchemaError {
                     Shape|error shape = j.ensureType();
                     if shape is error {
                         return error(shape.message());
@@ -175,7 +175,7 @@ function customTagDataGen() returns map<[json, common:StartEvent|common:ScalarEv
                 kind: schema:SEQUENCE,
                 construct: constructShape,
                 identity: identifyShape,
-                represent: function(json j) returns json|schema:SchemaError {
+                represent: isolated function(json j) returns json|schema:SchemaError {
                     Shape|error shape = j.ensureType();
                     if shape is error {
                         return error(shape.message());
@@ -191,7 +191,7 @@ function customTagDataGen() returns map<[json, common:StartEvent|common:ScalarEv
                 kind: schema:MAPPING,
                 construct: constructShape,
                 identity: identifyShape,
-                represent: function(json data) returns json => data
+                represent: isolated function(json data) returns json => data
             }
         ]
     };

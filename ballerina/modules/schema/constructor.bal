@@ -15,26 +15,26 @@
 import yaml.common;
 
 isolated function constructSimpleNull(json data) returns json|SchemaError =>
-    constructWithRegex(re `null`, data, "null", function(string s) returns json|SchemaError => ());
+    constructWithRegex(re `null`, data, "null", isolated function(string s) returns json|SchemaError => ());
 
 isolated function constructSimpleBool(json data) returns json|SchemaError =>
     constructWithRegex(re `true|false`, data, "bool",
-    function(string s) returns json|SchemaError => common:processTypeCastingError(boolean:fromString(s)));
+    isolated function(string s) returns json|SchemaError => common:processTypeCastingError(boolean:fromString(s)));
 
 isolated function constructSimpleInteger(json data) returns json|SchemaError =>
     constructWithRegex(re `-?(0|[1-9][0-9]*)`, data, "int",
-    function(string s) returns json|SchemaError => common:processTypeCastingError(int:fromString(s)));
+    isolated function(string s) returns json|SchemaError => common:processTypeCastingError(int:fromString(s)));
 
 isolated function constructSimpleFloat(json data) returns json|SchemaError =>
     constructWithRegex(re `-?(0|[1-9][0-9]*)(\.[0-9]*)?([eE][-+]?[0-9]+)?`, data, "float",
-    function(string s) returns json|SchemaError => common:processTypeCastingError('decimal:fromString(s)));
+    isolated function(string s) returns json|SchemaError => common:processTypeCastingError('decimal:fromString(s)));
 
 isolated function constructNull(json data) returns json|SchemaError =>
-    constructWithRegex(re `null|Null|NULL|~`, data, "null", function(string s) returns json|SchemaError => ());
+    constructWithRegex(re `null|Null|NULL|~`, data, "null", isolated function(string s) returns json|SchemaError => ());
 
 isolated function constructBool(json data) returns json|SchemaError =>
     constructWithRegex(re `true|True|TRUE|false|False|FALSE`, data, "bool",
-    function(string s) returns json|SchemaError => common:processTypeCastingError(boolean:fromString(s)));
+    isolated function(string s) returns json|SchemaError => common:processTypeCastingError(boolean:fromString(s)));
 
 isolated function constructInteger(json data) returns json|SchemaError {
     string value = data.toString();
@@ -68,7 +68,7 @@ isolated function constructInteger(json data) returns json|SchemaError {
 
     // Cast to a decimal integer
     return constructWithRegex(re `[-+]?[0-9]+`, data, "int",
-        function(string s) returns json|SchemaError => common:processTypeCastingError(int:fromString(s)));
+        isolated function(string s) returns json|SchemaError => common:processTypeCastingError(int:fromString(s)));
 }
 
 isolated function constructFloat(json data) returns json|SchemaError {

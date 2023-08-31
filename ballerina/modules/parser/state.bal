@@ -16,7 +16,7 @@ import yaml.lexer;
 import yaml.common;
 
 public class ParserState {
-    # Properties for the TOML lines
+    # Properties for the YAML lines
     string[] lines;
     int numLines;
     int lineIndex = -1;

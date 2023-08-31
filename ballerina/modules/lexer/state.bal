@@ -74,7 +74,7 @@ public class LexerState {
 
     int mappingKeyColumn = -1;
 
-    # Output TOML token
+    # Output YAML token
     YAMLToken token = DUMMY;
 
     Indentation? indentation = ();

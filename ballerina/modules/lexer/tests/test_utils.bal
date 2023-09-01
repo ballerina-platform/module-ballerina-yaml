@@ -16,7 +16,7 @@ import ballerina/test;
 
 # Returns a new lexer with the configured line for testing
 #
-# + testingLine - Testing TOML string  
+# + testingLine - Testing YAML string
 # + context - The state for the lexer to be initialized with
 # + return - Configured lexer
 function setLexerString(string testingLine, Context context = LEXER_START) returns LexerState {
@@ -29,7 +29,7 @@ function setLexerString(string testingLine, Context context = LEXER_START) retur
 # Assert the token at the given index
 #
 # + state - Lexer state configured for testing  
-# + assertingToken - Expected TOML token  
+# + assertingToken - Expected YAML token
 # + currentIndex - Index of the targeted token (default = 0)  
 # + lexeme - Expected lexeme of the token (optional)
 # + return - Returns an lexical error if unsuccessful

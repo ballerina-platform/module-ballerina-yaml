@@ -20,7 +20,7 @@ import ballerina/test;
     groups: ["api"],
     enable: false
 }
-function testReadTOMLString() returns error? {
+function testReadYamlString() returns error? {
     string input = string `
         outer:
           inner: {outer: inner}
@@ -47,7 +47,7 @@ function testReadTOMLString() returns error? {
 @test:Config {
     groups: ["api"]
 }
-function testReadTOMLFile() returns error? {
+function testReadYamlFile() returns error? {
     check io:fileWriteString("input.yaml", "bool: true\nint: 1");
     json output = check readFile("input.yaml");
     test:assertEquals(output, {"bool": true, "int": 1});
@@ -57,7 +57,7 @@ function testReadTOMLFile() returns error? {
 @test:Config {
     groups: ["api"]
 }
-function testWriteTOMLString() returns error? {
+function testWriteYamlString() returns error? {
     string[] output = check writeString({"key": "value"});
     test:assertEquals(output[0], "key: value");
 }
@@ -65,11 +65,11 @@ function testWriteTOMLString() returns error? {
 @test:Config {
     groups: ["api"]
 }
-function testWriteTOMLFile() returns error? {
-    check writeFile("output.toml", {"outer": {"inner": "value"}}, blockLevel = 2, indentationPolicy = 2);
-    string[] output = check io:fileReadLines("output.toml");
+function testWriteYamlFile() returns error? {
+    check writeFile("output.yaml", {"outer": {"inner": "value"}}, blockLevel = 2, indentationPolicy = 2);
+    string[] output = check io:fileReadLines("output.yaml");
     test:assertEquals(output, ["outer:", "  inner: value"]);
-    check file:remove("output.toml");
+    check file:remove("output.yaml");
 }
 
 @test:Config {

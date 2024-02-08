@@ -86,11 +86,16 @@ function testQuotesForInvalidPlanarChar(string line) returns error? {
 
 function invalidPlanarDataGen() returns map<[string]> {
     return {
-        "comment": [" #"],
+        "comment": [" # comment"],
         "explicit key": ["? "],
         "sequence entry": ["- "],
         "mapping value": [": "],
-        "flow indicator": ["}a"]
+        "flow indicator": ["}a"],
+        "alias": ["*/*"],
+        "collect-entry": [", "],
+        "anchor": ["&anchor"],
+        "tag": ["!tag"],
+        "directive": ["%YAML 1.2"]
     };
 }
 

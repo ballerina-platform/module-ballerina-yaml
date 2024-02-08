@@ -62,7 +62,7 @@ public isolated function scan(LexerState state) returns LexerState|LexicalError 
         return state.index == 0 ? state.tokenize(EMPTY_LINE) : state.tokenize(EOL);
     }
 
-    // Check for line breaks when reading form string
+    // Check for line breaks when reading from string
     if state.peek() == "\n" && state.context != LEXER_DOUBLE_QUOTE {
         state.isNewLine = true;
         return state.tokenize(EOL);

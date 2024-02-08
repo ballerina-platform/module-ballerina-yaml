@@ -14,15 +14,12 @@
 
 import yaml.common;
 import yaml.schema;
-
-const string INVALID_PLANAR_PATTERN = "([\\w|\\s]*[\\-|\\?|:|] [\\w|\\s]*)|"
-    + "([\\w|\\s]* #[\\w|\\s]*)|"
-    + "([,|\\[|\\]|\\{|\\}|&\\*|!\\||>|'|\"|%|@|`][\\w|\\s]*)";
+import yaml.parser;
 
 isolated function serializeString(SerializerState state, json data, string tag) {
     string value = data.toString();
     state.events.push({
-        value: re `${INVALID_PLANAR_PATTERN}`.isFullMatch(value) || state.forceQuotes
+        value: (!parser:isValidPlanarScalar(value) || state.forceQuotes)
                 ? string `${state.delimiter}${value}${state.delimiter}` : value,
         tag
     });

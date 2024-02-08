@@ -251,15 +251,7 @@ public isolated function parse(ParserState state, ParserOption option = DEFAULT,
 # + return - True if the string is a valid planar scalar. Else, false.
 public isolated function isValidPlanarScalar(string value) returns boolean {
     string? planarScalarResult = ();
-    do {
-        lexer:LexerState lexerState = new();
-        lexerState.line = value;
-        lexerState = check lexer:scan(lexerState);
-        lexer:Token token = lexerState.getToken();
-        if (token.token == lexer:SEQUENCE_ENTRY) {
-            return false;
-        }
-    
+    do {   
         ParserState parserState = check new ([value]);
         planarScalarResult = check planarScalar(parserState, false);
     } on fail {

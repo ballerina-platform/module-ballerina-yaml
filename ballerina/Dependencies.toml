@@ -163,7 +163,6 @@ modules = [
 	{org = "ballerina", packageName = "yaml", moduleName = "yaml.emitter"},
 	{org = "ballerina", packageName = "yaml", moduleName = "yaml.lexer"},
 	{org = "ballerina", packageName = "yaml", moduleName = "yaml.parser"},
-	{org = "ballerina", packageName = "yaml", moduleName = "yaml.pattern"},
 	{org = "ballerina", packageName = "yaml", moduleName = "yaml.schema"},
 	{org = "ballerina", packageName = "yaml", moduleName = "yaml.serializer"}
 ]

@@ -15,14 +15,16 @@
 import yaml.common;
 import yaml.schema;
 import yaml.parser;
+import ballerina/lang.regexp;
 
 isolated function serializeString(SerializerState state, json data, string tag) {
     string value = data.toString();
-    state.events.push({
-        value: (!parser:isValidPlanarScalar(value) || state.forceQuotes)
-                ? string `${state.delimiter}${value}${state.delimiter}` : value,
-        tag
-    });
+    if value.includes("\n") {
+        value = state.delimiter + regexp:replaceAll(re `\n`, data.toString(), "\\n") + state.delimiter;
+    } else {
+        value = (!parser:isValidPlanarScalar(value) || state.forceQuotes) ? state.delimiter + value + state.delimiter : value;
+    }
+    state.events.push({value, tag});
 }
 
 isolated function serializeSequence(SerializerState state, json[] data, string tag, int depthLevel) returns schema:SchemaError? {

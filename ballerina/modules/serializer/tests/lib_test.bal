@@ -100,6 +100,30 @@ function invalidPlanarDataGen() returns map<[string]> {
 }
 
 @test:Config {
+    dataProvider: scalarWithNewLinesDataGen,
+    groups: ["serializer"]
+}
+function testScalarWithNewLines(json line, string[] expectedOutputs) returns error? {
+    common:Event[] events = check getSerializedEvents(line);
+    int index = 0;
+    foreach common:Event event in events {
+        if event is common:ScalarEvent {
+            test:assertEquals(event.value, string `"${expectedOutputs[++index]}"`);
+            break;
+        }
+    }
+}
+
+function scalarWithNewLinesDataGen()returns map<[json, string[]]> =>
+    {
+        "simple scalar": ["first\nsecond", ["first\\nsecond"]],
+        "sequence": [[["first\nsecond"], ["first\nsecond\n\nthird"]], ["first\\nsecond", "first\\nsecond\\n\\nthird"]],
+        "nested sequence": [[[["first\nsecond"]]], ["first\\nsecond"]],
+        "mapping": [{"key\nline": "first\nsecond"}, ["key\\nline", "first\\nsecond"]],
+        "nested mapping": [{"key\nline": {"nested\nline": "first\nsecond"}}, ["key\\nline", "nested\\nline", "first\\nsecond"]]
+    };
+
+@test:Config {
     groups: ["serializer"]
 }
 function testSingleQuotesOption() returns error? {

@@ -108,10 +108,11 @@ function testScalarWithNewLines(json line, string[] expectedOutputs) returns err
     int index = 0;
     foreach common:Event event in events {
         if event is common:ScalarEvent {
-            test:assertEquals(event.value, string `"${expectedOutputs[++index]}"`);
-            break;
+            test:assertEquals(event.value, string `"${expectedOutputs[index]}"`);
+            index += 1;
         }
     }
+    test:assertEquals(index, expectedOutputs.length());
 }
 
 function scalarWithNewLinesDataGen()returns map<[json, string[]]> =>

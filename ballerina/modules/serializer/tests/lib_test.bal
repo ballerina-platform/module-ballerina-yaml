@@ -86,13 +86,43 @@ function testQuotesForInvalidPlanarChar(string line) returns error? {
 
 function invalidPlanarDataGen() returns map<[string]> {
     return {
-        "comment": [" #"],
+        "comment": [" # comment"],
         "explicit key": ["? "],
         "sequence entry": ["- "],
         "mapping value": [": "],
-        "flow indicator": ["}a"]
+        "flow indicator": ["}a"],
+        "alias": ["*/*"],
+        "collect-entry": [", "],
+        "anchor": ["&anchor"],
+        "tag": ["!tag"],
+        "directive": ["%YAML 1.2"]
     };
 }
+
+@test:Config {
+    dataProvider: scalarWithNewLinesDataGen,
+    groups: ["serializer"]
+}
+function testScalarWithNewLines(json line, string[] expectedOutputs) returns error? {
+    common:Event[] events = check getSerializedEvents(line);
+    int index = 0;
+    foreach common:Event event in events {
+        if event is common:ScalarEvent {
+            test:assertEquals(event.value, string `"${expectedOutputs[index]}"`);
+            index += 1;
+        }
+    }
+    test:assertEquals(index, expectedOutputs.length());
+}
+
+function scalarWithNewLinesDataGen()returns map<[json, string[]]> =>
+    {
+        "simple scalar": ["first\nsecond", ["first\\nsecond"]],
+        "sequence": [[["first\nsecond"], ["first\nsecond\n\nthird"]], ["first\\nsecond", "first\\nsecond\\n\\nthird"]],
+        "nested sequence": [[[["first\nsecond"]]], ["first\\nsecond"]],
+        "mapping": [{"key\nline": "first\nsecond"}, ["key\\nline", "first\\nsecond"]],
+        "nested mapping": [{"key\nline": {"nested\nline": "first\nsecond"}}, ["key\\nline", "nested\\nline", "first\\nsecond"]]
+    };
 
 @test:Config {
     groups: ["serializer"]

@@ -169,14 +169,15 @@ isolated function singleQuoteScalar(ParserState state) returns ParsingError|stri
 
 # Parse the string of a planar scalar.
 #
-# + state - Current parser state
+# + state - Current parser state  
+# + allowTokensAsPlanar - If set, then the restricted tokens are allowed as planar scalar
 # + return - Parsed planar scalar value
-isolated function planarScalar(ParserState state) returns ParsingError|string {
+isolated function planarScalar(ParserState state, boolean allowTokensAsPlanar = true) returns ParsingError|string {
     // Process the first planar char
     string lexemeBuffer = state.currentToken.value;
     boolean isFirstLine = true;
     string newLineBuffer = "";
-    state.lexerState.allowTokensAsPlanar = true;
+    state.lexerState.allowTokensAsPlanar = allowTokensAsPlanar;
 
     check checkToken(state, peek = true);
 

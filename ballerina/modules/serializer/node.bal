@@ -14,18 +14,17 @@
 
 import yaml.common;
 import yaml.schema;
-
-const string INVALID_PLANAR_PATTERN = "([\\w|\\s]*[\\-|\\?|:|] [\\w|\\s]*)|"
-    + "([\\w|\\s]* #[\\w|\\s]*)|"
-    + "([,|\\[|\\]|\\{|\\}|&\\*|!\\||>|'|\"|%|@|`][\\w|\\s]*)";
+import yaml.parser;
+import ballerina/lang.regexp;
 
 isolated function serializeString(SerializerState state, json data, string tag) {
     string value = data.toString();
-    state.events.push({
-        value: re `${INVALID_PLANAR_PATTERN}`.isFullMatch(value) || state.forceQuotes
-                ? string `${state.delimiter}${value}${state.delimiter}` : value,
-        tag
-    });
+    if value.includes("\n") {
+        value = state.delimiter + regexp:replaceAll(re `\n`, data.toString(), "\\n") + state.delimiter;
+    } else {
+        value = (!parser:isValidPlanarScalar(value) || state.forceQuotes) ? state.delimiter + value + state.delimiter : value;
+    }
+    state.events.push({value, tag});
 }
 
 isolated function serializeSequence(SerializerState state, json[] data, string tag, int depthLevel) returns schema:SchemaError? {

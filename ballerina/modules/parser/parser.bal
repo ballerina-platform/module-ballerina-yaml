@@ -244,3 +244,18 @@ public isolated function parse(ParserState state, ParserOption option = DEFAULT,
 
     return generateGrammarError(state, string `Invalid token '${state.currentToken.token}' as the first for generating an event`);
 }
+
+# Check if the given string is a valid planar scalar.
+#
+# + value - The string to be checked
+# + return - True if the string is a valid planar scalar. Else, false.
+public isolated function isValidPlanarScalar(string value) returns boolean {
+    string? planarScalarResult = ();
+    do {   
+        ParserState parserState = check new ([value]);
+        planarScalarResult = check planarScalar(parserState, false);
+    } on fail {
+        return false;
+    }
+    return planarScalarResult is string && planarScalarResult.trim() == value.trim();
+}

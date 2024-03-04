@@ -251,7 +251,7 @@ public isolated function parse(ParserState state, ParserOption option = DEFAULT,
 public isolated function isValidPlanarScalar(string value) returns boolean {
     string? planarScalarResult = ();
     do {   
-        ParserState parserState = check new ([value], true);
+        ParserState parserState = check new (value);
         planarScalarResult = check planarScalar(parserState, false);
     } on fail {
         return false;

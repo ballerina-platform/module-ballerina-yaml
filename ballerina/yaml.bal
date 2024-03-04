@@ -23,9 +23,9 @@ import yaml.composer;
 # + config - Configuration for reading a YAML file
 # + return - YAML map object on success. Else, returns an error
 public isolated function readString(string yamlString, *ReadConfig config) returns json|Error {
-    composer:ComposerState composerState = check new ([yamlString],
+    composer:ComposerState composerState = check new (yamlString,
         generateTagHandlesMap(config.yamlTypes, config.schema), config.allowAnchorRedefinition,
-        config.allowMapEntryRedefinition, true);
+        config.allowMapEntryRedefinition);
     return composer:composeDocument(composerState);
 }
 

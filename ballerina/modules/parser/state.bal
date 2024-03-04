@@ -17,7 +17,7 @@ import yaml.common;
 
 public class ParserState {
     # Properties for the YAML lines
-    string[] lines;
+    string[]|string yamlInput;
     int numLines;
     int lineIndex = -1;
 
@@ -64,10 +64,10 @@ public class ParserState {
 
     boolean isString;
 
-    public isolated function init(string[] lines, boolean isString = false) returns ParsingError? {
-        self.lines = lines;
-        self.isString = isString;
-        self.numLines = lines.length();
+    public isolated function init(string[]|string yamlInput) returns ParsingError? {
+        self.yamlInput = yamlInput;
+        self.isString = yamlInput is string;
+        self.numLines = self.isString ? 1 : (<string[]>yamlInput).length();
         ParsingError? err = self.initLexer();
         if err is ParsingError {
             self.eventBuffer.push({endType: common:STREAM});
@@ -96,7 +96,7 @@ public class ParserState {
                 line = currentLine.substring(self.lexerState.index);
             } else {
                 if self.lineIndex == 0 {
-                    line = self.lines[0];
+                    line = <string>self.yamlInput;
                 } else {
                     int? index = currentLine.indexOf("\n");
                     if index is int {
@@ -110,7 +110,8 @@ public class ParserState {
             if self.lineIndex >= self.numLines {
                 return generateGrammarError(self, message);
             }
-            line = self.lines[self.lineIndex];
+            string[] lines = <string[]>self.yamlInput;
+            line = lines[self.lineIndex];
         }
 
         self.explicitDoc = false;

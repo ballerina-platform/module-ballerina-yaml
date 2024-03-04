@@ -52,8 +52,7 @@ public isolated function parse(ParserState state, ParserOption option = DEFAULT,
     if state.currentToken.token == lexer:EOL || state.currentToken.token == lexer:EMPTY_LINE
         || state.currentToken.token == lexer:COMMENT {
 
-        if (!state.lexerState.isNewLine && state.lineIndex >= state.numLines - 1) ||
-            (state.lexerState.isNewLine && state.lexerState.isEndOfStream()) {
+        if state.isEndOfFile() {
             if docType == DIRECTIVE_DOCUMENT {
                 return generateExpectError(state, lexer:DIRECTIVE_MARKER, lexer:DIRECTIVE);
             }
@@ -252,7 +251,7 @@ public isolated function parse(ParserState state, ParserOption option = DEFAULT,
 public isolated function isValidPlanarScalar(string value) returns boolean {
     string? planarScalarResult = ();
     do {   
-        ParserState parserState = check new ([value]);
+        ParserState parserState = check new ([value], true);
         planarScalarResult = check planarScalar(parserState, false);
     } on fail {
         return false;

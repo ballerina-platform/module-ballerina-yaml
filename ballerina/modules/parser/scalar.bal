@@ -201,8 +201,7 @@ isolated function planarScalar(ParserState state, boolean allowTokensAsPlanar = 
                 check checkToken(state);
 
                 // Terminate at the end of the line
-                if (!state.lexerState.isNewLine && state.lineIndex >= state.numLines - 1) ||
-                    (state.lexerState.isNewLine && state.lexerState.isEndOfStream()) {
+                if state.isEndOfFile() {
                     break;
                 }
                 check state.initLexer();

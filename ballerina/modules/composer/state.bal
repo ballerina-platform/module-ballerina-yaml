@@ -37,9 +37,9 @@ public class ComposerState {
     readonly & boolean allowMapEntryRedefinition;
 
     public isolated function init(string[] lines, map<schema:YAMLTypeConstructor> tagSchema,
-        boolean allowAnchorRedefinition, boolean allowMapEntryRedefinition) returns parser:ParsingError? {
+        boolean allowAnchorRedefinition, boolean allowMapEntryRedefinition, boolean isString = false) returns parser:ParsingError? {
 
-        self.parserState = check new (lines);
+        self.parserState = check new (lines, isString);
         self.tagSchema = tagSchema;
         self.allowAnchorRedefinition = allowAnchorRedefinition;
         self.allowMapEntryRedefinition = allowMapEntryRedefinition;

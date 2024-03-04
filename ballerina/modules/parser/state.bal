@@ -62,8 +62,11 @@ public class ParserState {
 
     common:Event[] eventBuffer = [];
 
-    public isolated function init(string[] lines) returns ParsingError? {
+    boolean isString;
+
+    public isolated function init(string[] lines, boolean isString = false) returns ParsingError? {
         self.lines = lines;
+        self.isString = isString;
         self.numLines = lines.length();
         ParsingError? err = self.initLexer();
         if err is ParsingError {
@@ -86,8 +89,23 @@ public class ParserState {
     isolated function initLexer(string message = "Unexpected end of stream") returns ParsingError? {
         self.lineIndex += 1;
         string line;
-        if self.lexerState.isNewLine {
-            line = self.lexerState.line.substring(self.lexerState.index);
+
+        if self.isString {
+            string currentLine = self.lexerState.line;
+            if self.lexerState.isNewLine {
+                line = currentLine.substring(self.lexerState.index);
+            } else {
+                if self.lineIndex == 0 {
+                    line = self.lines[0];
+                } else {
+                    int? index = currentLine.indexOf("\n");
+                    if index is int {
+                        line = currentLine.substring(index + 1);
+                    } else {
+                        return generateGrammarError(self, message);
+                    }
+                }
+            }
         } else {
             if self.lineIndex >= self.numLines {
                 return generateGrammarError(self, message);
@@ -100,4 +118,7 @@ public class ParserState {
         self.tagPropertiesInLine = false;
         self.lexerState.setLine(line, self.lineIndex);
     }
+
+    isolated function isEndOfFile() returns boolean =>
+        self.isString ? self.lexerState.isEndOfStream() : self.lineIndex >= self.numLines - 1;
 }

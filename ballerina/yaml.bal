@@ -25,7 +25,7 @@ import yaml.composer;
 public isolated function readString(string yamlString, *ReadConfig config) returns json|Error {
     composer:ComposerState composerState = check new ([yamlString],
         generateTagHandlesMap(config.yamlTypes, config.schema), config.allowAnchorRedefinition,
-        config.allowMapEntryRedefinition);
+        config.allowMapEntryRedefinition, true);
     return composer:composeDocument(composerState);
 }
 

@@ -62,12 +62,12 @@ public class ParserState {
 
     common:Event[] eventBuffer = [];
 
-    boolean isString;
+    boolean isStringInput;
 
     public isolated function init(string[]|string yamlInput) returns ParsingError? {
         self.yamlInput = yamlInput;
-        self.isString = yamlInput is string;
-        self.numLines = self.isString ? 1 : (<string[]>yamlInput).length();
+        self.isStringInput = yamlInput is string;
+        self.numLines = self.isStringInput ? 1 : (<string[]>yamlInput).length();
         ParsingError? err = self.initLexer();
         if err is ParsingError {
             self.eventBuffer.push({endType: common:STREAM});
@@ -90,7 +90,7 @@ public class ParserState {
         self.lineIndex += 1;
         string line;
 
-        if self.isString {
+        if self.isStringInput {
             string currentLine = self.lexerState.line;
             if self.lexerState.isNewLine {
                 line = currentLine.substring(self.lexerState.index);
@@ -121,5 +121,5 @@ public class ParserState {
     }
 
     isolated function isEndOfFile() returns boolean =>
-        self.isString ? self.lexerState.isEndOfStream() : self.lineIndex >= self.numLines - 1;
+        self.isStringInput ? self.lexerState.isEndOfStream() : self.lineIndex >= self.numLines - 1;
 }

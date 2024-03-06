@@ -22,9 +22,11 @@ import ballerina/test;
 }
 function testReadYamlString() returns error? {
     string input = string `
+        # comment
         outer:
           inner: {outer: inner}
         seq:
+          # comment
           - - [[nested, sequence]]
         int: 1
         bool: true

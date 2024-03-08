@@ -15,7 +15,6 @@
 import ballerina/io;
 import yaml.emitter;
 import yaml.serializer;
-import yaml.common;
 
 # Parses a Ballerina string of YAML content into a Ballerina map object.
 #
@@ -23,7 +22,9 @@ import yaml.common;
 # + config - Configuration for reading a YAML file
 # + return - YAML map object on success. Else, returns an error
 public isolated function readString(string yamlString, *ReadConfig config) returns json|Error {
-    string[] lines = common:convertStringToLines(yamlString);
+    io:ReadableByteChannel readableChannel = check io:createReadableChannel(yamlString.toBytes());
+    io:ReadableCharacterChannel readableCharChannel = new (readableChannel, io:DEFAULT_ENCODING);
+    string[] lines = check readableCharChannel.readAllLines();
     return readLines(lines, config);
 }
 

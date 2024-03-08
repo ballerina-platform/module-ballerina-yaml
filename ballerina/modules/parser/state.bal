@@ -11,13 +11,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 import yaml.lexer;
 import yaml.common;
 
 public class ParserState {
     # Properties for the YAML lines
-    string[]|string yamlInput;
+    string[] lines;
     int numLines;
     int lineIndex = -1;
 
@@ -62,12 +61,9 @@ public class ParserState {
 
     common:Event[] eventBuffer = [];
 
-    boolean isStringInput;
-
-    public isolated function init(string[]|string yamlInput) returns ParsingError? {
-        self.yamlInput = yamlInput;
-        self.isStringInput = yamlInput is string;
-        self.numLines = self.isStringInput ? 1 : (<string[]>yamlInput).length();
+    public isolated function init(string[] lines) returns ParsingError? {
+        self.lines = lines;
+        self.numLines = lines.length();
         ParsingError? err = self.initLexer();
         if err is ParsingError {
             self.eventBuffer.push({endType: common:STREAM});
@@ -90,29 +86,11 @@ public class ParserState {
         self.lineIndex += 1;
         string line;
 
-        if self.isStringInput {
-            string currentLine = self.lexerState.line;
-            if self.lexerState.isNewLine {
-                line = currentLine.substring(self.lexerState.index);
-            } else {
-                if self.lineIndex == 0 {
-                    line = <string>self.yamlInput;
-                } else {
-                    int? index = currentLine.indexOf("\n");
-                    if index is int {
-                        line = currentLine.substring(index + 1);
-                    } else {
-                        return generateGrammarError(self, message);
-                    }
-                }
-            }
-        } else {
-            if self.lineIndex >= self.numLines {
-                return generateGrammarError(self, message);
-            }
-            string[] lines = <string[]>self.yamlInput;
-            line = lines[self.lineIndex];
+        if self.lineIndex >= self.numLines {
+            return generateGrammarError(self, message);
         }
+        string[] lines = <string[]>self.lines;
+        line = lines[self.lineIndex];
 
         self.explicitDoc = false;
         self.expectBlockSequenceValue = false;
@@ -120,6 +98,5 @@ public class ParserState {
         self.lexerState.setLine(line, self.lineIndex);
     }
 
-    isolated function isEndOfFile() returns boolean =>
-        self.isStringInput ? self.lexerState.isEndOfStream() : self.lineIndex >= self.numLines - 1;
+    isolated function isEndOfFile() returns boolean => self.lineIndex >= self.numLines - 1;
 }

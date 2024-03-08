@@ -15,7 +15,7 @@
 import ballerina/io;
 import yaml.emitter;
 import yaml.serializer;
-import yaml.composer;
+import yaml.common;
 
 # Parses a Ballerina string of YAML content into a Ballerina map object.
 #
@@ -23,10 +23,8 @@ import yaml.composer;
 # + config - Configuration for reading a YAML file
 # + return - YAML map object on success. Else, returns an error
 public isolated function readString(string yamlString, *ReadConfig config) returns json|Error {
-    composer:ComposerState composerState = check new (yamlString,
-        generateTagHandlesMap(config.yamlTypes, config.schema), config.allowAnchorRedefinition,
-        config.allowMapEntryRedefinition);
-    return composer:composeDocument(composerState);
+    string[] lines = common:convertStringToLines(yamlString);
+    return readLines(lines, config);
 }
 
 # Parses a YAML file into a Ballerina json object.
@@ -36,9 +34,7 @@ public isolated function readString(string yamlString, *ReadConfig config) retur
 # + return - YAML map object on success. Else, returns an error
 public isolated function readFile(string filePath, *ReadConfig config) returns json|Error {
     string[] lines = check io:fileReadLines(filePath);
-    composer:ComposerState composerState = check new (lines, generateTagHandlesMap(config.yamlTypes, config.schema),
-        config.allowAnchorRedefinition, config.allowMapEntryRedefinition);
-    return config.isStream ? composer:composeStream(composerState) : composer:composeDocument(composerState);
+    return readLines(lines, config);
 }
 
 # Converts the YAML structure to an array of strings.

@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import ballerina/io;
+
 # Generate an error for conversion fault between Ballerina and YAML.
 #
 # + message - Cause of the error message
@@ -40,3 +42,17 @@ public isolated function processTypeCastingError(json|error value) returns json|
 # + return - Formatted error message as a string
 public isolated function generateExpectedEndEventErrorMessage(string actualEvent, string expectedEvent) returns string
     => string `Expected '-${expectedEvent}' before '-${actualEvent}'`;
+
+# Convert the string to a string array.
+#
+# + inputStr - Input string to be converted
+# + return - String array of the input string
+public isolated function convertStringToLines(string inputStr) returns string[] {
+    do {
+        io:ReadableByteChannel readableChannel = check io:createReadableChannel(inputStr.toBytes());
+        io:ReadableCharacterChannel readableCharChannel = new (readableChannel, io:DEFAULT_ENCODING);
+        return check readableCharChannel.readAllLines();
+    } on fail {
+        return [inputStr];
+    }
+}

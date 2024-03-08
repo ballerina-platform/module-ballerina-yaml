@@ -89,8 +89,7 @@ public class ParserState {
         if self.lineIndex >= self.numLines {
             return generateGrammarError(self, message);
         }
-        string[] lines = <string[]>self.lines;
-        line = lines[self.lineIndex];
+        line = self.lines[self.lineIndex];
 
         self.explicitDoc = false;
         self.expectBlockSequenceValue = false;

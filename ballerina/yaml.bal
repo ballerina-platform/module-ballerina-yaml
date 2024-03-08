@@ -22,9 +22,9 @@ import yaml.serializer;
 # + config - Configuration for reading a YAML file
 # + return - YAML map object on success. Else, returns an error
 public isolated function readString(string yamlString, *ReadConfig config) returns json|Error {
-    io:ReadableByteChannel readableChannel = check io:createReadableChannel(yamlString.toBytes());
-    io:ReadableCharacterChannel readableCharChannel = new (readableChannel, io:DEFAULT_ENCODING);
-    string[] lines = check readableCharChannel.readAllLines();
+    io:ReadableByteChannel byteChannel = check io:createReadableChannel(yamlString.toBytes());
+    io:ReadableCharacterChannel charChannel = new (byteChannel, io:DEFAULT_ENCODING);
+    string[] lines = check charChannel.readAllLines();
     return readLines(lines, config);
 }
 

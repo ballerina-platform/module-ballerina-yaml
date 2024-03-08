@@ -164,4 +164,10 @@ public class LexerState {
     }
 
     public isolated function isFlowCollection() returns boolean => self.numOpenedFlowCollections > 0;
+    
+    # Check if the current character is a new line. 
+    # This should be replaced by the os module once it supports an API: #4931.
+    # 
+    # + return - True if the current character is a new line
+    public isolated function isNewLine() returns boolean => self.peek() == "\n" || self.peek() == "\r\n";
 }

@@ -158,7 +158,7 @@ isolated function scanPlanarChar(LexerState state) returns boolean|LexicalError 
     }
 
     // Step back from the white spaces if EOL or ':' is reached 
-    if state.peek() == () || state.peek() == "\n" {
+    if state.peek() == () || state.isNewLine() {
         state.forward(-numWhitespace);
         return true;
     }

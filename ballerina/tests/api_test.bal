@@ -17,8 +17,7 @@ import ballerina/io;
 import ballerina/test;
 
 @test:Config {
-    groups: ["api"],
-    enable: false
+    groups: ["api"]
 }
 function testReadYamlString() returns error? {
     string input = string `
@@ -76,8 +75,7 @@ function testWriteYamlFile() returns error? {
 
 @test:Config {
     dataProvider: yamlSchemaDataGen,
-    groups: ["api"],
-    enable: false
+    groups: ["api"]
 }
 function testReadYAMLSchema(YAMLSchema schema, json expectedOutput) returns error? {
     string input = string `

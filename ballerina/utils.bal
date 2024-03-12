@@ -11,8 +11,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 import yaml.schema;
+import yaml.composer;
+
 import ballerina/file;
 
 # Checks if the file exists. If not, creates a new file.
@@ -60,4 +61,16 @@ isolated function generateTagHandlesMap(YamlType[] yamlTypes, YAMLSchema yamlSch
     }
 
     return tagHandles;
+}
+
+# Parses the given lines of YAML and returns the JSON representation.
+#
+# + lines - Lines of the YAML document
+# + config - Configuration for the YAML parser
+# + return - JSON representation of the YAML document
+isolated function readLines(string[] lines, ReadConfig config) returns json|Error {
+    composer:ComposerState composerState = check new (lines, generateTagHandlesMap(config.yamlTypes, config.schema),
+        config.allowAnchorRedefinition, config.allowMapEntryRedefinition
+    );
+    return config.isStream ? composer:composeStream(composerState) : composer:composeDocument(composerState);
 }

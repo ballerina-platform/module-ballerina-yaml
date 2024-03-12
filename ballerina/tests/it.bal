@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import ballerina/io;
 import ballerina/test;
 
 YamlType[] customYamlTypes = [];
@@ -35,7 +36,7 @@ map<FailSafeSchema> customTags = {
 };
 
 @test:BeforeSuite
-function initYamlCustomeTypes() {
+function initYamlCustomTypes() {
     customTags.entries().forEach(function([string, FailSafeSchema] entry) {
         customYamlTypes.push({
             tag: entry[0],
@@ -50,11 +51,27 @@ function initYamlCustomeTypes() {
 @test:Config {
     dataProvider: yamlDataGen
 }
-function testYAMLIntegrationTest(string filePath, json expectedOutput, boolean isStream, boolean isError) returns error? {
+function testYAMLIntegrationTestForReadFile(string filePath, json expectedOutput, boolean isStream, boolean isError) returns error? {
     json|Error output = readFile(filePath, yamlTypes = customYamlTypes, isStream = isStream);
+    assertOutput(output, expectedOutput, isError);
+}
+
+@test:Config {
+    dataProvider: yamlDataGen
+}
+function testYAMLIntegrationTestForReadString(string filePath, json expectedOutput, boolean isStream, boolean isError) returns error? {
+    io:ReadableByteChannel byteChannel = check io:openReadableFile(filePath);
+    (byte[] & readonly) readBytes = check byteChannel.readAll();
+    string yamlContent = check string:fromBytes(readBytes);
+
+    json|Error output = readString(yamlContent, yamlTypes = customYamlTypes, isStream = isStream);
+    assertOutput(output, expectedOutput, isError);
+}
+
+function assertOutput(json|Error actualOut, json expectedOut, boolean isError) {
     if isError {
-        test:assertTrue(output is Error);
+        test:assertTrue(actualOut is Error);
     } else {
-        test:assertEquals(output, expectedOutput);
+        test:assertEquals(actualOut, expectedOut);
     }
 }

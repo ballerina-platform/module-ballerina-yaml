@@ -6,7 +6,7 @@ Ballerina Yaml Library
 [![Trivy](https://github.com/ballerina-platform/module-ballerina-yaml/actions/workflows/trivy-scan.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerina-yaml/actions/workflows/trivy-scan.yml)
 [![GraalVM Check](https://github.com/ballerina-platform/module-ballerina-yaml/actions/workflows/build-with-bal-test-graalvm.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerina-yaml/actions/workflows/build-with-bal-test-graalvm.yml)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerina-yaml.svg)](https://github.com/ballerina-platform/module-ballerina-yaml/commits/main)
-[![Github issues](https://img.shields.io/github/issues/ballerina-platform/ballerina-standard-library/module/yaml.svg?label=Open%20Issues)](https://github.com/ballerina-platform/ballerina-standard-library/labels/module%2Fyaml)
+[![Github issues](https://img.shields.io/github/issues/ballerina-platform/ballerina-library/module/yaml.svg?label=Open%20Issues)](https://github.com/ballerina-platform/ballerina-library/labels/module%2Fyaml)
 [![codecov](https://codecov.io/gh/ballerina-platform/module-ballerina-yaml/branch/main/graph/badge.svg)](https://codecov.io/gh/ballerina-platform/module-ballerina-yaml)
 
 This library provides APIs to convert a YAML configuration file to json, and vice-versa.
@@ -15,7 +15,7 @@ Since the parser is following LL(1) grammar, it follows a non-recursive predicti
 
 ## Issues and projects
 
-The **Issues** and **Projects** tabs are disabled for this repository as this is part of the Ballerina Standard Library. To report bugs, request new features, start new discussions, view project boards, etc., go to the Ballerina Standard Library [parent repository](https://github.com/ballerina-platform/ballerina-standard-library).
+The **Issues** and **Projects** tabs are disabled for this repository as this is part of the Ballerina Library. To report bugs, request new features, start new discussions, view project boards, etc., go to the Ballerina Library [parent repository](https://github.com/ballerina-platform/ballerina-library).
 
 This repository contains only the source code of the package.
 

@@ -148,7 +148,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "yaml"
-version = "0.7.0"
+version = "0.7.1"
 dependencies = [
 	{org = "ballerina", name = "file"},
 	{org = "ballerina", name = "io"},
